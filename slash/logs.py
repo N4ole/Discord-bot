@@ -6,10 +6,11 @@ from discord import app_commands
 from discord.ext import commands
 from log_manager import log_manager
 
+
 class LogsSlash(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-    
+
     @app_commands.command(name="setlog", description="Définit le canal de logs")
     @app_commands.describe(channel="Le canal où envoyer les logs")
     @app_commands.guild_only()
@@ -24,9 +25,10 @@ class LogsSlash(commands.Cog):
             )
             await interaction.response.send_message(embed=embed, ephemeral=True)
             return
-        
-        success, message = log_manager.set_log_channel(interaction.guild.id, channel.id)
-        
+
+        success, message = log_manager.set_log_channel(
+            interaction.guild.id, channel.id)
+
         if success:
             embed = discord.Embed(
                 title="✅ Canal de Logs Configuré",
@@ -49,9 +51,9 @@ class LogsSlash(commands.Cog):
                 description=message,
                 color=discord.Color.red()
             )
-        
+
         await interaction.response.send_message(embed=embed)
-    
+
     @app_commands.command(name="logon", description="Active les logs pour ce serveur")
     @app_commands.guild_only()
     async def logon_slash(self, interaction: discord.Interaction):
@@ -65,9 +67,9 @@ class LogsSlash(commands.Cog):
             )
             await interaction.response.send_message(embed=embed, ephemeral=True)
             return
-        
+
         success, message = log_manager.enable_logs(interaction.guild.id)
-        
+
         if success:
             channel_id = log_manager.get_log_channel(interaction.guild.id)
             embed = discord.Embed(
@@ -97,9 +99,9 @@ class LogsSlash(commands.Cog):
                 description=message,
                 color=discord.Color.red()
             )
-        
+
         await interaction.response.send_message(embed=embed)
-    
+
     @app_commands.command(name="logoff", description="Désactive les logs pour ce serveur")
     @app_commands.guild_only()
     async def logoff_slash(self, interaction: discord.Interaction):
@@ -113,9 +115,9 @@ class LogsSlash(commands.Cog):
             )
             await interaction.response.send_message(embed=embed, ephemeral=True)
             return
-        
+
         success, message = log_manager.disable_logs(interaction.guild.id)
-        
+
         if success:
             embed = discord.Embed(
                 title="⚠️ Logs Désactivés",
@@ -133,16 +135,16 @@ class LogsSlash(commands.Cog):
                 description="Impossible de désactiver les logs",
                 color=discord.Color.red()
             )
-        
+
         await interaction.response.send_message(embed=embed)
-    
+
     @app_commands.command(name="logstatus", description="Affiche le statut des logs")
     @app_commands.guild_only()
     async def logstatus_slash(self, interaction: discord.Interaction):
         """Commande slash pour afficher le statut des logs"""
         is_enabled = log_manager.is_logging_enabled(interaction.guild.id)
         channel_id = log_manager.get_log_channel(interaction.guild.id)
-        
+
         if is_enabled and channel_id:
             embed = discord.Embed(
                 title="📊 Statut des Logs",
@@ -181,8 +183,9 @@ class LogsSlash(commands.Cog):
                 value="Utilisez `/setlog <canal>` puis `/logon`",
                 inline=False
             )
-        
+
         await interaction.response.send_message(embed=embed)
+
 
 async def setup(bot):
     """Fonction pour charger le cog"""

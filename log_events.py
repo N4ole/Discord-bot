@@ -6,15 +6,16 @@ from discord.ext import commands
 from log_manager import log_manager, LogFormatter
 from datetime import datetime
 
+
 class LogEvents(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-    
+
     async def send_log(self, guild, embed):
         """Envoie un log dans le canal configuré"""
         if not log_manager.is_logging_enabled(guild.id):
             return
-        
+
         channel_id = log_manager.get_log_channel(guild.id)
         if channel_id:
             try:
@@ -23,14 +24,14 @@ class LogEvents(commands.Cog):
                     await channel.send(embed=embed)
             except Exception as e:
                 print(f"❌ Erreur envoi log: {e}")
-    
+
     # === ÉVÉNEMENTS DE MESSAGES ===
     @commands.Cog.listener()
     async def on_message_delete(self, message):
         """Log des messages supprimés"""
         if message.author.bot or not message.guild:
             return
-        
+
         embed = LogFormatter.create_log_embed(
             title="🗑️ Message Supprimé",
             description=f"**Contenu:** {message.content[:1000] if message.content else '*Aucun contenu texte*'}",
@@ -38,22 +39,22 @@ class LogEvents(commands.Cog):
             user=message.author,
             channel=message.channel
         )
-        
+
         if message.attachments:
             embed.add_field(
                 name="📎 Pièces jointes",
                 value=f"{len(message.attachments)} fichier(s)",
                 inline=True
             )
-        
+
         await self.send_log(message.guild, embed)
-    
+
     @commands.Cog.listener()
     async def on_message_edit(self, before, after):
         """Log des messages édités"""
         if before.author.bot or not before.guild or before.content == after.content:
             return
-        
+
         embed = LogFormatter.create_log_embed(
             title="✏️ Message Modifié",
             description=f"**Avant:** {before.content[:500] if before.content else '*Aucun contenu*'}\n\n**Après:** {after.content[:500] if after.content else '*Aucun contenu*'}",
@@ -61,15 +62,15 @@ class LogEvents(commands.Cog):
             user=after.author,
             channel=after.channel
         )
-        
+
         embed.add_field(
             name="🔗 Lien",
             value=f"[Aller au message]({after.jump_url})",
             inline=True
         )
-        
+
         await self.send_log(after.guild, embed)
-    
+
     # === ÉVÉNEMENTS DE MEMBRES ===
     @commands.Cog.listener()
     async def on_member_join(self, member):
@@ -80,13 +81,15 @@ class LogEvents(commands.Cog):
             color=LogFormatter.get_color_for_event("join"),
             user=member,
             extra_fields=[
-                {"name": "📅 Compte créé", "value": f"<t:{int(member.created_at.timestamp())}:R>", "inline": True},
-                {"name": "📊 Membre n°", "value": str(member.guild.member_count), "inline": True}
+                {"name": "📅 Compte créé",
+                    "value": f"<t:{int(member.created_at.timestamp())}:R>", "inline": True},
+                {"name": "📊 Membre n°", "value": str(
+                    member.guild.member_count), "inline": True}
             ]
         )
-        
+
         await self.send_log(member.guild, embed)
-    
+
     @commands.Cog.listener()
     async def on_member_remove(self, member):
         """Log des départs de membres"""
@@ -96,20 +99,22 @@ class LogEvents(commands.Cog):
             color=LogFormatter.get_color_for_event("leave"),
             user=member,
             extra_fields=[
-                {"name": "📅 Avait rejoint", "value": f"<t:{int(member.joined_at.timestamp())}:R>" if member.joined_at else "Inconnu", "inline": True},
-                {"name": "🎭 Rôles", "value": ", ".join([r.mention for r in member.roles[1:]]) if len(member.roles) > 1 else "Aucun", "inline": False}
+                {"name": "📅 Avait rejoint",
+                    "value": f"<t:{int(member.joined_at.timestamp())}:R>" if member.joined_at else "Inconnu", "inline": True},
+                {"name": "🎭 Rôles", "value": ", ".join([r.mention for r in member.roles[1:]]) if len(
+                    member.roles) > 1 else "Aucun", "inline": False}
             ]
         )
-        
+
         await self.send_log(member.guild, embed)
-    
+
     # === ÉVÉNEMENTS VOCAUX ===
     @commands.Cog.listener()
     async def on_voice_state_update(self, member, before, after):
         """Log des changements d'état vocal"""
         if member.bot:
             return
-        
+
         # Connexion à un canal vocal
         if before.channel is None and after.channel is not None:
             embed = LogFormatter.create_log_embed(
@@ -119,11 +124,12 @@ class LogEvents(commands.Cog):
                 user=member,
                 extra_fields=[
                     {"name": "🎤 Canal", "value": after.channel.mention, "inline": True},
-                    {"name": "👥 Membres dans le canal", "value": str(len(after.channel.members)), "inline": True}
+                    {"name": "👥 Membres dans le canal", "value": str(
+                        len(after.channel.members)), "inline": True}
                 ]
             )
             await self.send_log(member.guild, embed)
-        
+
         # Déconnexion d'un canal vocal
         elif before.channel is not None and after.channel is None:
             embed = LogFormatter.create_log_embed(
@@ -132,11 +138,12 @@ class LogEvents(commands.Cog):
                 color=LogFormatter.get_color_for_event("voice_leave"),
                 user=member,
                 extra_fields=[
-                    {"name": "🎤 Canal quitté", "value": before.channel.mention, "inline": True}
+                    {"name": "🎤 Canal quitté",
+                        "value": before.channel.mention, "inline": True}
                 ]
             )
             await self.send_log(member.guild, embed)
-        
+
         # Changement de canal vocal
         elif before.channel != after.channel and before.channel is not None and after.channel is not None:
             embed = LogFormatter.create_log_embed(
@@ -145,12 +152,14 @@ class LogEvents(commands.Cog):
                 color=LogFormatter.get_color_for_event("voice_move"),
                 user=member,
                 extra_fields=[
-                    {"name": "📤 Ancien canal", "value": before.channel.mention, "inline": True},
-                    {"name": "📥 Nouveau canal", "value": after.channel.mention, "inline": True}
+                    {"name": "📤 Ancien canal",
+                        "value": before.channel.mention, "inline": True},
+                    {"name": "📥 Nouveau canal",
+                        "value": after.channel.mention, "inline": True}
                 ]
             )
             await self.send_log(member.guild, embed)
-    
+
     # === ÉVÉNEMENTS DE MODÉRATION ===
     @commands.Cog.listener()
     async def on_member_ban(self, guild, user):
@@ -161,9 +170,9 @@ class LogEvents(commands.Cog):
             color=LogFormatter.get_color_for_event("ban"),
             user=user
         )
-        
+
         await self.send_log(guild, embed)
-    
+
     @commands.Cog.listener()
     async def on_member_unban(self, guild, user):
         """Log des débannissements"""
@@ -173,9 +182,9 @@ class LogEvents(commands.Cog):
             color=LogFormatter.get_color_for_event("unban"),
             user=user
         )
-        
+
         await self.send_log(guild, embed)
-    
+
     # === ÉVÉNEMENTS DE RÔLES ===
     @commands.Cog.listener()
     async def on_member_update(self, before, after):
@@ -183,7 +192,7 @@ class LogEvents(commands.Cog):
         if before.roles != after.roles:
             added_roles = set(after.roles) - set(before.roles)
             removed_roles = set(before.roles) - set(after.roles)
-            
+
             if added_roles:
                 embed = LogFormatter.create_log_embed(
                     title="➕ Rôle(s) Ajouté(s)",
@@ -191,11 +200,12 @@ class LogEvents(commands.Cog):
                     color=LogFormatter.get_color_for_event("role_add"),
                     user=after,
                     extra_fields=[
-                        {"name": "🎭 Rôles ajoutés", "value": ", ".join([r.mention for r in added_roles]), "inline": False}
+                        {"name": "🎭 Rôles ajoutés", "value": ", ".join(
+                            [r.mention for r in added_roles]), "inline": False}
                     ]
                 )
                 await self.send_log(after.guild, embed)
-            
+
             if removed_roles:
                 embed = LogFormatter.create_log_embed(
                     title="➖ Rôle(s) Retiré(s)",
@@ -203,11 +213,12 @@ class LogEvents(commands.Cog):
                     color=LogFormatter.get_color_for_event("role_remove"),
                     user=after,
                     extra_fields=[
-                        {"name": "🎭 Rôles retirés", "value": ", ".join([r.mention for r in removed_roles]), "inline": False}
+                        {"name": "🎭 Rôles retirés", "value": ", ".join(
+                            [r.mention for r in removed_roles]), "inline": False}
                     ]
                 )
                 await self.send_log(after.guild, embed)
-    
+
     # === ÉVÉNEMENTS DE CANAUX ===
     @commands.Cog.listener()
     async def on_guild_channel_create(self, channel):
@@ -218,13 +229,14 @@ class LogEvents(commands.Cog):
             color=LogFormatter.get_color_for_event("channel_create"),
             extra_fields=[
                 {"name": "📋 Nom", "value": channel.name, "inline": True},
-                {"name": "🔖 Type", "value": str(channel.type).title(), "inline": True},
+                {"name": "🔖 Type", "value": str(
+                    channel.type).title(), "inline": True},
                 {"name": "🆔 ID", "value": channel.id, "inline": True}
             ]
         )
-        
+
         await self.send_log(channel.guild, embed)
-    
+
     @commands.Cog.listener()
     async def on_guild_channel_delete(self, channel):
         """Log de suppression de canaux"""
@@ -234,12 +246,14 @@ class LogEvents(commands.Cog):
             color=LogFormatter.get_color_for_event("channel_delete"),
             extra_fields=[
                 {"name": "📋 Nom", "value": channel.name, "inline": True},
-                {"name": "🔖 Type", "value": str(channel.type).title(), "inline": True},
+                {"name": "🔖 Type", "value": str(
+                    channel.type).title(), "inline": True},
                 {"name": "🆔 ID", "value": channel.id, "inline": True}
             ]
         )
-        
+
         await self.send_log(channel.guild, embed)
+
 
 async def setup(bot):
     """Fonction pour charger le cog"""

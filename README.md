@@ -101,7 +101,54 @@ Le bot supporte des **préfixes personnalisés par serveur** !
 ### Permissions requises
 - Seuls les membres avec la permission "Gérer le serveur" peuvent changer le préfixe
 
-## 📝 Ajout de nouvelles commandes
+## � Système de Logs
+
+Le bot dispose d'un **système de logs complet** qui surveille automatiquement toutes les activités du serveur !
+
+### 🎯 Configuration rapide
+1. **Définir le canal** : `/setlog #logs` ou `!setlog #logs`
+2. **Activer** : `/logon` ou `!logon`
+3. **Vérifier** : `/logstatus` ou `!logstatus`
+
+### 📋 Événements surveillés
+- **💬 Messages** : Suppression, modification
+- **👥 Membres** : Arrivée, départ, changements de rôles
+- **🔊 Vocal** : Connexion, déconnexion, changement de canal
+- **🔨 Modération** : Bannissements, débannissements
+- **📝 Canaux** : Création, suppression
+- **🎭 Rôles** : Attribution, retrait
+
+### 🎨 Fonctionnalités avancées
+- **Embeds colorés** selon le type d'événement
+- **Timestamps** automatiques
+- **Informations détaillées** (IDs, liens, contexte)
+- **✨ Configuration par serveur** indépendante
+- **🌐 Support multi-serveurs** natif
+- **Sauvegarde automatique** des paramètres
+
+### 🌐 Multi-Serveurs
+Le bot peut être utilisé simultanément sur **plusieurs serveurs Discord** avec des configurations complètement **indépendantes** :
+
+- **🏠 Configuration unique** : Chaque serveur a ses propres paramètres (canal de logs, activation/désactivation)
+- **📊 Isolation complète** : Les logs d'un serveur n'interfèrent jamais avec ceux d'un autre
+- **⚡ Performance optimisée** : Un seul bot peut gérer des dizaines de serveurs
+- **🔧 Gestion centralisée** : Commandes de diagnostic pour les propriétaires du bot
+
+**Exemple de configuration multi-serveurs :**
+```json
+{
+  "serveur_A_id": {"channel_id": 123, "enabled": true},
+  "serveur_B_id": {"channel_id": 456, "enabled": false},
+  "serveur_C_id": {"channel_id": 789, "enabled": true}
+}
+```
+
+### 🔒 Sécurité
+- Seuls les membres avec "Gérer le serveur" peuvent configurer les logs
+- Pas de logs pour les actions de bots (évite le spam)
+- Gestion d'erreurs robuste
+
+## �📝 Ajout de nouvelles commandes
 
 Pour ajouter de nouvelles commandes :
 

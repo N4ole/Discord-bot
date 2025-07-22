@@ -5,17 +5,19 @@ import discord
 from discord.ext import commands
 from log_manager import log_manager
 
+
 class LogsPrefixe(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-    
+
     @commands.command(name="setlog", help="Définit le canal de logs")
     @commands.guild_only()
     @commands.has_permissions(manage_guild=True)
     async def setlog(self, ctx, channel: discord.TextChannel):
         """Définit le canal où envoyer les logs"""
-        success, message = log_manager.set_log_channel(ctx.guild.id, channel.id)
-        
+        success, message = log_manager.set_log_channel(
+            ctx.guild.id, channel.id)
+
         if success:
             embed = discord.Embed(
                 title="✅ Canal de Logs Configuré",
@@ -38,16 +40,16 @@ class LogsPrefixe(commands.Cog):
                 description=message,
                 color=discord.Color.red()
             )
-        
+
         await ctx.send(embed=embed)
-    
+
     @commands.command(name="logon", help="Active les logs pour ce serveur")
     @commands.guild_only()
     @commands.has_permissions(manage_guild=True)
     async def logon(self, ctx):
         """Active le système de logs"""
         success, message = log_manager.enable_logs(ctx.guild.id)
-        
+
         if success:
             channel_id = log_manager.get_log_channel(ctx.guild.id)
             embed = discord.Embed(
@@ -77,16 +79,16 @@ class LogsPrefixe(commands.Cog):
                 description=message,
                 color=discord.Color.red()
             )
-        
+
         await ctx.send(embed=embed)
-    
+
     @commands.command(name="logoff", help="Désactive les logs pour ce serveur")
     @commands.guild_only()
     @commands.has_permissions(manage_guild=True)
     async def logoff(self, ctx):
         """Désactive le système de logs"""
         success, message = log_manager.disable_logs(ctx.guild.id)
-        
+
         if success:
             embed = discord.Embed(
                 title="⚠️ Logs Désactivés",
@@ -104,16 +106,16 @@ class LogsPrefixe(commands.Cog):
                 description="Impossible de désactiver les logs",
                 color=discord.Color.red()
             )
-        
+
         await ctx.send(embed=embed)
-    
+
     @commands.command(name="logstatus", help="Affiche le statut des logs")
     @commands.guild_only()
     async def logstatus(self, ctx):
         """Affiche le statut actuel du système de logs"""
         is_enabled = log_manager.is_logging_enabled(ctx.guild.id)
         channel_id = log_manager.get_log_channel(ctx.guild.id)
-        
+
         if is_enabled and channel_id:
             embed = discord.Embed(
                 title="📊 Statut des Logs",
@@ -152,9 +154,9 @@ class LogsPrefixe(commands.Cog):
                 value="Utilisez `setlog <canal>` puis `logon`",
                 inline=False
             )
-        
+
         await ctx.send(embed=embed)
-    
+
     # Gestion des erreurs
     @setlog.error
     async def setlog_error(self, ctx, error):
@@ -180,7 +182,7 @@ class LogsPrefixe(commands.Cog):
                 color=discord.Color.red()
             )
             await ctx.send(embed=embed)
-    
+
     @logon.error
     @logoff.error
     async def log_toggle_error(self, ctx, error):
@@ -192,6 +194,7 @@ class LogsPrefixe(commands.Cog):
                 color=discord.Color.red()
             )
             await ctx.send(embed=embed)
+
 
 async def setup(bot):
     """Fonction pour charger le cog"""

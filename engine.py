@@ -37,10 +37,11 @@ class DiscordBot(commands.Bot):
         await self.load_extension('prefixe.bonjour')
         await self.load_extension('prefixe.prefix')
         await self.load_extension('prefixe.logs')
-        
+
         # Chargement du système d'événements de logs
         print("Chargement du système de logs...")
         await self.load_extension('log_events')
+        await self.load_extension('multiserver_diagnostic')
 
         # Synchronisation des commandes slash
         print("Synchronisation des commandes slash...")
