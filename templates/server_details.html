@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Détails {{ server.name }} - Panel Admin</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Arial", sans-serif;
+        background: #f5f7fa;
+        color: #333;
+        line-height: 1.6;
+      }
+
+      .navbar {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 1rem 2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      }
+
+      .navbar-brand {
+        font-size: 1.5rem;
+        font-weight: bold;
+      }
+
+      .navbar-nav {
+        display: flex;
+        gap: 2rem;
+        align-items: center;
+      }
+
+      .nav-link {
+        color: white;
+        text-decoration: none;
+        padding: 0.5rem 1rem;
+        border-radius: 5px;
+        transition: background-color 0.3s;
+      }
+
+      .nav-link:hover {
+        background-color: rgba(255, 255, 255, 0.2);
+      }
+
+      .container {
+        max-width: 1400px;
+        margin: 2rem auto;
+        padding: 0 2rem;
+      }
+
+      .server-header {
+        background: white;
+        border-radius: 12px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        display: flex;
+        align-items: center;
+        gap: 2rem;
+      }
+
+      .server-icon {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        background: #7289da;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+        color: white;
+        font-weight: bold;
+      }
+
+      .server-info {
+        flex: 1;
+      }
+
+      .server-name {
+        font-size: 2rem;
+        font-weight: bold;
+        margin-bottom: 0.5rem;
+        color: #2c3e50;
+      }
+
+      .server-description {
+        color: #7f8c8d;
+        font-size: 1.1rem;
+        margin-bottom: 1rem;
+      }
+
+      .server-stats {
+        display: flex;
+        gap: 2rem;
+      }
+
+      .stat-item {
+        text-align: center;
+      }
+
+      .stat-value {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #3498db;
+      }
+
+      .stat-label {
+        font-size: 0.9rem;
+        color: #7f8c8d;
+      }
+
+      .content-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem;
+        margin-bottom: 2rem;
+      }
+
+      .info-card {
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      }
+
+      .card-title {
+        font-size: 1.3rem;
+        font-weight: bold;
+        margin-bottom: 1rem;
+        color: #2c3e50;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .info-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.5rem 0;
+        border-bottom: 1px solid #ecf0f1;
+      }
+
+      .info-row:last-child {
+        border-bottom: none;
+      }
+
+      .info-label {
+        font-weight: 500;
+        color: #555;
+      }
+
+      .info-value {
+        color: #333;
+        text-align: right;
+      }
+
+      .permissions-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 0.5rem;
+      }
+
+      .permission-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem;
+        border-radius: 6px;
+        background: #f8f9fa;
+      }
+
+      .permission-granted {
+        background: #d4edda;
+        color: #155724;
+      }
+
+      .permission-denied {
+        background: #f8d7da;
+        color: #721c24;
+      }
+
+      .role-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0.75rem;
+        margin-bottom: 0.5rem;
+        border-radius: 6px;
+        background: #f8f9fa;
+        border-left: 4px solid var(--role-color, #7289da);
+      }
+
+      .role-info {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+      }
+
+      .role-name {
+        font-weight: bold;
+      }
+
+      .role-badges {
+        display: flex;
+        gap: 0.5rem;
+      }
+
+      .badge {
+        background: #6c757d;
+        color: white;
+        padding: 0.2rem 0.5rem;
+        border-radius: 12px;
+        font-size: 0.8rem;
+      }
+
+      .badge-success {
+        background: #28a745;
+      }
+
+      .badge-warning {
+        background: #ffc107;
+        color: #212529;
+      }
+
+      .channel-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0.5rem;
+        margin-bottom: 0.3rem;
+        border-radius: 6px;
+        background: #f8f9fa;
+      }
+
+      .channel-info {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .channel-icon {
+        width: 20px;
+        height: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .channel-details {
+        font-size: 0.9rem;
+        color: #666;
+      }
+
+      .full-width {
+        grid-column: 1 / -1;
+      }
+
+      .tabs {
+        display: flex;
+        background: white;
+        border-radius: 12px 12px 0 0;
+        overflow: hidden;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      }
+
+      .tab-button {
+        background: #f8f9fa;
+        border: none;
+        padding: 1rem 2rem;
+        cursor: pointer;
+        transition: background-color 0.3s;
+        font-size: 1rem;
+        font-weight: 500;
+      }
+
+      .tab-button.active,
+      .tab-button:hover {
+        background: white;
+        color: #3498db;
+      }
+
+      .tab-content {
+        background: white;
+        padding: 2rem;
+        border-radius: 0 0 12px 12px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        display: none;
+      }
+
+      .tab-content.active {
+        display: block;
+      }
+
+      .boost-info {
+        background: linear-gradient(135deg, #ff6b9d 0%, #c44569 100%);
+        color: white;
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 1rem;
+        text-align: center;
+      }
+
+      .back-button {
+        background: #6c757d;
+        color: white;
+        padding: 0.5rem 1rem;
+        border: none;
+        border-radius: 6px;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: background-color 0.3s;
+        margin-bottom: 1rem;
+      }
+
+      .back-button:hover {
+        background: #5a6268;
+        text-decoration: none;
+        color: white;
+      }
+
+      .activity-log {
+        max-height: 300px;
+        overflow-y: auto;
+        border: 1px solid #dee2e6;
+        border-radius: 6px;
+        padding: 1rem;
+        background: #f8f9fa;
+      }
+
+      .log-entry {
+        padding: 0.5rem;
+        margin-bottom: 0.5rem;
+        border-radius: 4px;
+        background: white;
+        border-left: 4px solid #17a2b8;
+      }
+
+      .log-time {
+        font-size: 0.8rem;
+        color: #6c757d;
+      }
+
+      .log-message {
+        margin-top: 0.2rem;
+      }
+
+      @media (max-width: 768px) {
+        .content-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .server-header {
+          flex-direction: column;
+          text-align: center;
+        }
+
+        .server-stats {
+          justify-content: center;
+        }
+
+        .container {
+          padding: 0 1rem;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <!-- Navigation -->
+    <nav class="navbar">
+      <div class="navbar-brand">🤖 Bot Admin Panel</div>
+      <div class="navbar-nav">
+        <a href="/" class="nav-link">Dashboard</a>
+        <a href="/logs" class="nav-link">Logs</a>
+        <a href="/stats" class="nav-link">Statistiques</a>
+        <a href="/control" class="nav-link">Contrôle</a>
+        <a href="/logout" class="nav-link">Déconnexion ({{ admin }})</a>
+      </div>
+    </nav>
+
+    <div class="container">
+      <a href="/control" class="back-button">← Retour au contrôle</a>
+
+      <!-- En-tête du serveur -->
+      <div class="server-header">
+        {% if server.icon_url %}
+        <img
+          src="{{ server.icon_url }}"
+          alt="Icône {{ server.name }}"
+          class="server-icon"
+        />
+        {% else %}
+        <div class="server-icon">{{ server.name[0].upper() }}</div>
+        {% endif %}
+
+        <div class="server-info">
+          <div class="server-name">{{ server.name }}</div>
+          <div class="server-description">{{ server.description }}</div>
+          <div class="server-stats">
+            <div class="stat-item">
+              <div class="stat-value">{{ server.member_count }}</div>
+              <div class="stat-label">Membres</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-value">{{ server.online_members }}</div>
+              <div class="stat-label">🟢 En ligne</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-value">{{ server.active_members }}</div>
+              <div class="stat-label">🔴 Actifs</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-value">{{ server.text_channels }}</div>
+              <div class="stat-label">Salons texte</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-value">{{ server.voice_channels }}</div>
+              <div class="stat-label">Salons vocaux</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-value">{{ server.role_count }}</div>
+              <div class="stat-label">Rôles</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Grille d'informations -->
+      <div class="content-grid">
+        <!-- Informations générales -->
+        <div class="info-card">
+          <div class="card-title">📋 Informations générales</div>
+          <div class="info-row">
+            <span class="info-label">ID du serveur</span>
+            <span class="info-value">{{ server.id }}</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Propriétaire</span>
+            <span class="info-value">{{ server.owner.name }}</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Créé le</span>
+            <span class="info-value">{{ server.created_at }}</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Bot rejoint le</span>
+            <span class="info-value">{{ server.joined_at }}</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Langue préférée</span>
+            <span class="info-value">{{ server.preferred_locale }}</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Serveur large</span>
+            <span class="info-value"
+              >{% if server.is_large %}Oui{% else %}Non{% endif %}</span
+            >
+          </div>
+        </div>
+
+        <!-- Sécurité et modération -->
+        <div class="info-card">
+          <div class="card-title">🛡️ Sécurité et modération</div>
+          <div class="info-row">
+            <span class="info-label">Niveau de vérification</span>
+            <span class="info-value">{{ server.verification_level }}</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Filtre de contenu</span>
+            <span class="info-value">{{ server.explicit_content_filter }}</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Notifications par défaut</span>
+            <span class="info-value">{{ server.default_notifications }}</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Niveau MFA</span>
+            <span class="info-value">{{ server.mfa_level }}</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Limite de membres</span>
+            <span class="info-value"
+              >{% if server.max_members %}{{ server.max_members }}{% else
+              %}Illimitée{% endif %}</span
+            >
+          </div>
+        </div>
+
+        <!-- Boost Nitro -->
+        {% if server.premium_tier > 0 %}
+        <div class="info-card">
+          <div class="card-title">💎 Boost Nitro</div>
+          <div class="boost-info">
+            <h3>Niveau {{ server.premium_tier }}</h3>
+            <p>{{ server.premium_subscribers }} boost(s) actif(s)</p>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Niveau de boost</span>
+            <span class="info-value">{{ server.boost_level }}/3</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Boosts actifs</span>
+            <span class="info-value">{{ server.premium_subscribers }}</span>
+          </div>
+        </div>
+        {% endif %}
+
+        <!-- Statistiques d'activité -->
+        <div class="info-card">
+          <div class="card-title">📊 Statistiques d'activité</div>
+          <div class="info-row">
+            <span class="info-label">Total des émojis</span>
+            <span class="info-value">{{ server.emoji_count }}</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Total des stickers</span>
+            <span class="info-value">{{ server.sticker_count }}</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Catégories</span>
+            <span class="info-value">{{ server.category_count }}</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Logs enregistrés</span>
+            <span class="info-value">{{ activity.total_logs }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Onglets pour les détails -->
+      <div class="full-width">
+        <div class="tabs">
+          <button
+            class="tab-button active"
+            onclick="switchTab(event, 'permissions')"
+          >
+            🔐 Permissions du Bot
+          </button>
+          <button class="tab-button" onclick="switchTab(event, 'roles')">
+            👥 Rôles (Top 10)
+          </button>
+          <button class="tab-button" onclick="switchTab(event, 'channels')">
+            💬 Salons
+          </button>
+          <button class="tab-button" onclick="switchTab(event, 'activity')">
+            📈 Activité récente
+          </button>
+        </div>
+
+        <!-- Onglet Permissions -->
+        <div id="permissions" class="tab-content active">
+          <div class="permissions-grid">
+            {% for permission_name, has_permission in permissions %}
+            <div
+              class="permission-item {% if has_permission %}permission-granted{% else %}permission-denied{% endif %}"
+            >
+              <span>{% if has_permission %}✅{% else %}❌{% endif %}</span>
+              <span>{{ permission_name }}</span>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+
+        <!-- Onglet Rôles -->
+        <div id="roles" class="tab-content">
+          {% for role in roles %}
+          <div class="role-item" style="--role-color: {{ role.color }}">
+            <div class="role-info">
+              <div class="role-name">{{ role.name }}</div>
+              <div class="role-badges">
+                {% if role.hoisted %}
+                <span class="badge badge-success">Affiché séparément</span>
+                {% endif %} {% if role.mentionable %}
+                <span class="badge badge-warning">Mentionnable</span>
+                {% endif %} {% if role.managed %}
+                <span class="badge">Géré par une intégration</span>
+                {% endif %}
+              </div>
+            </div>
+            <div><strong>{{ role.member_count }}</strong> membre(s)</div>
+          </div>
+          {% endfor %} {% if roles|length == 0 %}
+          <p>Aucun rôle trouvé (en dehors de @everyone).</p>
+          {% endif %}
+        </div>
+
+        <!-- Onglet Salons -->
+        <div id="channels" class="tab-content">
+          <h4>📁 Catégories ({{ channels.categories|length }})</h4>
+          {% for category in channels.categories %}
+          <div class="channel-item">
+            <div class="channel-info">
+              <div class="channel-icon">📁</div>
+              <div>
+                <div><strong>{{ category.name }}</strong></div>
+                <div class="channel-details">
+                  Position: {{ category.position }}
+                </div>
+              </div>
+            </div>
+            <div>{{ category.channel_count }} salon(s)</div>
+          </div>
+          {% endfor %}
+
+          <h4 style="margin-top: 2rem">
+            💬 Salons texte ({{ channels.text_channels|length }})
+          </h4>
+          {% for channel in channels.text_channels %}
+          <div class="channel-item">
+            <div class="channel-info">
+              <div class="channel-icon">
+                {% if channel.nsfw %}🔞{% else %}#{% endif %}
+              </div>
+              <div>
+                <div><strong>{{ channel.name }}</strong></div>
+                <div class="channel-details">
+                  {{ channel.category }} • {% if channel.topic %}{{
+                  channel.topic[:50] }}...{% else %}Aucun sujet{% endif %} {% if
+                  channel.slowmode > 0 %} • Slowmode: {{ channel.slowmode }}s{%
+                  endif %}
+                </div>
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+
+          <h4 style="margin-top: 2rem">
+            🔊 Salons vocaux ({{ channels.voice_channels|length }})
+          </h4>
+          {% for channel in channels.voice_channels %}
+          <div class="channel-item">
+            <div class="channel-info">
+              <div class="channel-icon">🔊</div>
+              <div>
+                <div><strong>{{ channel.name }}</strong></div>
+                <div class="channel-details">
+                  {{ channel.category }} • {{ channel.bitrate }} bps • Limite:
+                  {{ channel.user_limit }} • Connectés: {{
+                  channel.connected_members }}
+                </div>
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+
+        <!-- Onglet Activité -->
+        <div id="activity" class="tab-content">
+          <h4>📈 Activité récente du bot sur ce serveur</h4>
+          <div class="activity-log">
+            {% if activity.recent_activity %} {% for log in
+            activity.recent_activity %}
+            <div class="log-entry">
+              <div class="log-time">
+                {{ log.timestamp.strftime('%d/%m/%Y %H:%M:%S') }}
+              </div>
+              <div class="log-message">
+                <strong>[{{ log.level }}]</strong> {{ log.message }}
+              </div>
+            </div>
+            {% endfor %} {% else %}
+            <p>Aucune activité récente enregistrée pour ce serveur.</p>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      function switchTab(evt, tabName) {
+        // Masquer tous les contenus d'onglet
+        var tabContents = document.getElementsByClassName("tab-content");
+        for (var i = 0; i < tabContents.length; i++) {
+          tabContents[i].classList.remove("active");
+        }
+
+        // Désactiver tous les boutons d'onglet
+        var tabButtons = document.getElementsByClassName("tab-button");
+        for (var i = 0; i < tabButtons.length; i++) {
+          tabButtons[i].classList.remove("active");
+        }
+
+        // Afficher l'onglet sélectionné et marquer le bouton comme actif
+        document.getElementById(tabName).classList.add("active");
+        evt.currentTarget.classList.add("active");
+      }
+    </script>
+  </body>
+</html>

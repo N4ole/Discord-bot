@@ -272,10 +272,18 @@
           </div>
         </div>
       </div>
+
+      <!-- Activité des serveurs -->
+      <div class="chart-container full-width">
+        <div class="chart-title">🌍 Activité par Serveur (Top 10)</div>
+        <div class="chart-canvas">
+          <canvas id="serversChart"></canvas>
+        </div>
+      </div>
     </div>
 
     <script>
-      let commandsChart, errorsChart;
+      let commandsChart, errorsChart, serversChart;
       let lastStats = {};
 
       // Configuration des couleurs
@@ -355,6 +363,40 @@
             },
           },
         });
+
+        // Graphique d'activité des serveurs
+        const serversCtx = document
+          .getElementById("serversChart")
+          .getContext("2d");
+        serversChart = new Chart(serversCtx, {
+          type: "bar",
+          data: {
+            labels: [],
+            datasets: [
+              {
+                label: "Activité",
+                data: [],
+                backgroundColor: colors.success,
+                borderColor: colors.success,
+                borderWidth: 1,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                display: false,
+              },
+            },
+            scales: {
+              y: {
+                beginAtZero: true,
+              },
+            },
+          },
+        });
       }
 
       // Mettre à jour les données des graphiques
@@ -385,6 +427,15 @@
             errorsChart.data.datasets[0].data = [1];
           }
           errorsChart.update("none");
+
+          // Mettre à jour le graphique des serveurs
+          serversChart.data.labels = data.server_activity.map(
+            (item) => item.server
+          );
+          serversChart.data.datasets[0].data = data.server_activity.map(
+            (item) => item.activity
+          );
+          serversChart.update("none");
 
           // Mettre à jour les métriques
           updateMetrics(data.current_stats);

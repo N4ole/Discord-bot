@@ -89,6 +89,59 @@ python main.py
 
 ## 🌐 Panel Web d'Administration
 
+Le bot inclut un **panel web complet** pour l'administration et la surveillance !
+
+### 🚀 **Accès au Panel**
+- **URL** : http://127.0.0.1:8080 (une fois le bot lancé)
+- **Identifiants par défaut** : `admin` / `admin123`
+- ⚠️ **Important** : Changez les identifiants dans `web_panel.py` pour la production !
+
+### 🎛️ **Fonctionnalités du Panel**
+
+#### 📊 **Dashboard Principal**
+- **Statistiques en temps réel** : serveurs, utilisateurs, commandes
+- **Statut du bot** et temps de fonctionnement (uptime)
+- **Compteurs d'erreurs** et d'activité
+- **Actualisation automatique** toutes les 10 secondes
+
+#### 📝 **Gestion des Logs**
+- **Consultation complète** de l'historique
+- **Filtres avancés** par niveau (INFO, SUCCESS, WARNING, ERROR)
+- **Recherche textuelle** dans les messages
+- **Pagination** pour une navigation fluide
+
+#### 📈 **Statistiques Détaillées**
+- **Graphiques d'utilisation** par heure sur 24h
+- **Types d'erreurs** avec compteurs détaillés
+- **Métriques de performance** (taux de succès, etc.)
+- **Informations système** complètes
+
+#### 🎛️ **Contrôle du Bot** (NOUVEAU !)
+- **Liste complète des serveurs** avec détails (membres, canaux, rôles)
+- **Quitter un serveur** avec confirmation sécurisée
+- **Commandes de maintenance** :
+  - 🔄 Synchroniser les commandes slash
+  - 🗑️ Vider le cache
+  - 📊 Mettre à jour les statistiques
+  - 🔄 Recharger les modules
+- **Informations détaillées du bot** (latence, uptime, etc.)
+- **Sécurité** : Confirmation requise pour les actions critiques
+
+### 🔐 **Sécurité du Panel**
+- ✅ **Authentification obligatoire** pour toutes les pages
+- ✅ **Sessions sécurisées** avec timeout automatique
+- ✅ **Mots de passe hashés** (jamais stockés en clair)
+- ✅ **Logs d'audit** pour toutes les actions admin
+- ✅ **Confirmations** pour les actions critiques (quitter un serveur)
+
+### 🛠️ **Utilitaires d'Administration**
+Utilisez `python admin_panel.py` pour :
+- Créer de nouveaux utilisateurs admin
+- Générer des configurations Flask sécurisées
+- Voir les statistiques du panel
+
+## 🌐 Panel Web d'Administration
+
 Le bot intègre un **panel web sécurisé** pour surveiller et administrer le bot à distance !
 
 ### 🚀 Accès au Panel

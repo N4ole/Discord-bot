@@ -14,6 +14,8 @@ class DiscordBot(commands.Bot):
         # Configuration des intents
         intents = discord.Intents.default()
         intents.message_content = True
+        intents.members = True  # Nécessaire pour accéder aux informations des membres
+        intents.presences = True  # Nécessaire pour voir les statuts en ligne/hors ligne
 
         # Initialisation du bot avec le système de préfixes dynamiques
         super().__init__(

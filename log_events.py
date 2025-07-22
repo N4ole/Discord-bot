@@ -32,12 +32,37 @@ class LogEvents(commands.Cog):
         if message.author.bot or not message.guild:
             return
 
+        # Rechercher qui a supprimé le message dans les audit logs
+        deleted_by = None
+        try:
+            async for entry in message.guild.audit_logs(
+                action=discord.AuditLogAction.message_delete,
+                limit=1,
+                after=message.created_at
+            ):
+                if (entry.target.id == message.author.id and
+                    entry.extra.channel.id == message.channel.id and
+                        abs((entry.created_at - message.created_at).total_seconds()) < 10):
+                    deleted_by = entry.user
+                    break
+        except (discord.Forbidden, discord.HTTPException, AttributeError):
+            # Si on ne peut pas accéder aux audit logs ou qu'il y a une erreur
+            pass
+
         embed = LogFormatter.create_log_embed(
             title="🗑️ Message Supprimé",
             description=f"**Contenu:** {message.content[:1000] if message.content else '*Aucun contenu texte*'}",
             color=LogFormatter.get_color_for_event("message_delete"),
             user=message.author,
-            channel=message.channel
+            channel=message.channel,
+            extra_fields=[
+                {"name": "👤 Auteur du message",
+                    "value": f"{message.author.mention} ({message.author})", "inline": True},
+                {"name": "🗑️ Supprimé par",
+                    "value": f"{deleted_by.mention} ({deleted_by})" if deleted_by else "Auteur lui-même ou inconnu", "inline": True},
+                {"name": "🕐 Heure de création",
+                    "value": f"<t:{int(message.created_at.timestamp())}:f>", "inline": True}
+            ]
         )
 
         if message.attachments:
@@ -46,6 +71,20 @@ class LogEvents(commands.Cog):
                 value=f"{len(message.attachments)} fichier(s)",
                 inline=True
             )
+
+        # Log vers le panel web avec plus de détails
+        from web_panel import log_bot_event
+        log_bot_event(
+            'INFO',
+            f'Message supprimé de {message.author} dans #{message.channel.name}',
+            guild_id=message.guild.id,
+            guild_name=message.guild.name,
+            channel_name=message.channel.name,
+            message_author=str(message.author),
+            deleted_by=str(deleted_by) if deleted_by else "Auteur ou inconnu",
+            message_content=message.content[:200] if message.content else "Aucun contenu",
+            event_type="message_delete"
+        )
 
         await self.send_log(message.guild, embed)
 

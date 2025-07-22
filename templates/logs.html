@@ -159,6 +159,46 @@
             border-radius: 3px;
         }
 
+        .message-delete-details {
+            background: #fff5f5;
+            border: 1px solid #ffcdd2;
+            border-radius: 5px;
+            padding: 0.75rem;
+            margin-top: 0.5rem;
+            font-family: inherit;
+        }
+
+        .detail-row {
+            display: flex;
+            margin-bottom: 0.5rem;
+            align-items: flex-start;
+        }
+
+        .detail-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .detail-label {
+            font-weight: bold;
+            color: #d32f2f;
+            min-width: 140px;
+            margin-right: 0.5rem;
+        }
+
+        .detail-value {
+            color: #333;
+            flex: 1;
+        }
+
+        .message-content {
+            background: #f9f9f9;
+            padding: 0.25rem 0.5rem;
+            border-radius: 3px;
+            font-family: monospace;
+            font-size: 0.85rem;
+            border-left: 3px solid #ff5722;
+        }
+
         .pagination {
             display: flex;
             justify-content: center;
@@ -218,6 +258,7 @@
             <a href="/" class="nav-link">📊 Dashboard</a>
             <a href="/logs" class="nav-link">📝 Logs</a>
             <a href="/stats" class="nav-link">📈 Statistiques</a>
+            <a href="/control" class="nav-link">🎛️ Contrôle</a>
             <span class="nav-link">👤 {{ admin }}</span>
             <a href="/logout" class="nav-link">🚪 Déconnexion</a>
         </div>
@@ -260,7 +301,30 @@
                         <div class="log-timestamp">📅 {{ log.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</div>
                         <div class="log-message">{{ log.message }}</div>
                         {% if log.extra_data and log.extra_data|length > 0 %}
-                        <div class="log-extra">{{ log.extra_data }}</div>
+                            {% if log.extra_data.event_type == 'message_delete' %}
+                                <div class="log-extra message-delete-details">
+                                    <div class="detail-row">
+                                        <span class="detail-label">👤 Auteur du message:</span>
+                                        <span class="detail-value">{{ log.extra_data.message_author }}</span>
+                                    </div>
+                                    <div class="detail-row">
+                                        <span class="detail-label">🗑️ Supprimé par:</span>
+                                        <span class="detail-value">{{ log.extra_data.deleted_by }}</span>
+                                    </div>
+                                    <div class="detail-row">
+                                        <span class="detail-label"># Canal:</span>
+                                        <span class="detail-value">{{ log.extra_data.channel_name }}</span>
+                                    </div>
+                                    {% if log.extra_data.message_content and log.extra_data.message_content != "Aucun contenu" %}
+                                    <div class="detail-row">
+                                        <span class="detail-label">💬 Contenu:</span>
+                                        <span class="detail-value message-content">{{ log.extra_data.message_content }}</span>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            {% else %}
+                                <div class="log-extra">{{ log.extra_data }}</div>
+                            {% endif %}
                         {% endif %}
                     </div>
                 </div>
