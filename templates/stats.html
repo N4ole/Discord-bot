@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Statistiques - Panel Admin Bot</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Arial", sans-serif;
+        background: #f5f7fa;
+        color: #333;
+      }
+
+      .navbar {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 1rem 2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      }
+
+      .navbar-brand {
+        font-size: 1.5rem;
+        font-weight: bold;
+      }
+
+      .navbar-nav {
+        display: flex;
+        gap: 2rem;
+        align-items: center;
+      }
+
+      .nav-link {
+        color: white;
+        text-decoration: none;
+        padding: 0.5rem 1rem;
+        border-radius: 5px;
+        transition: background-color 0.3s;
+      }
+
+      .nav-link:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+      }
+
+      .container {
+        max-width: 1200px;
+        margin: 2rem auto;
+        padding: 0 2rem;
+      }
+
+      .stats-header {
+        background: white;
+        padding: 2rem;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        margin-bottom: 2rem;
+        text-align: center;
+      }
+
+      .stats-section {
+        background: white;
+        padding: 2rem;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        margin-bottom: 2rem;
+      }
+
+      .stats-section h3 {
+        margin-bottom: 1.5rem;
+        color: #333;
+        border-bottom: 2px solid #667eea;
+        padding-bottom: 0.5rem;
+      }
+
+      .chart-placeholder {
+        height: 300px;
+        background: #f8f9fa;
+        border: 2px dashed #ccc;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 8px;
+        color: #666;
+        font-size: 1.1rem;
+      }
+
+      .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 2rem;
+      }
+
+      .stat-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem;
+        background: #f8f9fa;
+        border-radius: 8px;
+        margin-bottom: 1rem;
+      }
+
+      .stat-label {
+        font-weight: bold;
+        color: #555;
+      }
+
+      .stat-value {
+        font-size: 1.2rem;
+        font-weight: bold;
+        color: #667eea;
+      }
+
+      .error-types {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 8px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      }
+
+      .error-type {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.75rem;
+        margin-bottom: 0.5rem;
+        background: #fff5f5;
+        border-left: 4px solid #f56565;
+        border-radius: 4px;
+      }
+
+      .commands-by-hour {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 1rem;
+        margin-top: 1rem;
+      }
+
+      .hour-stat {
+        text-align: center;
+        padding: 1rem;
+        background: #f0f4f8;
+        border-radius: 8px;
+      }
+
+      .hour-number {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #667eea;
+      }
+
+      .hour-label {
+        font-size: 0.9rem;
+        color: #666;
+        margin-top: 0.5rem;
+      }
+
+      .performance-metrics {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 2rem;
+        margin-top: 2rem;
+      }
+
+      .metric-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 2rem;
+        border-radius: 10px;
+        text-align: center;
+      }
+
+      .metric-value {
+        font-size: 2.5rem;
+        font-weight: bold;
+        margin-bottom: 0.5rem;
+      }
+
+      .metric-label {
+        font-size: 0.9rem;
+        opacity: 0.9;
+      }
+
+      @media (max-width: 768px) {
+        .navbar {
+          flex-direction: column;
+          gap: 1rem;
+        }
+
+        .container {
+          padding: 0 1rem;
+        }
+
+        .commands-by-hour {
+          grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <nav class="navbar">
+      <div class="navbar-brand">🤖 Panel Admin Bot Discord</div>
+      <div class="navbar-nav">
+        <a href="/" class="nav-link">📊 Dashboard</a>
+        <a href="/logs" class="nav-link">📝 Logs</a>
+        <a href="/stats" class="nav-link">📈 Statistiques</a>
+        <span class="nav-link">👤 {{ admin }}</span>
+        <a href="/logout" class="nav-link">🚪 Déconnexion</a>
+      </div>
+    </nav>
+
+    <div class="container">
+      <div class="stats-header">
+        <h1>📈 Statistiques Détaillées</h1>
+        <p>Analyses approfondies des performances et de l'utilisation du bot</p>
+      </div>
+
+      <div class="performance-metrics">
+        <div class="metric-card">
+          <div class="metric-value">{{ stats.commands_used }}</div>
+          <div class="metric-label">Commandes Totales</div>
+        </div>
+
+        <div class="metric-card">
+          <div class="metric-value">{{ stats.connected_servers }}</div>
+          <div class="metric-label">Serveurs Actifs</div>
+        </div>
+
+        <div class="metric-card">
+          <div class="metric-value">{{ stats.total_users }}</div>
+          <div class="metric-label">Utilisateurs Accessibles</div>
+        </div>
+
+        <div class="metric-card">
+          <div class="metric-value">
+            {% if stats.errors_count == 0 %} 100% {% else %} {{
+            "%.1f"|format((stats.commands_used - stats.errors_count) /
+            stats.commands_used * 100) }}% {% endif %}
+          </div>
+          <div class="metric-label">Taux de Succès</div>
+        </div>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stats-section">
+          <h3>⏰ Commandes par Heure</h3>
+          <div class="commands-by-hour">
+            {% for hour in range(24) %}
+            <div class="hour-stat">
+              <div class="hour-number">
+                {{ detailed.commands_by_hour[hour] or 0 }}
+              </div>
+              <div class="hour-label">{{ "%02d"|format(hour) }}h</div>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+
+        <div class="stats-section">
+          <h3>❌ Types d'Erreurs</h3>
+          {% if detailed.errors_by_type %}
+          <div class="error-types">
+            {% for error_type, count in detailed.errors_by_type.items() %}
+            <div class="error-type">
+              <span class="stat-label">{{ error_type }}</span>
+              <span class="stat-value">{{ count }}</span>
+            </div>
+            {% endfor %}
+          </div>
+          {% else %}
+          <p style="color: #4caf50; text-align: center; padding: 2rem">
+            🎉 Aucune erreur enregistrée !
+          </p>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="stats-section">
+        <h3>📊 Informations Système</h3>
+        <div class="stat-item">
+          <span class="stat-label">🚀 Heure de Démarrage</span>
+          <span class="stat-value">
+            {% if stats.start_time %} {{ stats.start_time.strftime('%d/%m/%Y
+            %H:%M:%S') }} {% else %} Non démarré {% endif %}
+          </span>
+        </div>
+
+        <div class="stat-item">
+          <span class="stat-label">🔄 Dernière Activité</span>
+          <span class="stat-value">
+            {% if stats.last_activity %} {{
+            stats.last_activity.strftime('%d/%m/%Y %H:%M:%S') }} {% else %}
+            Aucune activité {% endif %}
+          </span>
+        </div>
+
+        <div class="stat-item">
+          <span class="stat-label">📡 Statut de Connexion</span>
+          <span class="stat-value">
+            {% if stats.status == 'online' %} 🟢 En ligne {% elif stats.status
+            == 'offline' %} 🔴 Hors ligne {% else %} 🟡 Connexion... {% endif %}
+          </span>
+        </div>
+      </div>
+
+      <div class="stats-section">
+        <h3>📈 Graphiques de Performance</h3>
+        <div class="chart-placeholder">
+          📊 Graphiques détaillés (à implémenter avec Chart.js)
+          <br />
+          <small>Affichage des tendances d'utilisation sur 7 jours</small>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // Auto-refresh toutes les 30 secondes
+      setInterval(() => {
+        window.location.reload();
+      }, 30000);
+    </script>
+  </body>
+</html>
