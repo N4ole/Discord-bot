@@ -1,5 +1,5 @@
 # Fichiers sensibles
-#.env
+.env
 prefixes.json
 logs_config.json
 
