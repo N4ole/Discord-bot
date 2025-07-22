@@ -21,6 +21,9 @@ ADMIN_CREDENTIALS = {
     'owner': generate_password_hash('securepass2025')
 }
 
+# Variable globale pour stocker l'instance du bot
+bot_instance = None
+
 # Stockage des logs et statistiques en mémoire
 bot_logs = []
 bot_stats = {

@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contrôle Bot - Panel Admin</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: #f5f7fa;
+            color: #333;
+        }
+
+        .navbar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .navbar-brand {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .navbar-nav {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .nav-link {
+            color: white;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            background-color: rgba(255,255,255,0.1);
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+
+        .control-header {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .control-sections {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 2rem;
+        }
+
+        .control-section {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .section-title {
+            color: #333;
+            margin-bottom: 1.5rem;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .servers-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 1rem;
+        }
+
+        .server-card {
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 1.5rem;
+            background: #fafafa;
+            transition: all 0.3s;
+        }
+
+        .server-card:hover {
+            border-color: #667eea;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .server-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .server-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        .server-info h4 {
+            margin: 0;
+            color: #333;
+            font-size: 1.1rem;
+        }
+
+        .server-info p {
+            margin: 0;
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .server-stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 0.5rem;
+            background: white;
+            border-radius: 5px;
+        }
+
+        .stat-value {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: #666;
+            margin-top: 0.25rem;
+        }
+
+        .server-actions {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .btn-info {
+            background: #17a2b8;
+            color: white;
+        }
+
+        .btn-warning {
+            background: #ffc107;
+            color: #333;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn:hover {
+            opacity: 0.8;
+            transform: translateY(-1px);
+        }
+
+        .bot-controls {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+        }
+
+        .control-card {
+            background: #f8f9fa;
+            padding: 1.5rem;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+            text-align: center;
+        }
+
+        .control-icon {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .control-card h4 {
+            margin-bottom: 0.5rem;
+            color: #333;
+        }
+
+        .control-card p {
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+
+        .modal-content {
+            background: white;
+            margin: 10% auto;
+            padding: 2rem;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 500px;
+            position: relative;
+        }
+
+        .modal-header {
+            border-bottom: 1px solid #eee;
+            padding-bottom: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .modal-header h3 {
+            margin: 0;
+            color: #333;
+        }
+
+        .close {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #666;
+        }
+
+        .close:hover {
+            color: #333;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+
+        .alert {
+            padding: 1rem;
+            border-radius: 5px;
+            margin-bottom: 1rem;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-danger {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f1aeb5;
+        }
+
+        .alert-warning {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+
+        @media (max-width: 768px) {
+            .navbar {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            .container {
+                padding: 0 1rem;
+            }
+            
+            .servers-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .server-stats {
+                grid-template-columns: 1fr;
+            }
+
+            .server-actions {
+                flex-direction: column;
+            }
+
+            .modal-content {
+                margin: 5% auto;
+                width: 95%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="navbar-brand">🤖 Panel Admin Bot Discord</div>
+        <div class="navbar-nav">
+            <a href="/" class="nav-link">📊 Dashboard</a>
+            <a href="/logs" class="nav-link">📝 Logs</a>
+            <a href="/stats" class="nav-link">📈 Statistiques</a>
+            <a href="/control" class="nav-link active">🎛️ Contrôle</a>
+            <span class="nav-link">👤 {{ admin }}</span>
+            <a href="/logout" class="nav-link">🚪 Déconnexion</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="control-header">
+            <h1>🎛️ Contrôle du Bot</h1>
+            <p>Gestion avancée et administration du bot Discord</p>
+        </div>
+
+        {% if message %}
+        <div class="alert alert-{{ message.type }}">
+            {{ message.text }}
+        </div>
+        {% endif %}
+
+        <div class="control-sections">
+            <!-- Contrôles généraux du bot -->
+            <div class="control-section">
+                <h3 class="section-title">⚙️ Contrôles Généraux</h3>
+                <div class="bot-controls">
+                    <div class="control-card">
+                        <div class="control-icon">📊</div>
+                        <h4>Statistiques Bot</h4>
+                        <p>Serveurs: {{ bot_stats.servers }}<br>Utilisateurs: {{ bot_stats.users }}</p>
+                        <button class="btn btn-info" onclick="refreshBotStats()">🔄 Actualiser</button>
+                    </div>
+
+                    <div class="control-card">
+                        <div class="control-icon">🔄</div>
+                        <h4>Statut Bot</h4>
+                        <p>État: 
+                            {% if bot_stats.status == 'online' %}
+                                <span style="color: #28a745;">🟢 En ligne</span>
+                            {% elif bot_stats.status == 'offline' %}
+                                <span style="color: #dc3545;">🔴 Hors ligne</span>
+                            {% else %}
+                                <span style="color: #ffc107;">🟡 Connexion...</span>
+                            {% endif %}
+                        </p>
+                        <button class="btn btn-success" onclick="sendBotCommand('sync')">🔄 Sync Commandes</button>
+                    </div>
+
+                    <div class="control-card">
+                        <div class="control-icon">📋</div>
+                        <h4>Informations</h4>
+                        <p>Uptime: {{ uptime_str }}<br>Commandes: {{ bot_stats.commands }}</p>
+                        <button class="btn btn-info" onclick="openInfoModal()">ℹ️ Détails</button>
+                    </div>
+
+                    <div class="control-card">
+                        <div class="control-icon">⚠️</div>
+                        <h4>Maintenance</h4>
+                        <p>Gestion avancée du bot</p>
+                        <button class="btn btn-warning" onclick="openMaintenanceModal()">🔧 Options</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Liste des serveurs -->
+            <div class="control-section">
+                <h3 class="section-title">🏰 Serveurs Discord ({{ servers|length }})</h3>
+                <div class="servers-grid">
+                    {% for server in servers %}
+                    <div class="server-card">
+                        <div class="server-header">
+                            <div class="server-icon">
+                                {% if server.icon_url %}
+                                    <img src="{{ server.icon_url }}" alt="Icon" style="width: 100%; height: 100%; border-radius: 50%;">
+                                {% else %}
+                                    {{ server.name[0].upper() }}
+                                {% endif %}
+                            </div>
+                            <div class="server-info">
+                                <h4>{{ server.name }}</h4>
+                                <p>ID: {{ server.id }}</p>
+                            </div>
+                        </div>
+
+                        <div class="server-stats">
+                            <div class="stat-item">
+                                <div class="stat-value">{{ server.member_count }}</div>
+                                <div class="stat-label">Membres</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value">{{ server.role_count }}</div>
+                                <div class="stat-label">Rôles</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value">{{ server.text_channels }}</div>
+                                <div class="stat-label">Canaux Texte</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value">{{ server.voice_channels }}</div>
+                                <div class="stat-label">Canaux Vocal</div>
+                            </div>
+                        </div>
+
+                        <div style="margin: 1rem 0; font-size: 0.9rem; color: #666;">
+                            <strong>👑 Propriétaire:</strong> {{ server.owner }}<br>
+                            <strong>📅 Rejoint:</strong> {{ server.joined_at }}<br>
+                            <strong>🚀 Niveau Boost:</strong> {{ server.premium_tier }}
+                        </div>
+
+                        <div class="server-actions">
+                            <button class="btn btn-info" onclick="viewServerDetails('{{ server.id }}')">
+                                ℹ️ Détails
+                            </button>
+                            <button class="btn btn-warning" onclick="openLeaveServerModal('{{ server.id }}', '{{ server.name }}')">
+                                🚪 Quitter
+                            </button>
+                            {% if server.is_owner %}
+                            <span class="btn btn-success" style="cursor: default;">👑 Propriétaire</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal pour quitter un serveur -->
+    <div id="leaveServerModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('leaveServerModal')">&times;</span>
+            <div class="modal-header">
+                <h3>⚠️ Confirmer la sortie du serveur</h3>
+            </div>
+            <div class="modal-body">
+                <p>Êtes-vous sûr de vouloir faire quitter le bot du serveur <strong id="serverNameToLeave"></strong> ?</p>
+                <p style="color: #dc3545;"><strong>⚠️ Attention :</strong> Cette action est irréversible. Le bot devra être réinvité pour revenir.</p>
+                
+                <div class="form-group">
+                    <label for="confirmText">Tapez "CONFIRMER" pour valider :</label>
+                    <input type="text" id="confirmText" placeholder="CONFIRMER">
+                </div>
+            </div>
+            <div style="text-align: right; border-top: 1px solid #eee; padding-top: 1rem; margin-top: 1rem;">
+                <button class="btn btn-secondary" onclick="closeModal('leaveServerModal')" style="background: #6c757d; color: white; margin-right: 0.5rem;">Annuler</button>
+                <button class="btn btn-danger" onclick="confirmLeaveServer()" id="confirmLeaveBtn" disabled>🚪 Quitter le serveur</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal d'informations -->
+    <div id="infoModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('infoModal')">&times;</span>
+            <div class="modal-header">
+                <h3>ℹ️ Informations détaillées</h3>
+            </div>
+            <div class="modal-body" id="infoModalBody">
+                <p>🔄 Chargement des informations...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de maintenance -->
+    <div id="maintenanceModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('maintenanceModal')">&times;</span>
+            <div class="modal-header">
+                <h3>🔧 Options de maintenance</h3>
+            </div>
+            <div class="modal-body">
+                <div style="margin-bottom: 1rem;">
+                    <button class="btn btn-info" onclick="sendBotCommand('reload_modules')">🔄 Recharger modules</button>
+                    <button class="btn btn-warning" onclick="sendBotCommand('clear_cache')">🗑️ Vider cache</button>
+                </div>
+                <div style="margin-bottom: 1rem;">
+                    <button class="btn btn-success" onclick="sendBotCommand('sync_commands')">⚡ Sync commandes slash</button>
+                    <button class="btn btn-info" onclick="sendBotCommand('update_stats')">📊 MAJ statistiques</button>
+                </div>
+                <div class="alert alert-warning">
+                    <strong>⚠️ Attention :</strong> Ces actions peuvent affecter le fonctionnement du bot temporairement.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentServerIdToLeave = null;
+
+        function openLeaveServerModal(serverId, serverName) {
+            currentServerIdToLeave = serverId;
+            document.getElementById('serverNameToLeave').textContent = serverName;
+            document.getElementById('confirmText').value = '';
+            document.getElementById('confirmLeaveBtn').disabled = true;
+            document.getElementById('leaveServerModal').style.display = 'block';
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+
+        function confirmLeaveServer() {
+            if (!currentServerIdToLeave) return;
+            
+            fetch('/control/leave_server', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    server_id: currentServerIdToLeave,
+                    confirmation: document.getElementById('confirmText').value
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                } else {
+                    alert('Erreur: ' + data.message);
+                }
+            });
+        }
+
+        function sendBotCommand(command) {
+            fetch('/control/bot_command', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ command: command })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Commande exécutée avec succès: ' + data.message);
+                } else {
+                    alert('Erreur: ' + data.message);
+                }
+            });
+        }
+
+        function refreshBotStats() {
+            fetch('/api/stats')
+            .then(response => response.json())
+            .then(data => {
+                location.reload();
+            });
+        }
+
+        function openInfoModal() {
+            document.getElementById('infoModal').style.display = 'block';
+            
+            fetch('/api/bot_info')
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('infoModalBody').innerHTML = `
+                    <div style="font-family: monospace; font-size: 0.9rem;">
+                        <strong>🤖 Bot Information:</strong><br>
+                        • Nom: ${data.name}<br>
+                        • ID: ${data.id}<br>
+                        • Discriminator: ${data.discriminator}<br>
+                        • Avatar: ${data.avatar ? '✅' : '❌'}<br><br>
+                        
+                        <strong>📊 Statistiques:</strong><br>
+                        • Serveurs: ${data.guild_count}<br>
+                        • Utilisateurs: ${data.user_count}<br>
+                        • Commandes: ${data.command_count}<br>
+                        • Latence: ${data.latency}ms<br><br>
+                        
+                        <strong>⏰ Temps:</strong><br>
+                        • Démarré: ${data.start_time}<br>
+                        • Uptime: ${data.uptime}<br>
+                        • Dernière activité: ${data.last_activity}
+                    </div>
+                `;
+            })
+            .catch(error => {
+                document.getElementById('infoModalBody').innerHTML = 
+                    '<p style="color: #dc3545;">❌ Erreur lors du chargement des informations</p>';
+            });
+        }
+
+        function openMaintenanceModal() {
+            document.getElementById('maintenanceModal').style.display = 'block';
+        }
+
+        function viewServerDetails(serverId) {
+            window.open('/control/server/' + serverId, '_blank');
+        }
+
+        // Validation du texte de confirmation
+        document.getElementById('confirmText').addEventListener('input', function() {
+            const confirmBtn = document.getElementById('confirmLeaveBtn');
+            if (this.value === 'CONFIRMER') {
+                confirmBtn.disabled = false;
+            } else {
+                confirmBtn.disabled = true;
+            }
+        });
+
+        // Fermer les modals en cliquant à l'extérieur
+        window.onclick = function(event) {
+            const modals = document.querySelectorAll('.modal');
+            modals.forEach(modal => {
+                if (event.target === modal) {
+                    modal.style.display = 'none';
+                }
+            });
+        }
+
+        // Auto-refresh toutes les 30 secondes
+        setInterval(refreshBotStats, 30000);
+    </script>
+</body>
+</html>
