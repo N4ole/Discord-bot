@@ -1,233 +1,107 @@
-# 🤖## ✨ Fonctionnalités principales
+# 🤖 Bot Discord Multi-Fonctionnel
 
-- 🏗️ **Architecture modulaire** - Commandes organisées par cat### 🔧 **Nouvelles Commandes d'Outils Avancés**
-- 📊 **Analyse** : `/analyze` - Analyse détaillée serveur/utilisateur avec scoring sécurité
-- 🧹 **Nettoyage** : `/clean` - Suppression intelligente de messages avec filtres
-- ⏰ **Rappels** : `/remind` - Système de rappels programmables jusqu'à 30 jours
-- 🗳️ **Sondages** : `/poll` - Sondages interactifs avec timer automatique et résultats
-- ⚡ **Double interface** - Commandes slash (/) ET préfixées (!)
-- 🌐 **Multi-serveur** - Configuration indépendante par serveur
-- 📊 **Système de logs** - Surveillance complète des activités
-- 🛡️ **Modération complète** - Ban, kick, mute avec gestio## 📝 Ajout de nouvelles commandes
-
-Pour ajouter de nouvelles commandes :
-
-1. **Commande slash** : Créez un fichier dans `slash/`
-2. **Commande préfixée** : Créez un fichier dans `prefixe/`
-3. Ajoutez le chargement dans `engine.py` dans la méthode `setup_hook()`
-
-Chaque module doit avoir une fonction `setup(bot)` pour être chargé automatiquement.
-
-## 🚀 Déploiement et Production
-
-### 🔧 Configuration de Production
-1. **Changez les identifiants par défaut** dans `web_panel.py`
-2. **Utilisez un serveur WSGI** comme Gunicorn pour le panel web
-3. **Configurez un reverse proxy** (Nginx) pour HTTPS
-4. **Activez les logs en fichier** pour la persistance
-5. **Utilisez une base de données** pour les configurations (optionnel)
-
-### 🛡️ Sécurité
-- ✅ Tokens et mots de passe dans des variables d'environnement
-- ✅ Authentification obligatoire pour le panel web
-- ✅ Sessions sécurisées avec timeout automatique
-- ✅ Validation des permissions Discord
-- ✅ Logs d'audit pour toutes les actions sensibles
-
-### 📊 Monitoring
-- ✅ Statistiques en temps réel via le panel web
-- ✅ Logs détaillés de tous les événements
-- ✅ Métriques de performance et d'utilisation
-- ✅ Alertes automatiques en cas d'erreur
-
-## 🆘 Dépannage et FAQ
-
-### ❓ Problèmes Courants
-
-**Q: Le bot ne répond pas aux commandes**
-- Vérifiez que le token Discord est correct dans `.env`
-- Assurez-vous que le bot a les permissions nécessaires sur le serveur
-- Vérifiez que les intents sont activés (Members, Presences)
-
-**Q: Les commandes slash n'apparaissent pas**
-- Utilisez la commande `/sync` ou le bouton dans le panel web
-- Attendez quelques minutes (propagation Discord)
-- Vérifiez les permissions "Use Application Commands"
-
-**Q: Le panel web ne fonctionne pas**
-- Vérifiez que le port 8080 n'est pas utilisé par un autre programme
-- Assurez-vous que Flask et Werkzeug sont installés
-- Vérifiez la configuration dans `.env`
-
-**Q: Erreur "Intents" au démarrage**
-- Activez "Presence Intent" et "Server Members Intent" dans le Developer Portal
-- Redémarrez le bot après avoir modifié les intents
-
-**Q: Les logs ne s'affichent pas**
-- Configurez d'abord un canal avec `/setlog #canal`
-- Activez les logs avec `/logon`
-- Vérifiez que le bot peut écrire dans le canal
-
-### 🔧 Commandes de Diagnostic
-
-#### Pour les Propriétaires du Bot
-- `!diag` - Diagnostic complet du bot
-- `!servers` - Liste des serveurs connectés
-- `!stats` - Statistiques globales
-
-#### Panel Web
-- **Contrôle > Synchroniser** - Resynchronise les commandes slash
-- **Contrôle > Vider le cache** - Remet à zéro les statistiques
-- **Logs** - Consultation détaillée de l'historique
-
-## � Documentation des Commandes
-
-### 🆘 **Système d'Aide Intégré**
-
-#### **Aide Générale**
-- **Slash** : `/help` - Interface interactive avec sélection de catégories
-- **Préfixe** : `!help` - Aide complète avec toutes les commandes
-
-#### **Aide par Catégorie** (Slash)
-- `/help category:moderation` - �️ Commandes de modération (ban, kick, mute, clean)
-- `/help category:roles` - 🎭 Gestion des rôles
-- `/help category:logs` - 📊 Système de logs et surveillance
-- `/help category:config` - 🛠️ Configuration et préfixes
-- `/help category:info` - 📋 Informations utilisateur/serveur
-- `/help category:fun` - 🎮 Divertissement et jeux
-- `/help category:tools` - 🔧 Outils avancés (cryptographie, sondages, rappels)
-- `/help category:utils` - ⚙️ Utilitaires (ping, météo, traduction)
-
-#### **Aide Spécifique** (Préfixe)
-- `!help <commande>` - Aide détaillée d'une commande avec usage et exemples
-
-### 📚 **Documentation Complète**
-- 📄 **[AIDE_COMPLETE.md](AIDE_COMPLETE.md)** - Guide complet avec tous les détails et exemples
-- � **[NOUVELLES_COMMANDES.md](NOUVELLES_COMMANDES.md)** - Guide des outils avancés récemment ajoutés
-
-### 🔧 **Nouvelles Commandes d'Outils Avancés**
-- 📊 **Analyse** : `/analyze` - Analyse détaillée serveur/utilisateur avec scoring sécurité
-- 🧹 **Nettoyage** : `/clean` - Suppression intelligente de messages avec filtres
-- ⏰ **Rappels** : `/remind` - Système de rappels programmables jusqu'à 30 jours
-- � **Cryptographie** : `/encode`, `/decode`, `/hash` - Encodage Base64 et hashes sécurisés
-- 🔒 **Sécurité** : `/password` - Générateur de mots de passe avec calcul d'entropie
-- 🗳️ **Sondages** : `/poll` - Sondages interactifs avec timer automatique et résultats
-
-### 📞 Support et Documentation
-- 📚 **Aide intégrée** : `/help` ou `!help` pour l'aide interactive
-- 📖 **[AIDE_COMPLETE.md](AIDE_COMPLETE.md)** - Guide complet de toutes les commandes
-- 📝 **[NOUVELLES_COMMANDES.md](NOUVELLES_COMMANDES.md)** - Guide des outils avancés
-- 🌐 **Panel web** - Logs et diagnostics détaillés
-- 📚 Documentation Discord.py : https://discordpy.readthedocs.io/
-
-### 🎯 Roadmap et Améliorations Futures
-
-### ✅ **Récemment Ajouté**
-- [x] 🔧 **Outils avancés** - Cryptographie, sondages, rappels, analyse
-- [x] 🎮 **Commandes de divertissement** - Jeux interactifs et fun
-- [x] ⚙️ **Utilitaires étendus** - Météo, traduction, informations détaillées
-- [x] 🌐 **Panel web complet** - Contrôle, monitoring, gestion des serveurs
-- [x] 📖 **Documentation complète** - Guides détaillés et aide interactive
-- [ ] 🎵 Commandes musicales (lecture YouTube/Spotify)
-- [ ] 🎲 Système de niveaux et XP
-- [ ] 🏆 Système d'achievements
-- [ ] 📊 Statistiques avancées des utilisateurs
-- [ ] 🤖 Commandes d'IA (ChatGPT integration)
-- [ ] 📱 API REST complète
-- [ ] 🌍 Support multilingue
-- [ ] 📦 Système de plugins
-
-### 🔧 Améliorations Techniques
-- [ ] Migration vers PostgreSQL/MongoDB
-- [ ] Système de cache Redis
-- [ ] Interface web React/Vue.js
-- [ ] Tests automatisés complets
-- [ ] Docker containerization
-- [ ] CI/CD avec GitHub Actionses
-- 💬 **Mention interactive** - Aide automatique en mentionnant le bot
-- ⚙️ **Préfixes personnalisables** - Chaque serveur peut avoir son préfixe
-- 🌐 **Panel web d'administration** - Interface web sécurisée pour monitorer le bot
-- 🔧 **Commandes utilitaires** - Ping, infos utilisateur/serveur, météo, traduction
-- 🎮 **Commandes de divertissement** - Jeux, blagues, citations, mini-jeuxBot Multi-Fonctionnel
-
-Un bot Discord complet développé en Python avec une architecture modulaire, supportant les commandes slash et préfixées avec système multi-serveur et panel web d'administration.
+Un bot Discord complet développé en Python avec une architecture modulaire, supportant les commandes slash et préfixées avec système multi-serveur, panel web d'administration et système de support intégré.
 
 ## ✨ Fonctionnalités principales
 
 - 🏗️ **Architecture modulaire** - Commandes organisées par catégories
 - ⚡ **Double interface** - Commandes slash (/) ET préfixées (!)
 - 🌐 **Multi-serveur** - Configuration indépendante par serveur
-- � **Système de logs** - Surveillance complète des activités
+- 📊 **Système de logs** - Surveillance complète des activités
 - 🛡️ **Modération complète** - Ban, kick, mute avec gestion des rôles
-- 💬 **Mention interactive** - Aide automatique en mentionnant le bot
+- � **Mention interactive** - Aide automatique en mentionnant le bot
 - ⚙️ **Préfixes personnalisables** - Chaque serveur peut avoir son préfixe
+- 🌐 **Panel web d'administration** - Interface web sécurisée pour monitorer le bot
+- 🎫 **Système de support** - Interface utilisateur pour tickets de support
+- 🔧 **Commandes utilitaires** - Ping, infos utilisateur/serveur, météo, traduction
+- 🎮 **Commandes de divertissement** - Jeux, blagues, citations, mini-jeux
+- 🔐 **Outils avancés** - Cryptographie, sondages, rappels, analyse de sécurité
 
-## �📁 Structure du projet
+## 📁 Structure du projet
 
 ```
 Discord-bot/
-├── main.py                  # Point d'entrée principal
-├── engine.py                # Moteur principal du bot
-├── prefix_manager.py        # Gestion des préfixes multi-serveur
-├── log_manager.py          # Système de logs
-├── log_events.py           # Écouteurs d'événements
-├── bot_mentions.py         # Gestion des mentions du bot
-├── multiserver_diagnostic.py # Diagnostics pour le propriétaire
-├── web_panel.py            # 🌐 Panel web d'administration
-├── templates/              # 🎨 Templates HTML pour le panel web
-│   ├── login.html         # Page de connexion
-│   ├── dashboard.html     # Tableau de bord principal
-│   ├── logs.html          # Interface de consultation des logs
-│   └── stats.html         # Statistiques détaillées
-├── slash/                  # Commandes slash (/)
-│   ├── __init__.py
-│   ├── bonjour.py         # Commande de salutation
-│   ├── logs.py            # Configuration des logs
-│   ├── admin.py           # Commandes de modération
-│   ├── admin_roles.py     # Gestion des rôles
-│   ├── help.py            # Système d'aide interactif
-│   ├── utils.py           # 🔧 Commandes utilitaires (ping, info, météo...)
-│   └── fun.py             # 🎮 Commandes de divertissement (jeux, blagues...)
-├── prefixe/               # Commandes préfixées (!)
-│   ├── __init__.py
-│   ├── bonjour.py         # Commande de salutation
-│   ├── prefix.py          # Gestion des préfixes
-│   ├── logs.py            # Configuration des logs
-│   ├── admin.py           # Commandes de modération
-│   ├── admin_roles.py     # Gestion des rôles
-│   ├── help.py            # Système d'aide détaillé
-│   ├── utils.py           # 🔧 Commandes utilitaires (versions préfixées)
-│   └── fun.py             # 🎮 Commandes de divertissement (versions préfixées)
-├── data/                  # Données persistantes (auto-généré)
-│   ├── prefixes.json      # Configuration des préfixes
-│   └── logs_config.json   # Configuration des logs
-├── .env                   # Variables d'environnement (à créer)
-├── .env.example          # Exemple de configuration
-├── .env.panel            # Configuration du panel web
-└── README.md
+├── main.py                     # Point d'entrée principal
+├── engine.py                   # Moteur principal du bot
+├── prefix_manager.py           # Gestion des préfixes multi-serveur
+├── log_manager.py             # Système de logs
+├── log_events.py              # Écouteurs d'événements
+├── bot_mentions.py            # Gestion des mentions du bot
+├── multiserver_diagnostic.py  # Diagnostics pour le propriétaire
+├── web_panel.py               # 🌐 Panel web d'administration
+├── support_db.py              # 🎫 Base de données du système de support
+├── support_notifier.py        # 📧 Notifications Discord pour le support
+├── admin_panel.py             # 🛠️ Utilitaires d'administration
+├── templates/                 # 🎨 Templates HTML
+│   ├── login.html            # Page de connexion admin
+│   ├── dashboard.html        # Tableau de bord principal
+│   ├── logs.html             # Interface de consultation des logs
+│   ├── stats.html            # Statistiques détaillées
+│   ├── control.html          # Contrôle du bot
+│   ├── support_*.html        # 🎫 Interface du système de support
+│   └── admin_*.html          # 🛠️ Interface d'administration des tickets
+├── static/                   # 📁 Fichiers statiques (CSS, JS, images)
+├── slash/                    # Commandes slash (/)
+│   ├── bonjour.py           # Commande de salutation
+│   ├── logs.py              # Configuration des logs
+│   ├── admin.py             # Commandes de modération
+│   ├── admin_roles.py       # Gestion des rôles
+│   ├── help.py              # Système d'aide interactif
+│   ├── utils.py             # 🔧 Commandes utilitaires
+│   ├── fun.py               # 🎮 Commandes de divertissement
+│   ├── tools.py             # 🔧 Outils avancés
+│   └── prefix.py            # Gestion des préfixes
+├── prefixe/                 # Commandes préfixées (!)
+│   ├── bonjour.py           # Commande de salutation
+│   ├── prefix.py            # Gestion des préfixes
+│   ├── logs.py              # Configuration des logs
+│   ├── admin.py             # Commandes de modération
+│   ├── admin_roles.py       # Gestion des rôles
+│   ├── help.py              # Système d'aide détaillé
+│   ├── utils.py             # 🔧 Commandes utilitaires
+│   ├── fun.py               # 🎮 Commandes de divertissement
+│   └── tools.py             # 🔧 Outils avancés
+├── .env                     # Variables d'environnement (à créer)
+├── .env.example            # Exemple de configuration
+├── .env.panel              # Configuration du panel web
+├── support.db              # 🎫 Base de données SQLite du support
+├── prefixes.json           # Configuration des préfixes
+├── logs_config.json        # Configuration des logs
+└── requirements.txt        # Dépendances Python
 ```
 
 ## 🚀 Installation et Configuration
 
-1. **Clonez le repository**
+### 1. Prérequis
+- Python 3.8 ou plus récent
+- Un bot Discord créé sur le [Discord Developer Portal](https://discord.com/developers/applications)
+
+### 2. Installation
 ```bash
+# Cloner le repository
 git clone <votre-repo>
 cd Discord-bot
-```
 
-2. **Installez les dépendances**
-```bash
+# Installer les dépendances
 pip install -r requirements.txt
 ```
 
-3. **Configurez le token Discord**
-   - Copiez `.env.example` vers `.env`
-   - Remplacez `YOUR_DISCORD_BOT_TOKEN` par votre vrai token Discord
-   ```bash
-   cp .env.example .env
-   ```
+### 3. Configuration du token Discord
+```bash
+# Copier le fichier d'exemple
+cp .env.example .env
 
-4. **Lancez le bot**
+# Éditer le fichier .env et remplacer YOUR_DISCORD_BOT_TOKEN
+# par votre vrai token Discord
+```
+
+### 4. Configuration du panel web (optionnel)
+```bash
+# Modifier .env.panel pour personnaliser les identifiants
+# Par défaut : admin / admin123
+```
+
+### 5. Lancement du bot
 ```bash
 python main.py
 ```
@@ -236,86 +110,81 @@ python main.py
 
 Le bot inclut un **panel web complet** pour l'administration et la surveillance !
 
-### 🚀 **Accès au Panel**
+### � Accès au Panel
 - **URL** : http://127.0.0.1:8080 (une fois le bot lancé)
 - **Identifiants par défaut** : `admin` / `admin123`
-- ⚠️ **Important** : Changez les identifiants dans `web_panel.py` pour la production !
+- ⚠️ **Important** : Changez les identifiants dans `.env.panel` pour la production !
 
-### 🎛️ **Fonctionnalités du Panel**
+### 🎛️ Fonctionnalités du Panel
 
-#### 📊 **Dashboard Principal**
+#### 📊 Dashboard Principal
 - **Statistiques en temps réel** : serveurs, utilisateurs, commandes
 - **Statut du bot** et temps de fonctionnement (uptime)
 - **Compteurs d'erreurs** et d'activité
 - **Actualisation automatique** toutes les 10 secondes
 
-#### 📝 **Gestion des Logs**
+#### 📝 Gestion des Logs
 - **Consultation complète** de l'historique
 - **Filtres avancés** par niveau (INFO, SUCCESS, WARNING, ERROR)
 - **Recherche textuelle** dans les messages
 - **Pagination** pour une navigation fluide
 
-#### 📈 **Statistiques Détaillées**
+#### 📈 Statistiques Détaillées
 - **Graphiques d'utilisation** par heure sur 24h
 - **Types d'erreurs** avec compteurs détaillés
 - **Métriques de performance** (taux de succès, etc.)
 - **Informations système** complètes
 
-#### 🎛️ **Contrôle du Bot** (NOUVEAU !)
-- **Liste complète des serveurs** avec détails (membres, canaux, rôles)
+#### 🎛️ Contrôle du Bot
+- **Liste complète des serveurs** avec détails
 - **Quitter un serveur** avec confirmation sécurisée
 - **Commandes de maintenance** :
   - 🔄 Synchroniser les commandes slash
   - 🗑️ Vider le cache
   - 📊 Mettre à jour les statistiques
   - 🔄 Recharger les modules
-- **Informations détaillées du bot** (latence, uptime, etc.)
-- **Sécurité** : Confirmation requise pour les actions critiques
 
-### 🔐 **Sécurité du Panel**
+### 🔐 Sécurité du Panel
 - ✅ **Authentification obligatoire** pour toutes les pages
 - ✅ **Sessions sécurisées** avec timeout automatique
 - ✅ **Mots de passe hashés** (jamais stockés en clair)
 - ✅ **Logs d'audit** pour toutes les actions admin
-- ✅ **Confirmations** pour les actions critiques (quitter un serveur)
+- ✅ **Confirmations** pour les actions critiques
 
-### 🛠️ **Utilitaires d'Administration**
-Utilisez `python admin_panel.py` pour :
-- Créer de nouveaux utilisateurs admin
-- Générer des configurations Flask sécurisées
-- Voir les statistiques du panel
+## 🎫 Système de Support
 
-## 🌐 Panel Web d'Administration
+Le bot intègre un **système de support complet** avec interface web dédiée !
 
-Le bot intègre un **panel web sécurisé** pour surveiller et administrer le bot à distance !
+### 🌟 Fonctionnalités du Support
 
-### 🚀 Accès au Panel
-- **URL** : `http://127.0.0.1:8080` (démarre automatiquement avec le bot)
-- **Identifiants par défaut** : `admin` / `admin123`
-- **⚠️ Important** : Changez les identifiants dans `web_panel.py` pour la production !
+#### � Gestion des Utilisateurs
+- **Inscription sécurisée** avec validation des données
+- **Connexion** avec nom d'utilisateur ou email
+- **Intégration Discord** (nom d'utilisateur et ID)
+- **Sessions sécurisées** avec option "Se souvenir de moi"
 
-### 📊 Fonctionnalités du Panel
-- **📈 Dashboard en temps réel** - Statistiques du bot, uptime, serveurs connectés
-- **📝 Consultation des logs** - Filtrage par niveau, recherche, pagination
-- **📊 Statistiques détaillées** - Commandes par heure, types d'erreurs, métriques
-- **🔄 Actualisation automatique** - Données mises à jour toutes les 10 secondes
-- **📱 Interface responsive** - Compatible mobile et desktop
-- **🔐 Authentification sécurisée** - Session avec timeout automatique
+#### 🎫 Gestion des Tickets
+- **Création de tickets** avec catégorisation et priorités
+- **Métadonnées avancées** (ID serveur, commande utilisée, erreurs)
+- **Système de réponses** entre utilisateurs et administrateurs
+- **Statuts multiples** : ouvert, en cours, en attente, résolu, fermé
+- **Priorités configurables** : faible, moyenne, haute, urgente
+- **Numérotation séquentielle** : Les tickets gardent une numérotation continue même après suppression
 
-### 🛡️ Sécurité
-- **Mots de passe hashés** avec Werkzeug
-- **Sessions sécurisées** avec clés secrètes
-- **Logs d'audit** pour toutes les connexions
-- **Interface d'administration** accessible uniquement aux utilisateurs autorisés
+#### 🧹 Gestion Administrative
+- **Suppression individuelle** de tickets avec confirmation
+- **Nettoyage en masse** avec critères automatiques :
+  - Tickets fermés depuis plus de 30 jours
+  - Tickets résolus depuis plus de 90 jours
+  - Tickets inactifs depuis plus de 6 mois
+- **Interface d'administration** pour gérer tous les tickets
+- **Notifications Discord** automatiques vers les admins
 
-### ⚙️ Configuration Avancée
-Modifiez le fichier `.env.panel` pour personnaliser :
-- Identifiants administrateurs
-- Port et adresse du serveur web
-- Paramètres de sécurité
-- Fonctionnalités activées
+### 🚀 Accès au Support
+- **URL utilisateur** : http://127.0.0.1:8080/support
+- **URL admin** : http://127.0.0.1:8080/admin (nécessite connexion admin)
 
-## 💬 Système d'aide intégré
+##  Système d'aide intégré
 
 ### 🚀 3 façons d'obtenir de l'aide
 
@@ -342,88 +211,224 @@ Modifiez le fichier `.env.panel` pour personnaliser :
 ### 🔧 Commandes Utilitaires
 
 #### 📊 Informations (slash ET préfixé)
-- `/ping` ou `!ping` - Affiche la latence du bot et les statistiques de connexion
+- `/ping` ou `!ping` - Latence du bot et statistiques de connexion
 - `/info [utilisateur]` ou `!info [utilisateur]` - Informations détaillées d'un utilisateur
-- `/server` ou `!server` - Informations complètes du serveur (membres, canaux, rôles...)
-- `/avatar [utilisateur]` ou `!avatar [utilisateur]` - Affiche l'avatar d'un utilisateur en haute résolution
-- `/uptime` ou `!uptime` - Temps de fonctionnement du bot avec statistiques
-- `/botinfo` ou `!botinfo` - Informations complètes du bot (version, serveurs, utilisateurs...)
+- `/server` ou `!server` - Informations complètes du serveur
+- `/avatar [utilisateur]` ou `!avatar [utilisateur]` - Avatar en haute résolution
+- `/uptime` ou `!uptime` - Temps de fonctionnement du bot
+- `/botinfo` ou `!botinfo` - Informations complètes du bot
 
 #### 🌐 Utilitaires Web (slash ET préfixé)
 - `/weather <ville>` ou `!weather <ville>` - Météo actuelle d'une ville
-- `/translate <texte>` ou `!translate <texte>` - Traduction automatique de texte
+- `/translate <texte>` ou `!translate <texte>` - Traduction automatique
 
 #### 🔗 Utilitaires Préfixés Exclusifs
 - `!invite` - Génère un lien d'invitation pour le bot
-- `!roll [XdY]` - Lance des dés (par défaut 1d6, personnalisable ex: `!roll 2d20`)
+- `!roll [XdY]` - Lance des dés (ex: `!roll 2d20`)
 
 ### 🎮 Commandes de Divertissement
 
 #### 🎯 Jeux et Hasard (slash ET préfixé)
-- `/coinflip` ou `!coinflip` (alias: `!coin`) - Lance une pièce de monnaie
-- `/rps <choix>` ou `!rps <choix>` (alias: `!ppc`) - Pierre-papier-ciseaux contre le bot
-- `/8ball <question>` ou `!8ball <question>` (alias: `!ball`) - Pose une question à la boule magique
-- `/choose <option1> <option2> ...` ou `!choose <option1> <option2> ...` (alias: `!pick`) - Choisit aléatoirement entre plusieurs options
+- `/coinflip` ou `!coinflip` - Lance une pièce de monnaie
+- `/rps <choix>` ou `!rps <choix>` - Pierre-papier-ciseaux contre le bot
+- `/8ball <question>` ou `!8ball <question>` - Boule magique
+- `/choose <options>` ou `!choose <options>` - Choisit aléatoirement
 
 #### 😄 Divertissement et Social (slash ET préfixé)
 - `/joke` ou `!joke` - Raconte une blague aléatoire
-- `/quote` ou `!quote` (alias: `!citation`) - Affiche une citation inspirante
+- `/quote` ou `!quote` - Affiche une citation inspirante
 - `/compliment [utilisateur]` ou `!compliment [utilisateur]` - Donne un compliment
 
 #### 🎨 Divertissement Préfixé Exclusif
-- `!hug <utilisateur>` - Faire un câlin virtuel à quelqu'un
+- `!hug <utilisateur>` - Faire un câlin virtuel
 - `!ascii <texte>` - Génère de l'art ASCII simple
 
 ### 🔧 Commandes d'Outils Avancés
 
 #### 📊 Analyse et Monitoring (slash ET préfixé)
-- `/analyze [utilisateur]` ou `!analyze [utilisateur]` - Analyse détaillée d'un serveur ou utilisateur
-- `/clean <nombre> [filtres]` ou `!clean <nombre> [filtres]` - Nettoyage avancé des messages avec filtres
+- `/analyze [utilisateur]` ou `!analyze [utilisateur]` - Analyse détaillée avec scoring sécurité
+- `/clean <nombre> [filtres]` ou `!clean <nombre> [filtres]` - Nettoyage avancé des messages
 - `/remind <temps> <message>` ou `!remind <temps> <message>` - Système de rappels programmés
 
 #### 🔐 Sécurité et Cryptographie (slash ET préfixé)
 - `/encode <texte>` ou `!encode <texte>` - Encode du texte en base64
 - `/decode <texte>` ou `!decode <texte>` - Décode du texte base64
-- `/hash <algorithme> <texte>` ou `!hash <algorithme> <texte>` - Génère des hashes (MD5, SHA1, SHA256, SHA512)
-- `/password [longueur] [options]` ou `!password [longueur] [options]` - Génère des mots de passe sécurisés
+- `/hash <algorithme> <texte>` ou `!hash <algorithme> <texte>` - Génère des hashes sécurisés
+- `/password [longueur] [options]` ou `!password [longueur] [options]` - Génère des mots de passe
 
 #### 🗳️ Interaction Communautaire (slash ET préfixé)
-- `/poll <question> <options> [durée]` ou `!poll [durée] "question" option1,option2...` - Sondages avancés avec timer
+- `/poll <question> <options> [durée]` ou `!poll [durée] "question" options` - Sondages avancés
 
 #### 📝 Utilitaires Texte Préfixés Exclusifs
-- `!count <texte>` (alias: `!wc`) - Compte caractères, mots et lignes dans un texte
+- `!count <texte>` - Compte caractères, mots et lignes
 
 ### ⚙️ Configuration
 
 #### 🏷️ Gestion des Préfixes (préfixé uniquement)
 - `!prefix` - Gère le préfixe du bot pour ce serveur
-  - `!prefix set <nouveau_préfixe>` - Change le préfixe (nécessite "Gérer le serveur")
+  - `!prefix set <nouveau_préfixe>` - Change le préfixe
   - `!prefix reset` - Remet le préfixe par défaut
-  - `!prefix info` - Affiche les informations sur les préfixes
+  - `!prefix info` - Affiche les informations
 
 #### 📊 Système de Logs (slash ET préfixé)
-- `/setlog <canal>` ou `!setlog <canal>` - Définit le canal de logs (nécessite "Gérer le serveur")
-- `/logon` ou `!logon` - Active les logs (nécessite "Gérer le serveur")  
-- `/logoff` ou `!logoff` - Désactive les logs (nécessite "Gérer le serveur")
+- `/setlog <canal>` ou `!setlog <canal>` - Définit le canal de logs
+- `/logon` ou `!logon` - Active les logs
+- `/logoff` ou `!logoff` - Désactive les logs
 - `/logstatus` ou `!logstatus` - Affiche le statut des logs
 
 #### 🛡️ Commandes de Modération (slash ET préfixé)
-- `/ban <membre> [raison]` ou `!ban <membre> [raison]` - Bannit un membre (nécessite "Bannir des membres")
-- `/unban <user_id> [raison]` ou `!unban <user_id> [raison]` - Débannit un utilisateur (nécessite "Bannir des membres")
-- `/kick <membre> [raison]` ou `!kick <membre> [raison]` - Expulse un membre (nécessite "Expulser des membres")
-- `/mute <membre> [durée] [raison]` ou `!mute <membre> [durée] [raison]` - Met un membre en timeout (nécessite "Modérer les membres")
-- `/unmute <membre> [raison]` ou `!unmute <membre> [raison]` - Retire le timeout (nécessite "Modérer les membres")
+- `/ban <membre> [raison]` ou `!ban <membre> [raison]` - Bannit un membre
+- `/unban <user_id> [raison]` ou `!unban <user_id> [raison]` - Débannit un utilisateur
+- `/kick <membre> [raison]` ou `!kick <membre> [raison]` - Expulse un membre
+- `/mute <membre> [durée] [raison]` ou `!mute <membre> [durée] [raison]` - Met en timeout
+- `/unmute <membre> [raison]` ou `!unmute <membre> [raison]` - Retire le timeout
 
 #### 🎭 Gestion des Rôles (slash ET préfixé)
-- `/addrole <membre> <rôle>` ou `!addrole <membre> <rôle>` - Ajoute un rôle à un membre (nécessite "Gérer les rôles")
-- `/removerole <membre> <rôle>` ou `!removerole <membre> <rôle>` - Retire un rôle d'un membre (nécessite "Gérer les rôles")
+- `/addrole <membre> <rôle>` ou `!addrole <membre> <rôle>` - Ajoute un rôle
+- `/removerole <membre> <rôle>` ou `!removerole <membre> <rôle>` - Retire un rôle
+- `/roles [membre]` ou `!roles [membre]` - Affiche les rôles
+- `/userinfo [membre]` ou `!userinfo [membre]` - Informations d'un membre
+- `/serverinfo` ou `!serverinfo` - Informations du serveur
 
-#### � Informations (slash ET préfixé)
-- `/roles [membre]` ou `!roles [membre]` - Affiche les rôles d'un membre
-- `/userinfo [membre]` ou `!userinfo [membre]` - Affiche les informations d'un membre
-- `/serverinfo` ou `!serverinfo` - Affiche les informations du serveur
+## � Fonctionnalités Avancées
 
-> 💡 **Note**: Le préfixe `!` peut être différent selon le serveur. Tu peux aussi mentionner le bot (`@BotName`) pour obtenir de l'aide !
+### 🎯 Gestion des Préfixes
+- **Préfixe par défaut** : `!`
+- **Mention** : Tu peux toujours utiliser `@BotName` comme préfixe
+- **Personnalisation** : Chaque serveur peut avoir son préfixe unique
+- **Persistance** : Les préfixes sont sauvegardés automatiquement
+
+### 📊 Système de Logs
+Le bot dispose d'un **système de logs complet** qui surveille automatiquement :
+
+#### 🎯 Configuration rapide
+1. **Définir le canal** : `/setlog #logs` ou `!setlog #logs`
+2. **Activer** : `/logon` ou `!logon`
+3. **Vérifier** : `/logstatus` ou `!logstatus`
+
+#### � Événements surveillés
+- **💬 Messages** : Suppression, modification
+- **👥 Membres** : Arrivée, départ, changements de rôles
+- **🔊 Vocal** : Connexion, déconnexion, changement de canal
+- **🔨 Modération** : Bannissements, débannissements
+- **📝 Canaux** : Création, suppression
+- **🎭 Rôles** : Attribution, retrait
+
+### 🌐 Support Multi-Serveurs
+Le bot peut être utilisé simultanément sur **plusieurs serveurs Discord** :
+- **🏠 Configuration unique** : Chaque serveur a ses propres paramètres
+- **� Isolation complète** : Les configurations ne s'interfèrent pas
+- **⚡ Performance optimisée** : Un seul bot pour plusieurs serveurs
+- **🔧 Gestion centralisée** : Commandes de diagnostic pour les propriétaires
+
+## � Déploiement et Production
+
+### 🔧 Configuration de Production
+1. **Changez les identifiants par défaut** dans `.env.panel`
+2. **Utilisez un serveur WSGI** comme Gunicorn pour le panel web
+3. **Configurez un reverse proxy** (Nginx) pour HTTPS
+4. **Activez les logs en fichier** pour la persistance
+5. **Sauvegardez régulièrement** la base de données SQLite
+
+### 🛡️ Sécurité
+- ✅ Tokens et mots de passe dans des variables d'environnement
+- ✅ Authentification obligatoire pour le panel web
+- ✅ Sessions sécurisées avec timeout automatique
+- ✅ Validation des permissions Discord
+- ✅ Logs d'audit pour toutes les actions sensibles
+- ✅ Hachage sécurisé des mots de passe utilisateurs
+
+### 📊 Monitoring
+- ✅ Statistiques en temps réel via le panel web
+- ✅ Logs détaillés de tous les événements
+- ✅ Métriques de performance et d'utilisation
+- ✅ Alertes automatiques en cas d'erreur
+- ✅ Système de support intégré pour les utilisateurs
+
+## 🆘 Dépannage et FAQ
+
+### ❓ Problèmes Courants
+
+**Q: Le bot ne répond pas aux commandes**
+- Vérifiez que le token Discord est correct dans `.env`
+- Assurez-vous que le bot a les permissions nécessaires
+- Vérifiez que les intents sont activés (Members, Presences)
+
+**Q: Les commandes slash n'apparaissent pas**
+- Utilisez `/sync` ou le bouton dans le panel web
+- Attendez quelques minutes (propagation Discord)
+- Vérifiez les permissions "Use Application Commands"
+
+**Q: Le panel web ne fonctionne pas**
+- Vérifiez que le port 8080 n'est pas utilisé
+- Assurez-vous que Flask et Werkzeug sont installés
+- Vérifiez la configuration dans `.env.panel`
+
+**Q: Le système de support ne fonctionne pas**
+- Vérifiez que la base de données `support.db` est accessible
+- Assurez-vous que les templates HTML sont présents
+- Vérifiez les logs du panel web pour les erreurs
+
+### 🔧 Commandes de Diagnostic
+
+#### Pour les Propriétaires du Bot
+- `!diag` - Diagnostic complet du bot
+- `!servers` - Liste des serveurs connectés
+- `!stats` - Statistiques globales
+
+#### Panel Web
+- **Contrôle > Synchroniser** - Resynchronise les commandes slash
+- **Contrôle > Vider le cache** - Remet à zéro les statistiques
+- **Logs** - Consultation détaillée de l'historique
+
+## �️ Développement
+
+### 📝 Ajout de nouvelles commandes
+1. **Commande slash** : Créez un fichier dans `slash/`
+2. **Commande préfixée** : Créez un fichier dans `prefixe/`
+3. Ajoutez le chargement dans `engine.py` si nécessaire
+
+Chaque module doit avoir une fonction `setup(bot)` pour être chargé automatiquement.
+
+### 🗃️ Structure de la Base de Données
+
+#### Tables Principales
+- `support_users` - Comptes utilisateurs du système de support
+- `support_tickets` - Tickets de support avec métadonnées
+- `support_responses` - Réponses aux tickets
+- `support_counters` - Compteurs pour la numérotation séquentielle
+
+#### Migration Automatique
+Le système détecte automatiquement les nouvelles colonnes et effectue les migrations nécessaires.
+
+## 🎯 Roadmap et Améliorations Futures
+
+### ✅ Récemment Ajouté
+- [x] 🔧 **Outils avancés** - Cryptographie, sondages, rappels, analyse
+- [x] 🎮 **Commandes de divertissement** - Jeux interactifs et fun
+- [x] ⚙️ **Utilitaires étendus** - Météo, traduction, informations détaillées
+- [x] 🌐 **Panel web complet** - Contrôle, monitoring, gestion des serveurs
+- [x] 🎫 **Système de support** - Interface utilisateur complète avec gestion admin
+- [x] 🔢 **Numérotation séquentielle** - Tickets numérotés en continu
+- [x] 🧹 **Système de nettoyage** - Suppression automatique des anciens tickets
+
+### 🔮 À Venir
+- [ ] � Commandes musicales (lecture YouTube/Spotify)
+- [ ] 🎲 Système de niveaux et XP
+- [ ] 🏆 Système d'achievements
+- [ ] 📊 Statistiques avancées des utilisateurs
+- [ ] 🤖 Commandes d'IA (ChatGPT integration)
+- [ ] 📱 API REST complète
+- [ ] 🌍 Support multilingue
+- [ ] 📦 Système de plugins
+
+### 🔧 Améliorations Techniques
+- [ ] Migration vers PostgreSQL/MongoDB
+- [ ] Système de cache Redis
+- [ ] Interface web React/Vue.js
+- [ ] Tests automatisés complets
+- [ ] Docker containerization
+- [ ] CI/CD avec GitHub Actions
 
 ## 🛠️ Comment créer votre bot Discord
 
@@ -432,105 +437,26 @@ Modifiez le fichier `.env.panel` pour personnaliser :
 3. Allez dans la section "Bot"
 4. Créez un bot et copiez le token
 5. Invitez le bot sur votre serveur avec les bonnes permissions
+6. Activez les intents nécessaires (Presence Intent, Server Members Intent)
 
-## 🔧 Fonctionnalités
+### � Permissions requises
+- Lire les messages
+- Envoyer des messages
+- Gérer les messages
+- Utiliser les commandes slash
+- Gérer les rôles (pour les commandes de modération)
+- Bannir des membres (pour les commandes de modération)
+- Expulser des membres (pour les commandes de modération)
 
-- ✅ Architecture modulaire avec des cogs
-- ✅ Support des commandes slash modernes
-- ✅ Support des commandes préfixées classiques
-- ✅ **Préfixes personnalisés par serveur**
-- ✅ **Système de logs complet**
-- ✅ **🛡️ Commandes d'administration complètes**
-- ✅ **🎭 Gestion avancée des rôles**
-- ✅ **📊 Commandes d'information détaillées**
-- ✅ **🔧 Utilitaires complets** (météo, traduction, infos système)
-- ✅ **🎮 Divertissement interactif** (jeux, blagues, citations)
-- ✅ **🌐 Panel web d'administration**
-- ✅ **⚡ Monitoring en temps réel**
-- ✅ Gestion d'erreurs robuste
-- ✅ Embeds Discord élégants
-- ✅ Chargement automatique des modules
-- ✅ Support multi-serveurs complet
-- ✅ **🎭 Gestion avancée des rôles**
-- ✅ **📊 Commandes d'information**
-- ✅ Gestion d'erreurs
-- ✅ Embeds Discord élégants
-- ✅ Chargement automatique des modules
+## 📞 Support et Documentation
 
-## 🎯 Gestion des Préfixes
-
-Le bot supporte des **préfixes personnalisés par serveur** ! 
-
-### Configuration
-- **Préfixe par défaut**: `!`
-- **Mention**: Tu peux toujours utiliser `@BotName` comme préfixe
-- **Persistance**: Les préfixes sont sauvegardés automatiquement
-
-### Règles pour les préfixes
-- Maximum 5 caractères
-- Caractères interdits: `@` `#` `` ` `` `\` `/`
-- Pas d'espaces uniquement
-
-### Permissions requises
-- Seuls les membres avec la permission "Gérer le serveur" peuvent changer le préfixe
-
-## � Système de Logs
-
-Le bot dispose d'un **système de logs complet** qui surveille automatiquement toutes les activités du serveur !
-
-### 🎯 Configuration rapide
-1. **Définir le canal** : `/setlog #logs` ou `!setlog #logs`
-2. **Activer** : `/logon` ou `!logon`
-3. **Vérifier** : `/logstatus` ou `!logstatus`
-
-### 📋 Événements surveillés
-- **💬 Messages** : Suppression, modification
-- **👥 Membres** : Arrivée, départ, changements de rôles
-- **🔊 Vocal** : Connexion, déconnexion, changement de canal
-- **🔨 Modération** : Bannissements, débannissements
-- **📝 Canaux** : Création, suppression
-- **🎭 Rôles** : Attribution, retrait
-
-### 🎨 Fonctionnalités avancées
-- **Embeds colorés** selon le type d'événement
-- **Timestamps** automatiques
-- **Informations détaillées** (IDs, liens, contexte)
-- **✨ Configuration par serveur** indépendante
-- **🌐 Support multi-serveurs** natif
-- **Sauvegarde automatique** des paramètres
-
-### 🌐 Multi-Serveurs
-Le bot peut être utilisé simultanément sur **plusieurs serveurs Discord** avec des configurations complètement **indépendantes** :
-
-- **🏠 Configuration unique** : Chaque serveur a ses propres paramètres (canal de logs, activation/désactivation)
-- **📊 Isolation complète** : Les logs d'un serveur n'interfèrent jamais avec ceux d'un autre
-- **⚡ Performance optimisée** : Un seul bot peut gérer des dizaines de serveurs
-- **🔧 Gestion centralisée** : Commandes de diagnostic pour les propriétaires du bot
-
-**Exemple de configuration multi-serveurs :**
-```json
-{
-  "serveur_A_id": {"channel_id": 123, "enabled": true},
-  "serveur_B_id": {"channel_id": 456, "enabled": false},
-  "serveur_C_id": {"channel_id": 789, "enabled": true}
-}
-```
-
-### 🔒 Sécurité
-- Seuls les membres avec "Gérer le serveur" peuvent configurer les logs
-- Pas de logs pour les actions de bots (évite le spam)
-- Gestion d'erreurs robuste
-
-## �📝 Ajout de nouvelles commandes
-
-Pour ajouter de nouvelles commandes :
-
-1. **Commande slash** : Créez un fichier dans `slash/`
-2. **Commande préfixée** : Créez un fichier dans `prefixe/`
-3. Ajoutez le chargement dans `engine.py` si nécessaire
-
-Chaque module doit avoir une fonction `setup(bot)` pour être chargé automatiquement.
+- 📚 **Aide intégrée** : `/help` ou `!help` pour l'aide interactive
+- 🌐 **Panel web** - Logs et diagnostics détaillés
+- 🎫 **Système de support** - Interface utilisateur pour signaler des problèmes
+- 📚 **Documentation Discord.py** : https://discordpy.readthedocs.io/
 
 ---
 
-Développé avec ❤️ en Python
+**Développé avec ❤️ en Python**
+
+*Ce bot utilise Discord.py 2.3.0+ et Flask pour une expérience moderne et complète.*
