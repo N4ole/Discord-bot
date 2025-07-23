@@ -2,6 +2,9 @@
 Panel Web d'Administration pour le Bot Discord
 Interface web sécurisée pour surveiller les logs et statistiques
 """
+import uuid
+from werkzeug.utils import secure_filename
+from support_db import SupportDB
 from flask import Flask, render_template, request, session, redirect, url_for, flash, jsonify
 from werkzeug.security import check_password_hash, generate_password_hash
 from datetime import datetime, timedelta
@@ -24,6 +27,26 @@ ADMIN_CREDENTIALS = {
 
 # Variable globale pour stocker l'instance du bot
 bot_instance = None
+
+
+def set_bot_instance(bot):
+    """Définit l'instance du bot pour les notifications Discord"""
+    global bot_instance
+    bot_instance = bot
+
+    # Initialiser le notificateur de support avec l'instance du bot
+    try:
+        from support_notifier import support_notifier
+        support_notifier.set_bot_instance(bot)
+        print("✅ Notificateur de support initialisé avec l'instance du bot")
+        print(
+            f"🔍 DEBUG: support_notifier.bot après config = {support_notifier.bot}")
+        print(f"🔍 DEBUG: admin_user_id = {support_notifier.admin_user_id}")
+    except ImportError:
+        print("⚠️ Module de notification de support non trouvé")
+    except Exception as e:
+        print(f"⚠️ Erreur lors de l'initialisation du notificateur: {e}")
+
 
 # Stockage des logs et statistiques en mémoire
 bot_logs = []
@@ -93,9 +116,22 @@ logger = BotLogger()
 
 @app.before_request
 def require_login():
-    """Vérifie l'authentification pour toutes les routes sauf login"""
-    if request.endpoint not in ['login', 'static'] and 'admin_logged_in' not in session:
-        return redirect(url_for('login'))
+    """Vérifie l'authentification pour toutes les routes sauf login, promo et support"""
+    # Routes publiques (pas d'authentification admin requise)
+    public_routes = ['login', 'static', 'promo', 'index',
+                     'support_home', 'support_register', 'support_login',
+                     'support_logout', 'support_dashboard', 'support_ticket_new',
+                     'support_ticket_view', 'support_tickets', 'support_ticket_respond']
+
+    if request.endpoint not in public_routes and 'admin_logged_in' not in session:
+        # Rediriger vers la page de login admin pour les routes admin
+        if request.endpoint and not request.endpoint.startswith('support_'):
+            return redirect(url_for('login'))
+
+    # Initialiser la session de support si nécessaire
+    if request.endpoint and request.endpoint.startswith('support_'):
+        if 'support_session_id' not in session:
+            session['support_session_id'] = str(uuid.uuid4())
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -128,13 +164,33 @@ def logout():
     return redirect(url_for('login'))
 
 
+@app.route('/promo')
+def promo():
+    """Page publicitaire du bot"""
+    return render_template('promo.html')
+
+
 @app.route('/')
+def index():
+    """Page d'accueil - redirige vers promo ou dashboard selon l'authentification"""
+    if 'admin_logged_in' in session:
+        return redirect(url_for('dashboard'))
+    else:
+        return redirect(url_for('promo'))
+
+
+@app.route('/dashboard')
 def dashboard():
     """Dashboard principal"""
     # Calculer l'uptime
     uptime = None
     if bot_stats['start_time']:
-        uptime = datetime.now() - bot_stats['start_time']
+        try:
+            uptime = datetime.now() - bot_stats['start_time']
+        except TypeError:
+            # Si il y a un problème de timezone, réinitialiser start_time
+            bot_stats['start_time'] = datetime.now()
+            uptime = timedelta(seconds=0)
 
     return render_template('dashboard.html',
                            stats=bot_stats,
@@ -232,6 +288,16 @@ def api_stats_charts():
 @app.route('/api/stats')
 def api_stats():
     """API pour récupérer les statistiques en temps réel"""
+    try:
+        uptime_seconds = 0
+        if bot_stats['start_time']:
+            uptime_seconds = (
+                datetime.now() - bot_stats['start_time']).total_seconds()
+    except TypeError:
+        # Problème de timezone, réinitialiser
+        bot_stats['start_time'] = datetime.now()
+        uptime_seconds = 0
+
     return jsonify({
         'status': bot_stats['status'],
         'servers': bot_stats['connected_servers'],
@@ -239,7 +305,7 @@ def api_stats():
         'commands': bot_stats['commands_used'],
         'errors': bot_stats['errors_count'],
         'last_activity': bot_stats['last_activity'].isoformat() if bot_stats['last_activity'] else None,
-        'uptime': (datetime.now() - bot_stats['start_time']).total_seconds() if bot_stats['start_time'] else 0
+        'uptime': uptime_seconds
     })
 
 
@@ -272,7 +338,7 @@ def control():
                 'text_channels': len(guild.text_channels),
                 'voice_channels': len(guild.voice_channels),
                 'owner': str(guild.owner) if guild.owner else "Inconnu",
-                'joined_at': guild.me.joined_at.strftime('%d/%m/%Y') if guild.me.joined_at else "Inconnu",
+                'joined_at': guild.me.joined_at.replace(tzinfo=None).strftime('%d/%m/%Y') if guild.me.joined_at else "Inconnu",
                 'premium_tier': guild.premium_tier,
                 'icon_url': guild.icon.url if guild.icon else None,
                 'is_owner': guild.owner_id == bot_instance.user.id
@@ -281,17 +347,22 @@ def control():
 
         # Calculer l'uptime
         if bot_stats['start_time']:
-            uptime_delta = datetime.now() - bot_stats['start_time']
-            days = uptime_delta.days
-            hours, remainder = divmod(uptime_delta.seconds, 3600)
-            minutes, _ = divmod(remainder, 60)
+            try:
+                uptime_delta = datetime.now() - bot_stats['start_time']
+                days = uptime_delta.days
+                hours, remainder = divmod(uptime_delta.seconds, 3600)
+                minutes, _ = divmod(remainder, 60)
 
-            if days > 0:
-                uptime_str = f"{days}j {hours}h {minutes}m"
-            elif hours > 0:
-                uptime_str = f"{hours}h {minutes}m"
-            else:
-                uptime_str = f"{minutes}m"
+                if days > 0:
+                    uptime_str = f"{days}j {hours}h {minutes}m"
+                elif hours > 0:
+                    uptime_str = f"{hours}h {minutes}m"
+                else:
+                    uptime_str = f"{minutes}m"
+            except TypeError:
+                # Problème de timezone
+                bot_stats['start_time'] = datetime.now()
+                uptime_str = "0m"
 
         # Mettre à jour les stats actuelles
         bot_stats_current.update({
@@ -369,8 +440,8 @@ def server_details(server_id):
                 'id': guild.owner_id,
                 'avatar': guild.owner.avatar.url if guild.owner and guild.owner.avatar else None
             },
-            'created_at': guild.created_at.strftime('%d/%m/%Y à %H:%M'),
-            'joined_at': guild.me.joined_at.strftime('%d/%m/%Y à %H:%M') if guild.me.joined_at else "Inconnu",
+            'created_at': guild.created_at.replace(tzinfo=None).strftime('%d/%m/%Y à %H:%M') if guild.created_at else "Inconnu",
+            'joined_at': guild.me.joined_at.replace(tzinfo=None).strftime('%d/%m/%Y à %H:%M') if guild.me.joined_at else "Inconnu",
             'premium_tier': guild.premium_tier,
             'premium_subscribers': guild.premium_subscription_count or 0,
             'boost_level': guild.premium_tier,
@@ -645,12 +716,18 @@ def api_bot_info():
         uptime = 0
         uptime_str = "Non disponible"
         if bot_stats['start_time']:
-            uptime_delta = datetime.now() - bot_stats['start_time']
-            uptime = uptime_delta.total_seconds()
-            days = uptime_delta.days
-            hours, remainder = divmod(uptime_delta.seconds, 3600)
-            minutes, _ = divmod(remainder, 60)
-            uptime_str = f"{days}j {hours}h {minutes}m" if days > 0 else f"{hours}h {minutes}m"
+            try:
+                uptime_delta = datetime.now() - bot_stats['start_time']
+                uptime = uptime_delta.total_seconds()
+                days = uptime_delta.days
+                hours, remainder = divmod(uptime_delta.seconds, 3600)
+                minutes, _ = divmod(remainder, 60)
+                uptime_str = f"{days}j {hours}h {minutes}m" if days > 0 else f"{hours}h {minutes}m"
+            except TypeError:
+                # Problème de timezone
+                bot_stats['start_time'] = datetime.now()
+                uptime = 0
+                uptime_str = "Redémarré"
 
         return jsonify({
             'name': bot_instance.user.name,
@@ -742,6 +819,774 @@ def update_bot_stats(**kwargs):
         bot_stats['commands_used'] += 1
         current_hour = datetime.now().hour
         detailed_stats['commands_by_hour'][current_hour] += 1
+
+
+# ===============================================
+# SYSTÈME DE SUPPORT - ROUTES PUBLIQUES
+# ===============================================
+
+# Importer le système de support
+
+# Initialiser la base de données de support
+support_db = SupportDB()
+
+
+@app.route('/test-notifier')
+def test_notifier():
+    """Route de test pour vérifier l'état du notificateur"""
+    try:
+        from support_notifier import support_notifier
+        status = {
+            'bot_configured': support_notifier.bot is not None,
+            'bot_ready': support_notifier.bot.is_ready() if support_notifier.bot else False,
+            'admin_user_id': support_notifier.admin_user_id,
+            'bot_type': str(type(support_notifier.bot)) if support_notifier.bot else None
+        }
+        return f"""
+        <h1>Test Notificateur</h1>
+        <ul>
+            <li>Bot configuré: {status['bot_configured']}</li>
+            <li>Bot prêt: {status['bot_ready']}</li>
+            <li>Admin User ID: {status['admin_user_id']}</li>
+            <li>Type du bot: {status['bot_type']}</li>
+        </ul>
+        """
+    except Exception as e:
+        return f"Erreur: {e}"
+
+
+@app.route('/support')
+def support_home():
+    """Page d'accueil du support (publique)"""
+    # Statistiques publiques
+    stats = {
+        'total_tickets': support_db.get_total_tickets(),
+        'resolved_tickets': support_db.get_resolved_tickets_count(),
+        'active_users': support_db.get_active_users_count(),
+        'avg_response_time': '< 24h'  # Statique pour le moment
+    }
+
+    return render_template('support_home.html', stats=stats)
+
+
+@app.route('/support/register', methods=['GET', 'POST'])
+def support_register():
+    """Inscription au système de support"""
+    if request.method == 'POST':
+        try:
+            username = request.form.get('username', '').strip()
+            email = request.form.get('email', '').strip()
+            password = request.form.get('password', '')
+            confirm_password = request.form.get('confirm_password', '')
+            discord_username = request.form.get('discord_username', '').strip()
+            discord_id = request.form.get('discord_id', '').strip()
+
+            # Validation
+            if not username or not email or not password:
+                flash('Veuillez remplir tous les champs obligatoires.', 'error')
+                return render_template('support_register.html')
+
+            if password != confirm_password:
+                flash('Les mots de passe ne correspondent pas.', 'error')
+                return render_template('support_register.html')
+
+            if len(password) < 6:
+                flash('Le mot de passe doit contenir au moins 6 caractères.', 'error')
+                return render_template('support_register.html')
+
+            # Vérifier si l'utilisateur existe déjà
+            if support_db.get_user_by_username(username):
+                flash('Ce nom d\'utilisateur est déjà pris.', 'error')
+                return render_template('support_register.html')
+
+            if support_db.get_user_by_email(email):
+                flash('Cette adresse email est déjà utilisée.', 'error')
+                return render_template('support_register.html')
+
+            # Créer l'utilisateur
+            user_id = support_db.create_user(
+                username=username,
+                email=email,
+                password=password,
+                discord_username=discord_username if discord_username else None,
+                discord_id=discord_id if discord_id else None
+            )
+
+            if user_id:
+                flash(
+                    'Compte créé avec succès ! Vous pouvez maintenant vous connecter.', 'success')
+                return redirect(url_for('support_login'))
+            else:
+                flash(
+                    'Erreur lors de la création du compte. Veuillez réessayer.', 'error')
+
+        except Exception as e:
+            flash(f'Erreur lors de l\'inscription : {str(e)}', 'error')
+            logger.log('ERROR', f'Erreur inscription support: {str(e)}')
+
+    return render_template('support_register.html')
+
+
+@app.route('/support/login', methods=['GET', 'POST'])
+def support_login():
+    """Connexion au système de support"""
+    if request.method == 'POST':
+        try:
+            username = request.form.get('username', '').strip()
+            password = request.form.get('password', '')
+            remember_me = request.form.get('remember_me') == '1'
+
+            if not username or not password:
+                flash('Veuillez remplir tous les champs.', 'error')
+                return render_template('support_login.html')
+
+            # Authentification (peut être username ou email)
+            user = support_db.authenticate_user(username, password)
+
+            if user:
+                # Connexion réussie
+                session['support_user'] = {
+                    'id': user['id'],
+                    'username': user['username'],
+                    'email': user['email'],
+                    'discord_username': user['discord_username'],
+                    'discord_id': user['discord_id']
+                }
+
+                if remember_me:
+                    session.permanent = True
+                    app.permanent_session_lifetime = timedelta(days=30)
+
+                flash(f'Bienvenue, {user["username"]} !', 'success')
+                return redirect(url_for('support_dashboard'))
+            else:
+                flash('Nom d\'utilisateur/email ou mot de passe incorrect.', 'error')
+
+        except Exception as e:
+            flash(f'Erreur lors de la connexion : {str(e)}', 'error')
+            logger.log('ERROR', f'Erreur connexion support: {str(e)}')
+
+    return render_template('support_login.html')
+
+
+@app.route('/support/logout')
+def support_logout():
+    """Déconnexion du système de support"""
+    if 'support_user' in session:
+        username = session['support_user']['username']
+        session.pop('support_user', None)
+        flash(f'À bientôt, {username} !', 'info')
+
+    return redirect(url_for('support_home'))
+
+
+@app.route('/support/dashboard')
+def support_dashboard():
+    """Tableau de bord utilisateur du support"""
+    if 'support_user' not in session:
+        return redirect(url_for('support_login'))
+
+    user_id = session['support_user']['id']
+
+    # Statistiques utilisateur
+    user_tickets = support_db.get_user_tickets(user_id)
+    stats = {
+        'total_tickets': len(user_tickets),
+        'open_tickets': len([t for t in user_tickets if t['status'] in ['open', 'in_progress']]),
+        'resolved_tickets': len([t for t in user_tickets if t['status'] == 'resolved']),
+        'pending_responses': len([t for t in user_tickets if t['status'] == 'waiting_user'])
+    }
+
+    # Tickets récents (5 derniers)
+    recent_tickets = user_tickets[:5]
+
+    # Notifications (placeholder)
+    notifications = []
+
+    return render_template('support_dashboard.html',
+                           stats=stats,
+                           recent_tickets=recent_tickets,
+                           notifications=notifications)
+
+
+@app.route('/support/ticket/new', methods=['GET', 'POST'])
+def support_ticket_new():
+    """Créer un nouveau ticket de support"""
+    if 'support_user' not in session:
+        return redirect(url_for('support_login'))
+
+    if request.method == 'POST':
+        try:
+            user_id = session['support_user']['id']
+
+            # Récupérer les données du formulaire
+            category = request.form.get('category', '').strip()
+            priority = request.form.get('priority', 'medium')
+            subject = request.form.get('subject', '').strip()
+            description = request.form.get('description', '').strip()
+            steps_to_reproduce = request.form.get(
+                'steps_to_reproduce', '').strip()
+            server_id = request.form.get('server_id', '').strip()
+            command_used = request.form.get('command_used', '').strip()
+            error_message = request.form.get('error_message', '').strip()
+            urgent_contact = request.form.get('urgent_contact') == '1'
+            email_notifications = request.form.get(
+                'email_notifications') == '1'
+
+            # Validation
+            if not category or not subject or not description:
+                flash('Veuillez remplir tous les champs obligatoires.', 'error')
+                return render_template('support_ticket_new.html')
+
+            if len(description) < 20:
+                flash('La description doit contenir au moins 20 caractères.', 'error')
+                return render_template('support_ticket_new.html')
+
+            # Préparer les métadonnées
+            metadata = {
+                'steps_to_reproduce': steps_to_reproduce,
+                'server_id': server_id,
+                'command_used': command_used,
+                'error_message': error_message,
+                'urgent_contact': urgent_contact,
+                'email_notifications': email_notifications
+            }
+
+            # Créer le ticket
+            ticket_id = support_db.create_ticket(
+                user_id=user_id,
+                category=category,
+                priority=priority,
+                subject=subject,
+                description=description,
+                metadata=metadata
+            )
+
+            if ticket_id:
+                # TODO: Envoyer notification Discord à l'admin
+                logger.log('INFO', f'Nouveau ticket créé: #{ticket_id}', {
+                    'user': session['support_user']['username'],
+                    'category': category,
+                    'priority': priority
+                })
+
+                flash(
+                    f'Ticket #{ticket_id} créé avec succès ! Nous vous répondrons dans les plus brefs délais.', 'success')
+                return redirect(url_for('support_ticket_view', ticket_id=ticket_id))
+            else:
+                flash(
+                    'Erreur lors de la création du ticket. Veuillez réessayer.', 'error')
+
+        except Exception as e:
+            flash(f'Erreur lors de la création du ticket : {str(e)}', 'error')
+            logger.log('ERROR', f'Erreur création ticket: {str(e)}')
+
+    return render_template('support_ticket_new.html')
+
+
+@app.route('/support/ticket/<int:ticket_id>')
+def support_ticket_view(ticket_id):
+    """Voir un ticket spécifique"""
+    if 'support_user' not in session:
+        return redirect(url_for('support_login'))
+
+    user_id = session['support_user']['id']
+
+    # Récupérer le ticket
+    ticket = support_db.get_ticket_by_id(ticket_id)
+
+    if not ticket or ticket['user_id'] != user_id:
+        flash('Ticket non trouvé ou accès non autorisé.', 'error')
+        return redirect(url_for('support_dashboard'))
+
+    # Récupérer les réponses
+    responses = support_db.get_ticket_responses(ticket_id)
+
+    return render_template('support_ticket_view.html',
+                           ticket=ticket,
+                           responses=responses)
+
+# Fonction utilitaire pour les templates
+
+
+@app.template_filter('timeago')
+def timeago_filter(dt):
+    """Filtre pour afficher le temps relatif"""
+    if isinstance(dt, str):
+        try:
+            dt = datetime.fromisoformat(dt.replace('Z', '+00:00'))
+        except:
+            return dt
+
+    now = datetime.now()
+    if dt.tzinfo:
+        now = now.replace(tzinfo=dt.tzinfo)
+
+    diff = now - dt
+
+    if diff.days > 0:
+        return f"il y a {diff.days} jour{'s' if diff.days > 1 else ''}"
+    elif diff.seconds > 3600:
+        hours = diff.seconds // 3600
+        return f"il y a {hours} heure{'s' if hours > 1 else ''}"
+    elif diff.seconds > 60:
+        minutes = diff.seconds // 60
+        return f"il y a {minutes} minute{'s' if minutes > 1 else ''}"
+    else:
+        return "à l'instant"
+
+
+@app.route('/support/tickets')
+def support_tickets():
+    """Liste de tous les tickets de l'utilisateur"""
+    if 'support_user' not in session:
+        return redirect(url_for('support_login'))
+
+    user_id = session['support_user']['id']
+
+    # Filtres
+    status_filter = request.args.get('status', '')
+    priority_filter = request.args.get('priority', '')
+    category_filter = request.args.get('category', '')
+    search_filter = request.args.get('search', '')
+
+    # Récupérer tous les tickets de l'utilisateur
+    all_tickets = support_db.get_user_tickets(user_id)
+
+    # Appliquer les filtres
+    filtered_tickets = all_tickets
+
+    if status_filter:
+        filtered_tickets = [
+            t for t in filtered_tickets if t['status'] == status_filter]
+
+    if priority_filter:
+        filtered_tickets = [
+            t for t in filtered_tickets if t['priority'] == priority_filter]
+
+    if category_filter:
+        filtered_tickets = [
+            t for t in filtered_tickets if t['category'] == category_filter]
+
+    if search_filter:
+        filtered_tickets = [t for t in filtered_tickets
+                            if search_filter.lower() in t['subject'].lower()]
+
+    # Statistiques
+    total_tickets = len(all_tickets)
+    open_tickets = len([t for t in all_tickets if t['status'] == 'open'])
+    in_progress_tickets = len(
+        [t for t in all_tickets if t['status'] == 'in_progress'])
+    resolved_tickets = len(
+        [t for t in all_tickets if t['status'] == 'resolved'])
+
+    return render_template('support_tickets.html',
+                           tickets=filtered_tickets,
+                           total_tickets=total_tickets,
+                           open_tickets=open_tickets,
+                           in_progress_tickets=in_progress_tickets,
+                           resolved_tickets=resolved_tickets)
+
+
+@app.route('/support/ticket/<int:ticket_id>/respond', methods=['POST'])
+def support_ticket_respond(ticket_id):
+    """Ajouter une réponse à un ticket"""
+    if 'support_user' not in session:
+        return redirect(url_for('support_login'))
+
+    user_id = session['support_user']['id']
+
+    # Vérifier que le ticket appartient à l'utilisateur
+    ticket = support_db.get_ticket_by_id(ticket_id)
+    if not ticket or ticket['user_id'] != user_id:
+        flash('Ticket non trouvé ou accès non autorisé.', 'error')
+        return redirect(url_for('support_dashboard'))
+
+    try:
+        message = request.form.get('message', '').strip()
+        mark_resolved = request.form.get('mark_resolved') == '1'
+
+        if not message:
+            flash('Veuillez saisir une réponse.', 'error')
+            return redirect(url_for('support_ticket_view', ticket_id=ticket_id))
+
+        # Ajouter la réponse
+        response_id = support_db.add_ticket_response(
+            ticket_id=ticket_id,
+            message=message,
+            is_admin=False
+        )
+
+        if response_id:
+            # Mettre à jour le statut si demandé
+            if mark_resolved:
+                support_db.update_ticket_status(ticket_id, 'resolved')
+                flash(
+                    'Votre réponse a été ajoutée et le ticket marqué comme résolu.', 'success')
+            else:
+                # Remettre en attente de réponse admin
+                support_db.update_ticket_status(ticket_id, 'waiting_admin')
+                flash(
+                    'Votre réponse a été ajoutée. Notre équipe vous répondra bientôt.', 'success')
+
+            logger.log('INFO', f'Réponse ajoutée au ticket #{ticket_id}', {
+                'user': session['support_user']['username'],
+                'resolved': mark_resolved
+            })
+        else:
+            flash('Erreur lors de l\'ajout de la réponse.', 'error')
+
+    except Exception as e:
+        flash(f'Erreur lors de l\'ajout de la réponse : {str(e)}', 'error')
+        logger.log('ERROR', f'Erreur ajout réponse ticket: {str(e)}')
+
+    return redirect(url_for('support_ticket_view', ticket_id=ticket_id))
+
+# ===============================================
+# ROUTES D'ADMINISTRATION DES NOTIFICATIONS
+# ===============================================
+
+
+@app.route('/admin/notifications')
+def admin_notifications():
+    """Interface d'administration des notifications Discord"""
+    if 'admin_logged_in' not in session:
+        return redirect(url_for('login'))
+
+    try:
+        from support_notifier import support_notifier
+
+        # Vérifier le statut du système de notifications
+        notification_status = {
+            'bot_connected': bot_instance is not None,
+            'notifier_ready': support_notifier.bot is not None,
+            'admin_user_id': support_notifier.admin_user_id,
+            'last_notification': None  # TODO: implémenter le suivi
+        }
+
+        return render_template('admin_notifications.html',
+                               status=notification_status,
+                               logs=bot_logs[-50:])  # Derniers 50 logs
+    except ImportError:
+        flash('Module de notifications non disponible', 'error')
+        return redirect(url_for('admin'))
+    except Exception as e:
+        flash(
+            f'Erreur lors du chargement des notifications: {str(e)}', 'error')
+        return redirect(url_for('admin'))
+
+
+@app.route('/admin/test-notification', methods=['POST'])
+def admin_test_notification():
+    """Test d'envoi de notification Discord"""
+    if 'admin_logged_in' not in session:
+        return redirect(url_for('login'))
+
+    try:
+        from support_notifier import support_notifier
+
+        # Données de test
+        test_ticket_data = {
+            'ticket_id': 'TEST',
+            'username': 'Admin Test',
+            'email': 'admin@test.com',
+            'category': 'test',
+            'priority': 'medium',
+            'subject': 'Test de notification Discord',
+            'description': 'Ceci est un test manuel du système de notifications Discord depuis le panel d\'administration.'
+        }
+
+        # Programmer l'envoi de la notification de test
+        import threading
+
+        def send_test_notification():
+            try:
+                import asyncio
+                loop = asyncio.new_event_loop()
+                asyncio.set_event_loop(loop)
+                result = loop.run_until_complete(
+                    support_notifier.send_new_ticket_notification(
+                        test_ticket_data)
+                )
+                loop.close()
+
+                if result:
+                    logger.log(
+                        'SUCCESS', 'Test de notification Discord réussi')
+                else:
+                    logger.log(
+                        'ERROR', 'Échec du test de notification Discord')
+            except Exception as e:
+                logger.log('ERROR', f'Erreur test notification: {str(e)}')
+
+        test_thread = threading.Thread(
+            target=send_test_notification, daemon=True)
+        test_thread.start()
+
+        flash(
+            'Test de notification Discord programmé. Vérifiez vos messages privés.', 'info')
+        logger.log('INFO', 'Test de notification Discord lancé par admin')
+
+    except ImportError:
+        flash('Module de notifications non disponible', 'error')
+    except Exception as e:
+        flash(f'Erreur lors du test: {str(e)}', 'error')
+        logger.log('ERROR', f'Erreur test notification admin: {str(e)}')
+
+    return redirect(url_for('admin_notifications'))
+
+# ===============================================
+# ADMINISTRATION DES TICKETS DE SUPPORT
+# ===============================================
+
+
+@app.route('/admin/tickets')
+def admin_tickets():
+    """Interface d'administration pour gérer tous les tickets de support"""
+    if 'admin_logged_in' not in session:
+        return redirect(url_for('login'))
+
+    try:
+        from support_db import support_db
+
+        # Récupérer tous les tickets avec les informations utilisateur
+        tickets = support_db.get_all_tickets_for_admin()
+
+        # Statistiques des tickets
+        stats = {
+            'total': len(tickets),
+            'open': len([t for t in tickets if t['status'] == 'open']),
+            'waiting_admin': len([t for t in tickets if t['status'] == 'waiting_admin']),
+            'resolved': len([t for t in tickets if t['status'] == 'resolved']),
+            'closed': len([t for t in tickets if t['status'] == 'closed'])
+        }
+
+        return render_template('admin_tickets.html',
+                               tickets=tickets,
+                               stats=stats,
+                               admin=session.get('admin_username'))
+
+    except Exception as e:
+        flash(f'Erreur lors du chargement des tickets: {str(e)}', 'error')
+        logger.log('ERROR', f'Erreur admin tickets: {str(e)}')
+        return redirect(url_for('dashboard'))
+
+
+@app.route('/admin/ticket/<int:ticket_id>')
+def admin_ticket_view(ticket_id):
+    """Vue détaillée d'un ticket pour l'admin avec possibilité de répondre"""
+    if 'admin_logged_in' not in session:
+        return redirect(url_for('login'))
+
+    try:
+        support_db = SupportDB()
+
+        # Récupérer le ticket avec les informations utilisateur
+        ticket = support_db.get_ticket_by_id(ticket_id)
+        if not ticket:
+            flash('Ticket non trouvé.', 'error')
+            return redirect(url_for('admin_tickets'))
+
+        # Récupérer les réponses du ticket
+        responses = support_db.get_ticket_responses(ticket_id)
+
+        return render_template('admin_ticket_view.html',
+                               ticket=ticket,
+                               responses=responses,
+                               admin=session.get('admin_username'))
+
+    except Exception as e:
+        flash(f'Erreur lors du chargement du ticket: {str(e)}', 'error')
+        logger.log('ERROR', f'Erreur admin ticket view: {str(e)}')
+        return redirect(url_for('admin_tickets'))
+
+
+@app.route('/admin/ticket/<int:ticket_id>/respond', methods=['POST'])
+def admin_ticket_respond(ticket_id):
+    """Ajouter une réponse admin à un ticket"""
+    if 'admin_logged_in' not in session:
+        return redirect(url_for('login'))
+
+    try:
+        support_db = SupportDB()
+        message = request.form.get('message', '').strip()
+        new_status = request.form.get('status', 'waiting_user')
+
+        if not message:
+            flash('Veuillez saisir une réponse.', 'error')
+            return redirect(url_for('admin_ticket_view', ticket_id=ticket_id))
+
+        # Ajouter la réponse admin
+        response_id = support_db.add_ticket_response(
+            ticket_id=ticket_id,
+            message=message,
+            is_admin=True
+        )
+
+        if response_id:
+            # Mettre à jour le statut du ticket
+            support_db.update_ticket_status(ticket_id, new_status)
+
+            flash('Votre réponse a été ajoutée avec succès.', 'success')
+            logger.log('INFO', f'Réponse admin ajoutée au ticket #{ticket_id}', {
+                'admin': session['admin_username'],
+                'new_status': new_status
+            })
+
+            # TODO: Envoyer une notification à l'utilisateur (email ou Discord)
+
+        else:
+            flash('Erreur lors de l\'ajout de la réponse.', 'error')
+
+    except Exception as e:
+        flash(f'Erreur lors de l\'ajout de la réponse: {str(e)}', 'error')
+        logger.log('ERROR', f'Erreur admin réponse: {str(e)}')
+
+    return redirect(url_for('admin_ticket_view', ticket_id=ticket_id))
+
+
+@app.route('/admin/ticket/<int:ticket_id>/status', methods=['POST'])
+def admin_ticket_status(ticket_id):
+    """Changer le statut d'un ticket"""
+    if 'admin_logged_in' not in session:
+        return redirect(url_for('login'))
+
+    try:
+        support_db = SupportDB()
+        new_status = request.form.get('status')
+
+        if new_status in ['open', 'waiting_admin', 'waiting_user', 'resolved', 'closed']:
+            support_db.update_ticket_status(ticket_id, new_status)
+            flash(f'Statut du ticket mis à jour : {new_status}', 'success')
+            logger.log('INFO', f'Statut ticket #{ticket_id} changé', {
+                'admin': session['admin_username'],
+                'new_status': new_status
+            })
+        else:
+            flash('Statut invalide.', 'error')
+
+    except Exception as e:
+        flash(f'Erreur lors du changement de statut: {str(e)}', 'error')
+        logger.log('ERROR', f'Erreur changement statut: {str(e)}')
+
+    return redirect(url_for('admin_ticket_view', ticket_id=ticket_id))
+
+
+@app.route('/admin/ticket/<int:ticket_id>/delete', methods=['POST'])
+def admin_ticket_delete(ticket_id):
+    """Supprimer un ticket spécifique"""
+    if 'admin_logged_in' not in session:
+        return redirect(url_for('login'))
+
+    try:
+        from support_db import support_db
+
+        # Vérifier que le ticket existe
+        ticket = support_db.get_ticket_by_id(ticket_id)
+        if not ticket:
+            flash('Ticket introuvable.', 'error')
+            return redirect(url_for('admin_tickets'))
+
+        # Supprimer le ticket
+        if support_db.delete_ticket(ticket_id):
+            flash(
+                f'Ticket #{ticket_id} "{ticket["subject"]}" supprimé avec succès.', 'success')
+            logger.log('WARNING', f'Ticket #{ticket_id} supprimé', {
+                'admin': session['admin_username'],
+                'ticket_subject': ticket['subject']
+            })
+        else:
+            flash('Erreur lors de la suppression du ticket.', 'error')
+
+    except Exception as e:
+        flash(f'Erreur lors de la suppression: {str(e)}', 'error')
+        logger.log(
+            'ERROR', f'Erreur suppression ticket #{ticket_id}: {str(e)}')
+
+    return redirect(url_for('admin_tickets'))
+
+
+@app.route('/admin/tickets/cleanup')
+def admin_tickets_cleanup():
+    """Page de nettoyage des anciens tickets"""
+    if 'admin_logged_in' not in session:
+        return redirect(url_for('login'))
+
+    try:
+        from support_db import support_db
+
+        # Récupérer les tickets qui peuvent être supprimés
+        old_tickets = support_db.get_tickets_for_deletion(
+            status='closed', days_old=30)
+        very_old_tickets = support_db.get_tickets_for_deletion(
+            status='resolved', days_old=90)
+
+        return render_template('admin_tickets_cleanup.html',
+                               old_closed_tickets=old_tickets,
+                               old_resolved_tickets=very_old_tickets,
+                               stats={
+                                   'old_closed_count': len(old_tickets),
+                                   'old_resolved_count': len(very_old_tickets)
+                               })
+
+    except Exception as e:
+        flash(f'Erreur lors du chargement: {str(e)}', 'error')
+        logger.log('ERROR', f'Erreur cleanup page: {str(e)}')
+        return redirect(url_for('admin_tickets'))
+
+
+@app.route('/admin/tickets/cleanup/execute', methods=['POST'])
+def admin_tickets_cleanup_execute():
+    """Exécuter le nettoyage des anciens tickets"""
+    if 'admin_logged_in' not in session:
+        return redirect(url_for('login'))
+
+    try:
+        from support_db import support_db
+
+        cleanup_type = request.form.get('cleanup_type')
+
+        if cleanup_type == 'closed_30':
+            # Supprimer les tickets fermés de plus de 30 jours
+            deleted_count = support_db.delete_old_tickets(
+                status='closed', days_old=30)
+            flash(
+                f'{deleted_count} ticket(s) fermé(s) de plus de 30 jours supprimé(s).', 'success')
+
+        elif cleanup_type == 'resolved_90':
+            # Supprimer les tickets résolus de plus de 90 jours
+            deleted_count = support_db.delete_old_tickets(
+                status='resolved', days_old=90)
+            flash(
+                f'{deleted_count} ticket(s) résolu(s) de plus de 90 jours supprimé(s).', 'success')
+
+        elif cleanup_type == 'all_old':
+            # Supprimer tous les anciens tickets
+            deleted_closed = support_db.delete_old_tickets(
+                status='closed', days_old=30)
+            deleted_resolved = support_db.delete_old_tickets(
+                status='resolved', days_old=90)
+            total_deleted = deleted_closed + deleted_resolved
+            flash(f'{total_deleted} ancien(s) ticket(s) supprimé(s) ({deleted_closed} fermés, {deleted_resolved} résolus).', 'success')
+
+        else:
+            flash('Type de nettoyage invalide.', 'error')
+
+        logger.log('WARNING', f'Nettoyage des tickets exécuté', {
+            'admin': session['admin_username'],
+            'type': cleanup_type
+        })
+
+    except Exception as e:
+        flash(f'Erreur lors du nettoyage: {str(e)}', 'error')
+        logger.log('ERROR', f'Erreur cleanup execute: {str(e)}')
+
+    return redirect(url_for('admin_tickets_cleanup'))
+
+
+# ===============================================
+# FIN DU SYSTÈME DE SUPPORT
+# ===============================================
 
 
 if __name__ == '__main__':

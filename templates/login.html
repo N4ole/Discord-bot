@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Panel Admin - Bot Discord</title>
+    <title>Interface Développeurs - Summer Bot</title>
     <style>
       * {
         margin: 0;
@@ -118,8 +118,8 @@
     <div class="login-container">
       <div class="login-header">
         <div class="bot-icon">🤖</div>
-        <h1>Panel Admin</h1>
-        <p>Connexion au tableau de bord du bot Discord</p>
+        <h1>Interface Développeurs</h1>
+        <p>Accès privé au tableau de bord du bot Discord</p>
       </div>
 
       {% with messages = get_flashed_messages() %} {% if messages %} {% for
@@ -142,7 +142,18 @@
       </form>
 
       <div class="security-note">
-        🔐 Zone sécurisée - Accès réservé aux administrateurs autorisés
+        🔐 Zone privée - Accès réservé aux développeurs du bot<br />
+        <a
+          href="/promo"
+          style="
+            color: #667eea;
+            text-decoration: none;
+            margin-top: 10px;
+            display: inline-block;
+          "
+        >
+          🤖 Découvrir Summer Bot
+        </a>
       </div>
     </div>
   </body>

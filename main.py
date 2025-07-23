@@ -21,6 +21,17 @@ def main():
 
     # Crée et lance le bot
     bot = DiscordBot()
+
+    # Initialiser le système de notifications de support
+    try:
+        from web_panel import set_bot_instance
+        set_bot_instance(bot)
+        print("📱 Système de notifications de support initialisé")
+    except ImportError as e:
+        print(f"⚠️ Impossible d'importer le module web_panel: {e}")
+    except Exception as e:
+        print(f"⚠️ Erreur lors de l'initialisation des notifications: {e}")
+
     bot.run(token)
 
 

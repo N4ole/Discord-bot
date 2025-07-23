@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Summer Bot - Bot Discord Multi-Fonctionnel</title>
+    <meta
+      name="description"
+      content="Summer Bot - Le bot Discord le plus complet avec modération, logs, outils avancés et panel web d'administration. Invitez-le maintenant !"
+    />
+    <meta
+      name="keywords"
+      content="discord bot, modération, logs, panel web, tools, analysis, polls"
+    />
+
+    <!-- Open Graph Meta Tags -->
+    <meta
+      property="og:title"
+      content="Summer Bot - Bot Discord Multi-Fonctionnel"
+    />
+    <meta
+      property="og:description"
+      content="Découvrez le bot Discord le plus complet avec 33+ commandes, panel web et outils avancés !"
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="http://127.0.0.1:8080/promo" />
+
+    <!-- Font Awesome -->
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+      rel="stylesheet"
+    />
+
+    <!-- Custom CSS -->
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        line-height: 1.6;
+        color: #333;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+      }
+
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 20px;
+      }
+
+      /* Header */
+      .header {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        padding: 1rem 0;
+        position: fixed;
+        width: 100%;
+        top: 0;
+        z-index: 1000;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+      }
+
+      .nav {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .logo {
+        font-size: 1.8rem;
+        font-weight: bold;
+        color: #fff;
+        text-decoration: none;
+      }
+
+      .nav-links {
+        display: flex;
+        gap: 2rem;
+        list-style: none;
+      }
+
+      .nav-links a {
+        color: #fff;
+        text-decoration: none;
+        transition: opacity 0.3s;
+      }
+
+      .nav-links a:hover {
+        opacity: 0.8;
+      }
+
+      /* Hero Section */
+      .hero {
+        padding: 120px 0 80px;
+        text-align: center;
+        color: #fff;
+      }
+
+      .hero h1 {
+        font-size: 3.5rem;
+        margin-bottom: 1rem;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+      }
+
+      .hero .subtitle {
+        font-size: 1.3rem;
+        margin-bottom: 2rem;
+        opacity: 0.9;
+      }
+
+      .hero .description {
+        font-size: 1.1rem;
+        margin-bottom: 3rem;
+        max-width: 600px;
+        margin-left: auto;
+        margin-right: auto;
+        opacity: 0.8;
+      }
+
+      /* Buttons */
+      .btn {
+        display: inline-block;
+        padding: 15px 30px;
+        text-decoration: none;
+        border-radius: 50px;
+        font-weight: bold;
+        font-size: 1.1rem;
+        transition: all 0.3s ease;
+        text-align: center;
+        border: none;
+        cursor: pointer;
+        margin: 0 10px;
+      }
+
+      .btn-primary {
+        background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+        color: #fff;
+        box-shadow: 0 4px 15px rgba(238, 90, 36, 0.4);
+      }
+
+      .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(238, 90, 36, 0.6);
+      }
+
+      .btn-secondary {
+        background: rgba(255, 255, 255, 0.2);
+        color: #fff;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+      }
+
+      .btn-secondary:hover {
+        background: rgba(255, 255, 255, 0.3);
+        transform: translateY(-2px);
+      }
+
+      /* Features Section */
+      .features {
+        padding: 80px 0;
+        background: #fff;
+      }
+
+      .features h2 {
+        text-align: center;
+        font-size: 2.5rem;
+        margin-bottom: 3rem;
+        color: #333;
+      }
+
+      .features-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 2rem;
+      }
+
+      .feature-card {
+        background: #fff;
+        padding: 2rem;
+        border-radius: 15px;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+        text-align: center;
+        transition: transform 0.3s ease;
+      }
+
+      .feature-card:hover {
+        transform: translateY(-5px);
+      }
+
+      .feature-icon {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        background: linear-gradient(45deg, #667eea, #764ba2);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+
+      .feature-card h3 {
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+        color: #333;
+      }
+
+      .feature-card p {
+        color: #666;
+        line-height: 1.6;
+      }
+
+      /* Stats Section */
+      .stats {
+        padding: 80px 0;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: #fff;
+      }
+
+      .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 2rem;
+        text-align: center;
+      }
+
+      .stat-item h3 {
+        font-size: 3rem;
+        margin-bottom: 0.5rem;
+        font-weight: bold;
+      }
+
+      .stat-item p {
+        font-size: 1.2rem;
+        opacity: 0.9;
+      }
+
+      /* Commands Section */
+      .commands {
+        padding: 80px 0;
+        background: #f8f9fa;
+      }
+
+      .commands h2 {
+        text-align: center;
+        font-size: 2.5rem;
+        margin-bottom: 3rem;
+        color: #333;
+      }
+
+      .commands-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+        gap: 2rem;
+      }
+
+      .command-category {
+        background: #fff;
+        padding: 2rem;
+        border-radius: 15px;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+      }
+
+      .command-category h3 {
+        font-size: 1.8rem;
+        margin-bottom: 1rem;
+        color: #333;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .command-list {
+        list-style: none;
+      }
+
+      .command-list li {
+        padding: 0.5rem 0;
+        border-bottom: 1px solid #eee;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .command-list li:last-child {
+        border-bottom: none;
+      }
+
+      .command-name {
+        font-weight: bold;
+        color: #667eea;
+      }
+
+      .command-desc {
+        color: #666;
+        font-size: 0.9rem;
+      }
+
+      /* CTA Section */
+      .cta {
+        padding: 80px 0;
+        background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+        color: #fff;
+        text-align: center;
+      }
+
+      .cta h2 {
+        font-size: 2.5rem;
+        margin-bottom: 1rem;
+      }
+
+      .cta p {
+        font-size: 1.2rem;
+        margin-bottom: 2rem;
+        opacity: 0.9;
+      }
+
+      /* Footer */
+      .footer {
+        background: #333;
+        color: #fff;
+        padding: 2rem 0;
+        text-align: center;
+      }
+
+      .footer-links {
+        display: flex;
+        justify-content: center;
+        gap: 2rem;
+        margin-bottom: 1rem;
+      }
+
+      .footer-links a {
+        color: #fff;
+        text-decoration: none;
+        transition: opacity 0.3s;
+      }
+
+      .footer-links a:hover {
+        opacity: 0.8;
+      }
+
+      /* Responsive */
+      @media (max-width: 768px) {
+        .hero h1 {
+          font-size: 2.5rem;
+        }
+
+        .hero .subtitle {
+          font-size: 1.1rem;
+        }
+
+        .nav-links {
+          display: none;
+        }
+
+        .features-grid,
+        .commands-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .btn {
+          display: block;
+          margin: 10px 0;
+        }
+      }
+
+      /* Animations */
+      @keyframes fadeInUp {
+        from {
+          opacity: 0;
+          transform: translateY(30px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .hero,
+      .feature-card,
+      .command-category {
+        animation: fadeInUp 0.6s ease-out;
+      }
+
+      /* Discord-like styling */
+      .discord-embed {
+        background: #2f3136;
+        border-left: 4px solid #5865f2;
+        border-radius: 4px;
+        padding: 1rem;
+        margin: 1rem 0;
+        color: #dcddde;
+      }
+
+      .discord-embed .embed-title {
+        color: #fff;
+        font-weight: bold;
+        margin-bottom: 0.5rem;
+      }
+
+      .invite-preview {
+        background: #2f3136;
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin: 2rem 0;
+        color: #dcddde;
+        border: 1px solid #40444b;
+      }
+
+      .bot-avatar {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        background: linear-gradient(45deg, #667eea, #764ba2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+        color: white;
+        margin: 0 auto 1rem;
+        overflow: hidden;
+        border: 3px solid rgba(255, 255, 255, 0.2);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+      }
+
+      .bot-avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 50%;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Header -->
+    <header class="header">
+      <nav class="nav container">
+        <a href="#" class="logo"> <i class="fas fa-robot"></i> Summer Bot </a>
+        <ul class="nav-links">
+          <li><a href="#features">Fonctionnalités</a></li>
+          <li><a href="#commands">Commandes</a></li>
+          <li><a href="/support">Support</a></li>
+          <li><a href="/login">Interface Développeurs</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+      <div class="container">
+        <div class="bot-avatar">
+          <img src="/static/logo-bot.jpg" alt="Summer Bot Logo" />
+        </div>
+        <h1>Summer Bot</h1>
+        <p class="subtitle">Le Bot Discord Multi-Fonctionnel Ultime</p>
+        <p class="description">
+          Transformez votre serveur Discord avec un bot complet incluant
+          modération avancée, système de logs, outils d'analyse, panel web
+          d'administration et bien plus encore !
+        </p>
+
+        <!-- Bouton d'invitation principal -->
+        <div style="margin: 2rem 0">
+          <a
+            href="https://discord.com/api/oauth2/authorize?client_id=1397194777098981517&permissions=8&scope=bot%20applications.commands"
+            target="_blank"
+            class="btn btn-primary"
+          >
+            <i class="fab fa-discord"></i> Inviter Summer Bot
+          </a>
+          <a href="#features" class="btn btn-secondary">
+            <i class="fas fa-info-circle"></i> Découvrir les fonctionnalités
+          </a>
+        </div>
+
+        <!-- Aperçu Discord -->
+        <div class="invite-preview">
+          <div class="embed-title">🤖 Summer Bot vous salue !</div>
+          <p>
+            ✅ <strong>33+ commandes slash</strong> et
+            <strong>45+ commandes préfixées</strong>
+          </p>
+          <p>
+            🛡️ <strong>Modération complète</strong> avec ban, kick, mute et
+            nettoyage intelligent
+          </p>
+          <p>
+            📊 <strong>Système de logs avancé</strong> pour surveiller votre
+            serveur
+          </p>
+          <p></p>
+          <p>
+            🔧 <strong>Outils avancés</strong> : analyse, sondages, rappels
+            automatiques
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section class="stats">
+      <div class="container">
+        <div class="stats-grid">
+          <div class="stat-item">
+            <h3>33+</h3>
+            <p>Commandes Slash</p>
+          </div>
+          <div class="stat-item">
+            <h3>45+</h3>
+            <p>Commandes Préfixées</p>
+          </div>
+          <div class="stat-item">
+            <h3>9</h3>
+            <p>Catégories</p>
+          </div>
+          <div class="stat-item">
+            <h3>24/7</h3>
+            <p>En Ligne</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="features">
+      <div class="container">
+        <h2>Fonctionnalités Principales</h2>
+        <div class="features-grid">
+          <div class="feature-card">
+            <div class="feature-icon">
+              <i class="fas fa-shield-alt"></i>
+            </div>
+            <h3>Modération Avancée</h3>
+            <p>
+              Ban, kick, mute avec gestion des timeouts Discord natifs.
+              Nettoyage intelligent des messages avec filtres personnalisés.
+            </p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon">
+              <i class="fas fa-chart-line"></i>
+            </div>
+            <h3>Système de Logs</h3>
+            <p>
+              Surveillance complète des activités : messages, membres, vocal,
+              modération. Configuration par serveur indépendante.
+            </p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon">
+              <i class="fas fa-globe"></i>
+            </div>
+            <h3>Panel Administrateur</h3>
+            <p>
+              Interface d'administration privée pour les développeurs avec
+              statistiques en temps réel, gestion des logs et contrôle avancé du
+              bot.
+            </p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon">
+              <i class="fas fa-users"></i>
+            </div>
+            <h3>Gestion des Rôles</h3>
+            <p>
+              Attribution et retrait de rôles simplifiés. Affichage détaillé des
+              rôles avec couleurs et permissions.
+            </p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon">
+              <i class="fas fa-tools"></i>
+            </div>
+            <h3>Outils Avancés</h3>
+            <p>
+              Analyse de serveur, sondages interactifs, rappels automatiques,
+              nettoyage intelligent des messages.
+            </p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon">
+              <i class="fas fa-gamepad"></i>
+            </div>
+            <h3>Divertissement</h3>
+            <p>
+              Jeux interactifs, blagues, citations inspirantes,
+              pierre-papier-ciseaux et bien plus pour animer votre serveur.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Commands Section -->
+    <section id="commands" class="commands">
+      <div class="container">
+        <h2>Commandes Disponibles</h2>
+        <div class="commands-grid">
+          <div class="command-category">
+            <h3><i class="fas fa-shield-alt"></i> Modération</h3>
+            <ul class="command-list">
+              <li>
+                <span class="command-name">/ban</span>
+                <span class="command-desc">Bannit un membre</span>
+              </li>
+              <li>
+                <span class="command-name">/kick</span>
+                <span class="command-desc">Expulse un membre</span>
+              </li>
+              <li>
+                <span class="command-name">/mute</span>
+                <span class="command-desc">Met en timeout</span>
+              </li>
+              <li>
+                <span class="command-name">/clean</span>
+                <span class="command-desc">Nettoyage intelligent</span>
+              </li>
+            </ul>
+          </div>
+
+          <div class="command-category">
+            <h3><i class="fas fa-chart-bar"></i> Outils Avancés</h3>
+            <ul class="command-list">
+              <li>
+                <span class="command-name">/analyze</span>
+                <span class="command-desc">Analyse serveur/utilisateur</span>
+              </li>
+              <li>
+                <span class="command-name">/poll</span>
+                <span class="command-desc">Sondages interactifs</span>
+              </li>
+              <li>
+                <span class="command-name">/remind</span>
+                <span class="command-desc">Rappels programmés</span>
+              </li>
+            </ul>
+          </div>
+
+          <div class="command-category">
+            <h3><i class="fas fa-gamepad"></i> Divertissement</h3>
+            <ul class="command-list">
+              <li>
+                <span class="command-name">/8ball</span>
+                <span class="command-desc">Boule magique</span>
+              </li>
+              <li>
+                <span class="command-name">/rps</span>
+                <span class="command-desc">Pierre-papier-ciseaux</span>
+              </li>
+              <li>
+                <span class="command-name">/joke</span>
+                <span class="command-desc">Blagues aléatoires</span>
+              </li>
+              <li>
+                <span class="command-name">/quote</span>
+                <span class="command-desc">Citations inspirantes</span>
+              </li>
+            </ul>
+          </div>
+
+          <div class="command-category">
+            <h3><i class="fas fa-info-circle"></i> Informations</h3>
+            <ul class="command-list">
+              <li>
+                <span class="command-name">/info</span>
+                <span class="command-desc">Infos utilisateur</span>
+              </li>
+              <li>
+                <span class="command-name">/server</span>
+                <span class="command-desc">Infos serveur</span>
+              </li>
+              <li>
+                <span class="command-name">/avatar</span>
+                <span class="command-desc">Avatar utilisateur</span>
+              </li>
+              <li>
+                <span class="command-name">/botinfo</span>
+                <span class="command-desc">Infos du bot</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta">
+      <div class="container">
+        <h2>Prêt à améliorer votre serveur Discord ?</h2>
+        <p>
+          Rejoignez la communauté Summer Bot et bénéficiez d'un support complet
+          !
+        </p>
+
+        <a
+          href="https://discord.com/api/oauth2/authorize?client_id=1397194777098981517&permissions=8&scope=bot%20applications.commands"
+          target="_blank"
+          class="btn btn-secondary"
+          style="background: rgba(255, 255, 255, 0.2); margin-right: 1rem"
+        >
+          <i class="fab fa-discord"></i> Inviter Maintenant
+        </a>
+
+        <a
+          href="/support"
+          class="btn btn-secondary"
+          style="background: rgba(255, 255, 255, 0.2); margin-right: 1rem"
+        >
+          <i class="fas fa-headset"></i> Centre de Support
+        </a>
+
+        <a
+          href="/login"
+          class="btn btn-secondary"
+          style="background: rgba(255, 255, 255, 0.2)"
+        >
+          <i class="fas fa-cog"></i> Interface Développeurs
+        </a>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <div class="container">
+        <div class="footer-links">
+          <a href="/support">Centre de Support</a>
+          <a href="/login">Interface Développeurs</a>
+          <a href="#features">Fonctionnalités</a>
+          <a href="#commands">Commandes</a>
+          <a href="https://github.com/N4ole/Discord-bot" target="_blank"
+            >GitHub</a
+          >
+        </div>
+        <p>
+          &copy; 2025 Summer Bot. Développé avec ❤️ en Python. Tous droits
+          réservés.
+        </p>
+      </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script>
+      // Smooth scrolling pour les ancres
+      document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
+        anchor.addEventListener("click", function (e) {
+          e.preventDefault();
+          document.querySelector(this.getAttribute("href")).scrollIntoView({
+            behavior: "smooth",
+          });
+        });
+      });
+
+      // Animation au scroll
+      const observerOptions = {
+        threshold: 0.1,
+        rootMargin: "0px 0px -50px 0px",
+      };
+
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.style.opacity = "1";
+            entry.target.style.transform = "translateY(0)";
+          }
+        });
+      }, observerOptions);
+
+      // Appliquer l'animation aux éléments
+      document
+        .querySelectorAll(".feature-card, .command-category, .stat-item")
+        .forEach((el) => {
+          el.style.opacity = "0";
+          el.style.transform = "translateY(20px)";
+          el.style.transition = "opacity 0.6s ease, transform 0.6s ease";
+          observer.observe(el);
+        });
+
+      // Compteurs animés
+      function animateCounters() {
+        const counters = document.querySelectorAll(".stat-item h3");
+
+        counters.forEach((counter) => {
+          const target = parseInt(counter.textContent.replace("+", ""));
+          let current = 0;
+          const increment = target / 100;
+          const suffix = counter.textContent.includes("+") ? "+" : "";
+
+          const timer = setInterval(() => {
+            current += increment;
+            if (current >= target) {
+              counter.textContent = target + suffix;
+              clearInterval(timer);
+            } else {
+              counter.textContent = Math.floor(current) + suffix;
+            }
+          }, 20);
+        });
+      }
+
+      // Démarrer l'animation des compteurs quand la section est visible
+      const statsObserver = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            animateCounters();
+            statsObserver.unobserve(entry.target);
+          }
+        });
+      });
+
+      const statsSection = document.querySelector(".stats");
+      if (statsSection) {
+        statsObserver.observe(statsSection);
+      }
+    </script>
+  </body>
+</html>

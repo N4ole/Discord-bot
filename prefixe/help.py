@@ -120,8 +120,48 @@ class HelpPrefixe(commands.Cog):
         embed.add_field(
             name="📋 Informations",
             value="""
-            `{0}userinfo [membre]` - Infos sur un membre
-            `{0}serverinfo` - Infos sur le serveur
+            `{0}info [membre]` - Infos sur un membre
+            `{0}server` - Infos sur le serveur
+            `{0}avatar [membre]` - Avatar d'un utilisateur
+            `{0}uptime` - Temps de fonctionnement du bot
+            `{0}botinfo` - Informations détaillées du bot
+            """.format(ctx.prefix),
+            inline=False
+        )
+
+        # Utilitaires
+        embed.add_field(
+            name="⚙️ Utilitaires",
+            value="""
+            `{0}ping` - Latence du bot
+            """.format(ctx.prefix),
+            inline=False
+        )
+
+        # Divertissement
+        embed.add_field(
+            name="🎮 Divertissement",
+            value="""
+            `{0}coinflip` - Lance une pièce
+            `{0}8ball <question>` - Boule magique
+            `{0}rps <choix>` - Pierre-papier-ciseaux
+            `{0}choose <options>` - Choix aléatoire
+            `{0}joke` - Blague aléatoire
+            `{0}quote` - Citation inspirante
+            `{0}compliment [membre]` - Compliment
+            """.format(ctx.prefix),
+            inline=False
+        )
+
+        # Outils avancés
+        embed.add_field(
+            name="🔧 Outils Avancés",
+            value="""
+            `{0}analyze [utilisateur]` - Analyse serveur/utilisateur
+            `{0}clean <nombre> [filtres]` - Nettoyage intelligent
+            `{0}remind <temps> <message>` - Rappels programmés
+            `{0}poll [durée] "question" options` - Sondages avancés
+            `{0}count <texte>` - Statistiques de texte
             """.format(ctx.prefix),
             inline=False
         )
@@ -139,7 +179,7 @@ class HelpPrefixe(commands.Cog):
         )
 
         embed.set_footer(
-            text=f"Bot créé avec ❤️ • {len(self.bot.commands)} commandes préfixées")
+            text=f"Bot créé avec ❤️ • {len(self.bot.commands)} commandes préfixées • {len([cmd for cmd in self.bot.tree.walk_commands()])} commandes slash")
 
         return embed
 

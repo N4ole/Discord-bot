@@ -1,15 +1,156 @@
-# Di## ✨ Fonctionnalités principales
+# 🤖## ✨ Fonctionnalités principales
 
-- 🏗️ **Architecture modulaire** - Commandes organisées par catégories
+- 🏗️ **Architecture modulaire** - Commandes organisées par cat### 🔧 **Nouvelles Commandes d'Outils Avancés**
+- 📊 **Analyse** : `/analyze` - Analyse détaillée serveur/utilisateur avec scoring sécurité
+- 🧹 **Nettoyage** : `/clean` - Suppression intelligente de messages avec filtres
+- ⏰ **Rappels** : `/remind` - Système de rappels programmables jusqu'à 30 jours
+- 🗳️ **Sondages** : `/poll` - Sondages interactifs avec timer automatique et résultats
 - ⚡ **Double interface** - Commandes slash (/) ET préfixées (!)
 - 🌐 **Multi-serveur** - Configuration indépendante par serveur
 - 📊 **Système de logs** - Surveillance complète des activités
-- 🛡️ **Modération complète** - Ban, kick, mute avec gestion des rôles
+- 🛡️ **Modération complète** - Ban, kick, mute avec gestio## 📝 Ajout de nouvelles commandes
+
+Pour ajouter de nouvelles commandes :
+
+1. **Commande slash** : Créez un fichier dans `slash/`
+2. **Commande préfixée** : Créez un fichier dans `prefixe/`
+3. Ajoutez le chargement dans `engine.py` dans la méthode `setup_hook()`
+
+Chaque module doit avoir une fonction `setup(bot)` pour être chargé automatiquement.
+
+## 🚀 Déploiement et Production
+
+### 🔧 Configuration de Production
+1. **Changez les identifiants par défaut** dans `web_panel.py`
+2. **Utilisez un serveur WSGI** comme Gunicorn pour le panel web
+3. **Configurez un reverse proxy** (Nginx) pour HTTPS
+4. **Activez les logs en fichier** pour la persistance
+5. **Utilisez une base de données** pour les configurations (optionnel)
+
+### 🛡️ Sécurité
+- ✅ Tokens et mots de passe dans des variables d'environnement
+- ✅ Authentification obligatoire pour le panel web
+- ✅ Sessions sécurisées avec timeout automatique
+- ✅ Validation des permissions Discord
+- ✅ Logs d'audit pour toutes les actions sensibles
+
+### 📊 Monitoring
+- ✅ Statistiques en temps réel via le panel web
+- ✅ Logs détaillés de tous les événements
+- ✅ Métriques de performance et d'utilisation
+- ✅ Alertes automatiques en cas d'erreur
+
+## 🆘 Dépannage et FAQ
+
+### ❓ Problèmes Courants
+
+**Q: Le bot ne répond pas aux commandes**
+- Vérifiez que le token Discord est correct dans `.env`
+- Assurez-vous que le bot a les permissions nécessaires sur le serveur
+- Vérifiez que les intents sont activés (Members, Presences)
+
+**Q: Les commandes slash n'apparaissent pas**
+- Utilisez la commande `/sync` ou le bouton dans le panel web
+- Attendez quelques minutes (propagation Discord)
+- Vérifiez les permissions "Use Application Commands"
+
+**Q: Le panel web ne fonctionne pas**
+- Vérifiez que le port 8080 n'est pas utilisé par un autre programme
+- Assurez-vous que Flask et Werkzeug sont installés
+- Vérifiez la configuration dans `.env`
+
+**Q: Erreur "Intents" au démarrage**
+- Activez "Presence Intent" et "Server Members Intent" dans le Developer Portal
+- Redémarrez le bot après avoir modifié les intents
+
+**Q: Les logs ne s'affichent pas**
+- Configurez d'abord un canal avec `/setlog #canal`
+- Activez les logs avec `/logon`
+- Vérifiez que le bot peut écrire dans le canal
+
+### 🔧 Commandes de Diagnostic
+
+#### Pour les Propriétaires du Bot
+- `!diag` - Diagnostic complet du bot
+- `!servers` - Liste des serveurs connectés
+- `!stats` - Statistiques globales
+
+#### Panel Web
+- **Contrôle > Synchroniser** - Resynchronise les commandes slash
+- **Contrôle > Vider le cache** - Remet à zéro les statistiques
+- **Logs** - Consultation détaillée de l'historique
+
+## � Documentation des Commandes
+
+### 🆘 **Système d'Aide Intégré**
+
+#### **Aide Générale**
+- **Slash** : `/help` - Interface interactive avec sélection de catégories
+- **Préfixe** : `!help` - Aide complète avec toutes les commandes
+
+#### **Aide par Catégorie** (Slash)
+- `/help category:moderation` - �️ Commandes de modération (ban, kick, mute, clean)
+- `/help category:roles` - 🎭 Gestion des rôles
+- `/help category:logs` - 📊 Système de logs et surveillance
+- `/help category:config` - 🛠️ Configuration et préfixes
+- `/help category:info` - 📋 Informations utilisateur/serveur
+- `/help category:fun` - 🎮 Divertissement et jeux
+- `/help category:tools` - 🔧 Outils avancés (cryptographie, sondages, rappels)
+- `/help category:utils` - ⚙️ Utilitaires (ping, météo, traduction)
+
+#### **Aide Spécifique** (Préfixe)
+- `!help <commande>` - Aide détaillée d'une commande avec usage et exemples
+
+### 📚 **Documentation Complète**
+- 📄 **[AIDE_COMPLETE.md](AIDE_COMPLETE.md)** - Guide complet avec tous les détails et exemples
+- � **[NOUVELLES_COMMANDES.md](NOUVELLES_COMMANDES.md)** - Guide des outils avancés récemment ajoutés
+
+### 🔧 **Nouvelles Commandes d'Outils Avancés**
+- 📊 **Analyse** : `/analyze` - Analyse détaillée serveur/utilisateur avec scoring sécurité
+- 🧹 **Nettoyage** : `/clean` - Suppression intelligente de messages avec filtres
+- ⏰ **Rappels** : `/remind` - Système de rappels programmables jusqu'à 30 jours
+- � **Cryptographie** : `/encode`, `/decode`, `/hash` - Encodage Base64 et hashes sécurisés
+- 🔒 **Sécurité** : `/password` - Générateur de mots de passe avec calcul d'entropie
+- 🗳️ **Sondages** : `/poll` - Sondages interactifs avec timer automatique et résultats
+
+### 📞 Support et Documentation
+- 📚 **Aide intégrée** : `/help` ou `!help` pour l'aide interactive
+- 📖 **[AIDE_COMPLETE.md](AIDE_COMPLETE.md)** - Guide complet de toutes les commandes
+- 📝 **[NOUVELLES_COMMANDES.md](NOUVELLES_COMMANDES.md)** - Guide des outils avancés
+- 🌐 **Panel web** - Logs et diagnostics détaillés
+- 📚 Documentation Discord.py : https://discordpy.readthedocs.io/
+
+### 🎯 Roadmap et Améliorations Futures
+
+### ✅ **Récemment Ajouté**
+- [x] 🔧 **Outils avancés** - Cryptographie, sondages, rappels, analyse
+- [x] 🎮 **Commandes de divertissement** - Jeux interactifs et fun
+- [x] ⚙️ **Utilitaires étendus** - Météo, traduction, informations détaillées
+- [x] 🌐 **Panel web complet** - Contrôle, monitoring, gestion des serveurs
+- [x] 📖 **Documentation complète** - Guides détaillés et aide interactive
+- [ ] 🎵 Commandes musicales (lecture YouTube/Spotify)
+- [ ] 🎲 Système de niveaux et XP
+- [ ] 🏆 Système d'achievements
+- [ ] 📊 Statistiques avancées des utilisateurs
+- [ ] 🤖 Commandes d'IA (ChatGPT integration)
+- [ ] 📱 API REST complète
+- [ ] 🌍 Support multilingue
+- [ ] 📦 Système de plugins
+
+### 🔧 Améliorations Techniques
+- [ ] Migration vers PostgreSQL/MongoDB
+- [ ] Système de cache Redis
+- [ ] Interface web React/Vue.js
+- [ ] Tests automatisés complets
+- [ ] Docker containerization
+- [ ] CI/CD avec GitHub Actionses
 - 💬 **Mention interactive** - Aide automatique en mentionnant le bot
 - ⚙️ **Préfixes personnalisables** - Chaque serveur peut avoir son préfixe
-- 🌐 **Panel web d'administration** - Interface web sécurisée pour monitorer le bot 🤖
+- 🌐 **Panel web d'administration** - Interface web sécurisée pour monitorer le bot
+- 🔧 **Commandes utilitaires** - Ping, infos utilisateur/serveur, météo, traduction
+- 🎮 **Commandes de divertissement** - Jeux, blagues, citations, mini-jeuxBot Multi-Fonctionnel
 
-Un bot Discord développé en Python avec une architecture multi-fichiers, supportant les commandes slash et préfixées avec système multi-serveur.
+Un bot Discord complet développé en Python avec une architecture modulaire, supportant les commandes slash et préfixées avec système multi-serveur et panel web d'administration.
 
 ## ✨ Fonctionnalités principales
 
@@ -44,7 +185,9 @@ Discord-bot/
 │   ├── logs.py            # Configuration des logs
 │   ├── admin.py           # Commandes de modération
 │   ├── admin_roles.py     # Gestion des rôles
-│   └── help.py            # Système d'aide interactif
+│   ├── help.py            # Système d'aide interactif
+│   ├── utils.py           # 🔧 Commandes utilitaires (ping, info, météo...)
+│   └── fun.py             # 🎮 Commandes de divertissement (jeux, blagues...)
 ├── prefixe/               # Commandes préfixées (!)
 │   ├── __init__.py
 │   ├── bonjour.py         # Commande de salutation
@@ -52,7 +195,9 @@ Discord-bot/
 │   ├── logs.py            # Configuration des logs
 │   ├── admin.py           # Commandes de modération
 │   ├── admin_roles.py     # Gestion des rôles
-│   └── help.py            # Système d'aide détaillé
+│   ├── help.py            # Système d'aide détaillé
+│   ├── utils.py           # 🔧 Commandes utilitaires (versions préfixées)
+│   └── fun.py             # 🎮 Commandes de divertissement (versions préfixées)
 ├── data/                  # Données persistantes (auto-généré)
 │   ├── prefixes.json      # Configuration des préfixes
 │   └── logs_config.json   # Configuration des logs
@@ -72,7 +217,7 @@ cd Discord-bot
 
 2. **Installez les dépendances**
 ```bash
-pip install discord.py python-dotenv flask werkzeug
+pip install -r requirements.txt
 ```
 
 3. **Configurez le token Discord**
@@ -194,6 +339,60 @@ Modifiez le fichier `.env.panel` pour personnaliser :
 ### 🎉 Commandes de Base
 - `/bonjour` ou `!bonjour` - Dit bonjour avec une belle carte embed
 
+### 🔧 Commandes Utilitaires
+
+#### 📊 Informations (slash ET préfixé)
+- `/ping` ou `!ping` - Affiche la latence du bot et les statistiques de connexion
+- `/info [utilisateur]` ou `!info [utilisateur]` - Informations détaillées d'un utilisateur
+- `/server` ou `!server` - Informations complètes du serveur (membres, canaux, rôles...)
+- `/avatar [utilisateur]` ou `!avatar [utilisateur]` - Affiche l'avatar d'un utilisateur en haute résolution
+- `/uptime` ou `!uptime` - Temps de fonctionnement du bot avec statistiques
+- `/botinfo` ou `!botinfo` - Informations complètes du bot (version, serveurs, utilisateurs...)
+
+#### 🌐 Utilitaires Web (slash ET préfixé)
+- `/weather <ville>` ou `!weather <ville>` - Météo actuelle d'une ville
+- `/translate <texte>` ou `!translate <texte>` - Traduction automatique de texte
+
+#### 🔗 Utilitaires Préfixés Exclusifs
+- `!invite` - Génère un lien d'invitation pour le bot
+- `!roll [XdY]` - Lance des dés (par défaut 1d6, personnalisable ex: `!roll 2d20`)
+
+### 🎮 Commandes de Divertissement
+
+#### 🎯 Jeux et Hasard (slash ET préfixé)
+- `/coinflip` ou `!coinflip` (alias: `!coin`) - Lance une pièce de monnaie
+- `/rps <choix>` ou `!rps <choix>` (alias: `!ppc`) - Pierre-papier-ciseaux contre le bot
+- `/8ball <question>` ou `!8ball <question>` (alias: `!ball`) - Pose une question à la boule magique
+- `/choose <option1> <option2> ...` ou `!choose <option1> <option2> ...` (alias: `!pick`) - Choisit aléatoirement entre plusieurs options
+
+#### 😄 Divertissement et Social (slash ET préfixé)
+- `/joke` ou `!joke` - Raconte une blague aléatoire
+- `/quote` ou `!quote` (alias: `!citation`) - Affiche une citation inspirante
+- `/compliment [utilisateur]` ou `!compliment [utilisateur]` - Donne un compliment
+
+#### 🎨 Divertissement Préfixé Exclusif
+- `!hug <utilisateur>` - Faire un câlin virtuel à quelqu'un
+- `!ascii <texte>` - Génère de l'art ASCII simple
+
+### 🔧 Commandes d'Outils Avancés
+
+#### 📊 Analyse et Monitoring (slash ET préfixé)
+- `/analyze [utilisateur]` ou `!analyze [utilisateur]` - Analyse détaillée d'un serveur ou utilisateur
+- `/clean <nombre> [filtres]` ou `!clean <nombre> [filtres]` - Nettoyage avancé des messages avec filtres
+- `/remind <temps> <message>` ou `!remind <temps> <message>` - Système de rappels programmés
+
+#### 🔐 Sécurité et Cryptographie (slash ET préfixé)
+- `/encode <texte>` ou `!encode <texte>` - Encode du texte en base64
+- `/decode <texte>` ou `!decode <texte>` - Décode du texte base64
+- `/hash <algorithme> <texte>` ou `!hash <algorithme> <texte>` - Génère des hashes (MD5, SHA1, SHA256, SHA512)
+- `/password [longueur] [options]` ou `!password [longueur] [options]` - Génère des mots de passe sécurisés
+
+#### 🗳️ Interaction Communautaire (slash ET préfixé)
+- `/poll <question> <options> [durée]` ou `!poll [durée] "question" option1,option2...` - Sondages avancés avec timer
+
+#### 📝 Utilitaires Texte Préfixés Exclusifs
+- `!count <texte>` (alias: `!wc`) - Compte caractères, mots et lignes dans un texte
+
 ### ⚙️ Configuration
 
 #### 🏷️ Gestion des Préfixes (préfixé uniquement)
@@ -242,6 +441,16 @@ Modifiez le fichier `.env.panel` pour personnaliser :
 - ✅ **Préfixes personnalisés par serveur**
 - ✅ **Système de logs complet**
 - ✅ **🛡️ Commandes d'administration complètes**
+- ✅ **🎭 Gestion avancée des rôles**
+- ✅ **📊 Commandes d'information détaillées**
+- ✅ **🔧 Utilitaires complets** (météo, traduction, infos système)
+- ✅ **🎮 Divertissement interactif** (jeux, blagues, citations)
+- ✅ **🌐 Panel web d'administration**
+- ✅ **⚡ Monitoring en temps réel**
+- ✅ Gestion d'erreurs robuste
+- ✅ Embeds Discord élégants
+- ✅ Chargement automatique des modules
+- ✅ Support multi-serveurs complet
 - ✅ **🎭 Gestion avancée des rôles**
 - ✅ **📊 Commandes d'information**
 - ✅ Gestion d'erreurs

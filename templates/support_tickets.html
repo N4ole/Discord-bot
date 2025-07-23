@@ -1,0 +1,501 @@
+{% extends "support_base.html" %}
+
+{% block content %}
+<!-- En-tête -->
+<div class="card">
+  <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
+    <div>
+      <h2><i class="fas fa-list"></i> Mes Tickets de Support</h2>
+      <p>Gérez et suivez tous vos tickets de support en un seul endroit.</p>
+    </div>
+    <div style="display: flex; gap: 1rem;">
+      <a href="/support/ticket/new" class="btn">
+        <i class="fas fa-plus"></i> Nouveau Ticket
+      </a>
+      <a href="/support/dashboard" class="btn btn-secondary">
+        <i class="fas fa-arrow-left"></i> Tableau de Bord
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- Filtres et recherche -->
+<div class="card">
+  <h3><i class="fas fa-filter"></i> Filtres et Recherche</h3>
+  
+  <form method="GET" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-top: 1rem;">
+    
+    <div class="form-group">
+      <label for="status_filter">
+        <i class="fas fa-flag"></i> Statut
+      </label>
+      <select id="status_filter" name="status">
+        <option value="">Tous les statuts</option>
+        <option value="open" {% if request.args.get('status') == 'open' %}selected{% endif %}>Ouvert</option>
+        <option value="in_progress" {% if request.args.get('status') == 'in_progress' %}selected{% endif %}>En Cours</option>
+        <option value="waiting_user" {% if request.args.get('status') == 'waiting_user' %}selected{% endif %}>En Attente</option>
+        <option value="resolved" {% if request.args.get('status') == 'resolved' %}selected{% endif %}>Résolu</option>
+        <option value="closed" {% if request.args.get('status') == 'closed' %}selected{% endif %}>Fermé</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label for="priority_filter">
+        <i class="fas fa-exclamation-triangle"></i> Priorité
+      </label>
+      <select id="priority_filter" name="priority">
+        <option value="">Toutes les priorités</option>
+        <option value="urgent" {% if request.args.get('priority') == 'urgent' %}selected{% endif %}>Urgente</option>
+        <option value="high" {% if request.args.get('priority') == 'high' %}selected{% endif %}>Haute</option>
+        <option value="medium" {% if request.args.get('priority') == 'medium' %}selected{% endif %}>Moyenne</option>
+        <option value="low" {% if request.args.get('priority') == 'low' %}selected{% endif %}>Faible</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label for="category_filter">
+        <i class="fas fa-tags"></i> Catégorie
+      </label>
+      <select id="category_filter" name="category">
+        <option value="">Toutes les catégories</option>
+        <option value="bot_commands" {% if request.args.get('category') == 'bot_commands' %}selected{% endif %}>Commandes du Bot</option>
+        <option value="bot_config" {% if request.args.get('category') == 'bot_config' %}selected{% endif %}>Configuration</option>
+        <option value="permissions" {% if request.args.get('category') == 'permissions' %}selected{% endif %}>Permissions</option>
+        <option value="technical" {% if request.args.get('category') == 'technical' %}selected{% endif %}>Technique</option>
+        <option value="feature_request" {% if request.args.get('category') == 'feature_request' %}selected{% endif %}>Fonctionnalité</option>
+        <option value="bug_report" {% if request.args.get('category') == 'bug_report' %}selected{% endif %}>Bug</option>
+        <option value="other" {% if request.args.get('category') == 'other' %}selected{% endif %}>Autre</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label for="search">
+        <i class="fas fa-search"></i> Recherche
+      </label>
+      <input 
+        type="text" 
+        id="search" 
+        name="search" 
+        value="{{ request.args.get('search', '') }}"
+        placeholder="Rechercher dans les titres..."
+      />
+    </div>
+
+    <div style="display: flex; gap: 0.5rem; align-items: end;">
+      <button type="submit" class="btn btn-sm">
+        <i class="fas fa-search"></i> Filtrer
+      </button>
+      <a href="/support/tickets" class="btn btn-secondary btn-sm">
+        <i class="fas fa-times"></i> Reset
+      </a>
+    </div>
+
+  </form>
+</div>
+
+<!-- Statistiques rapides -->
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+  
+  <div class="stat-card">
+    <h3><i class="fas fa-list" style="color: #7289da;"></i></h3>
+    <div class="stat-number">{{ total_tickets }}</div>
+    <div class="stat-label">Total</div>
+  </div>
+
+  <div class="stat-card">
+    <h3><i class="fas fa-envelope-open" style="color: #f39c12;"></i></h3>
+    <div class="stat-number">{{ open_tickets }}</div>
+    <div class="stat-label">Ouverts</div>
+  </div>
+
+  <div class="stat-card">
+    <h3><i class="fas fa-cog" style="color: #17a2b8;"></i></h3>
+    <div class="stat-number">{{ in_progress_tickets }}</div>
+    <div class="stat-label">En Cours</div>
+  </div>
+
+  <div class="stat-card">
+    <h3><i class="fas fa-check" style="color: #28a745;"></i></h3>
+    <div class="stat-number">{{ resolved_tickets }}</div>
+    <div class="stat-label">Résolus</div>
+  </div>
+
+</div>
+
+<!-- Liste des tickets -->
+<div class="card">
+  <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem;">
+    <h3><i class="fas fa-ticket-alt"></i> Vos Tickets</h3>
+    <div style="color: #6c757d; font-size: 0.875rem;">
+      {{ tickets|length }} ticket{{ 's' if tickets|length != 1 else '' }} affiché{{ 's' if tickets|length != 1 else '' }}
+    </div>
+  </div>
+
+  {% if tickets %}
+    <div class="tickets-table">
+      {% for ticket in tickets %}
+      <div class="ticket-row" onclick="location.href='/support/ticket/{{ ticket.id }}'">
+        
+        <div class="ticket-main-info">
+          <div class="ticket-title">
+            <h4>
+              <a href="/support/ticket/{{ ticket.id }}">#{{ ticket.ticket_number or ticket.id }} - {{ ticket.subject }}</a>
+            </h4>
+            <div class="ticket-meta-inline">
+              <span class="ticket-status ticket-status-{{ ticket.status }}">
+                {% if ticket.status == 'open' %}
+                  <i class="fas fa-envelope-open"></i> Ouvert
+                {% elif ticket.status == 'in_progress' %}
+                  <i class="fas fa-cog fa-spin"></i> En Cours
+                {% elif ticket.status == 'waiting_user' %}
+                  <i class="fas fa-user-clock"></i> En Attente
+                {% elif ticket.status == 'resolved' %}
+                  <i class="fas fa-check"></i> Résolu
+                {% elif ticket.status == 'closed' %}
+                  <i class="fas fa-times"></i> Fermé
+                {% endif %}
+              </span>
+              <span class="ticket-priority ticket-priority-{{ ticket.priority }}">
+                {% if ticket.priority == 'low' %}
+                  <i class="fas fa-arrow-down"></i> Faible
+                {% elif ticket.priority == 'medium' %}
+                  <i class="fas fa-minus"></i> Moyenne
+                {% elif ticket.priority == 'high' %}
+                  <i class="fas fa-arrow-up"></i> Haute
+                {% elif ticket.priority == 'urgent' %}
+                  <i class="fas fa-exclamation"></i> Urgente
+                {% endif %}
+              </span>
+              <span class="ticket-category">
+                <i class="fas fa-tag"></i> {{ ticket.category|replace('_', ' ')|title }}
+              </span>
+            </div>
+          </div>
+          
+          <div class="ticket-description">
+            <p>{{ ticket.description[:120] }}{% if ticket.description|length > 120 %}...{% endif %}</p>
+          </div>
+        </div>
+
+        <div class="ticket-timeline">
+          <div class="timeline-item">
+            <i class="fas fa-clock"></i>
+            <div>
+              <strong>Créé</strong><br>
+              <small>{{ ticket.created_at | timeago }}</small>
+            </div>
+          </div>
+          
+          {% if ticket.updated_at and ticket.updated_at != ticket.created_at %}
+          <div class="timeline-item">
+            <i class="fas fa-edit"></i>
+            <div>
+              <strong>Mis à jour</strong><br>
+              <small>{{ ticket.updated_at | timeago }}</small>
+            </div>
+          </div>
+          {% endif %}
+
+          {% if ticket.last_response %}
+          <div class="timeline-item">
+            <i class="fas fa-comment"></i>
+            <div>
+              <strong>Dernière réponse</strong><br>
+              <small>{{ ticket.last_response | timeago }}</small>
+            </div>
+          </div>
+          {% endif %}
+        </div>
+
+        <div class="ticket-actions">
+          <a href="/support/ticket/{{ ticket.id }}" class="btn btn-sm">
+            <i class="fas fa-eye"></i> Voir
+          </a>
+          
+          {% if ticket.status in ['open', 'in_progress', 'waiting_user'] %}
+          <a href="/support/ticket/{{ ticket.id }}#response-form" class="btn btn-sm btn-secondary">
+            <i class="fas fa-reply"></i> Répondre
+          </a>
+          {% endif %}
+          
+          {% if ticket.unread_responses > 0 %}
+          <span class="unread-badge">{{ ticket.unread_responses }}</span>
+          {% endif %}
+        </div>
+
+      </div>
+      {% endfor %}
+    </div>
+
+    <!-- Pagination -->
+    {% if pagination and pagination.pages > 1 %}
+    <div class="pagination-container">
+      <div class="pagination">
+        {% if pagination.has_prev %}
+          <a href="{{ url_for('support_tickets', page=pagination.prev_num, **request.args) }}" class="page-link">
+            <i class="fas fa-chevron-left"></i> Précédent
+          </a>
+        {% endif %}
+        
+        {% for page_num in pagination.iter_pages() %}
+          {% if page_num %}
+            {% if page_num != pagination.page %}
+              <a href="{{ url_for('support_tickets', page=page_num, **request.args) }}" class="page-link">
+                {{ page_num }}
+              </a>
+            {% else %}
+              <span class="page-link active">{{ page_num }}</span>
+            {% endif %}
+          {% else %}
+            <span class="page-link disabled">…</span>
+          {% endif %}
+        {% endfor %}
+        
+        {% if pagination.has_next %}
+          <a href="{{ url_for('support_tickets', page=pagination.next_num, **request.args) }}" class="page-link">
+            Suivant <i class="fas fa-chevron-right"></i>
+          </a>
+        {% endif %}
+      </div>
+    </div>
+    {% endif %}
+
+  {% else %}
+    <div style="text-align: center; padding: 3rem; color: #6c757d;">
+      <i class="fas fa-inbox" style="font-size: 4rem; margin-bottom: 1rem; opacity: 0.5;"></i>
+      <h3>Aucun ticket trouvé</h3>
+      {% if request.args.get('search') or request.args.get('status') or request.args.get('priority') or request.args.get('category') %}
+        <p>Aucun ticket ne correspond à vos critères de recherche.</p>
+        <a href="/support/tickets" class="btn btn-secondary" style="margin-top: 1rem;">
+          <i class="fas fa-times"></i> Effacer les filtres
+        </a>
+      {% else %}
+        <p>Vous n'avez pas encore créé de ticket de support.</p>
+        <a href="/support/ticket/new" class="btn" style="margin-top: 1rem;">
+          <i class="fas fa-plus"></i> Créer votre premier ticket
+        </a>
+      {% endif %}
+    </div>
+  {% endif %}
+</div>
+
+<script>
+// Auto-refresh des statuts toutes les 30 secondes
+setInterval(function() {
+  // Vérifier s'il y a des mises à jour
+  fetch('/support/api/tickets/check_updates')
+    .then(response => response.json())
+    .then(data => {
+      if (data.hasUpdates) {
+        // Afficher une notification discrète
+        showUpdateNotification('Des mises à jour sont disponibles');
+      }
+    })
+    .catch(err => console.log('Erreur lors de la vérification des mises à jour'));
+}, 30000);
+
+function showUpdateNotification(message) {
+  const notification = document.createElement('div');
+  notification.className = 'floating-notification';
+  notification.innerHTML = `
+    <i class="fas fa-info-circle"></i>
+    ${message}
+    <a href="#" onclick="location.reload()" style="color: white; text-decoration: underline; margin-left: 0.5rem;">Actualiser</a>
+  `;
+  document.body.appendChild(notification);
+  
+  setTimeout(() => {
+    notification.remove();
+  }, 5000);
+}
+
+// Soumission automatique du formulaire de filtre
+document.querySelectorAll('select[name], input[name="search"]').forEach(element => {
+  element.addEventListener('change', function() {
+    if (this.name !== 'search') {
+      this.form.submit();
+    }
+  });
+});
+
+// Recherche avec délai
+let searchTimeout;
+document.getElementById('search').addEventListener('input', function() {
+  clearTimeout(searchTimeout);
+  searchTimeout = setTimeout(() => {
+    this.form.submit();
+  }, 500);
+});
+</script>
+
+<style>
+.tickets-table {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.ticket-row {
+  display: grid;
+  grid-template-columns: 2fr 1fr auto;
+  gap: 1rem;
+  padding: 1rem;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border-left: 4px solid #dee2e6;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.ticket-row:hover {
+  background: #e9ecef;
+  border-left-color: #7289da;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.ticket-main-info h4 {
+  margin: 0 0 0.5rem 0;
+}
+
+.ticket-main-info h4 a {
+  color: #333;
+  text-decoration: none;
+}
+
+.ticket-main-info h4 a:hover {
+  color: #7289da;
+}
+
+.ticket-meta-inline {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.5rem;
+}
+
+.ticket-description p {
+  margin: 0;
+  color: #6c757d;
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.ticket-timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+}
+
+.timeline-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #6c757d;
+}
+
+.timeline-item i {
+  width: 16px;
+  text-align: center;
+}
+
+.ticket-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  align-items: end;
+  position: relative;
+}
+
+.unread-badge {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background: #dc3545;
+  color: white;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: bold;
+}
+
+.pagination-container {
+  margin-top: 2rem;
+  display: flex;
+  justify-content: center;
+}
+
+.pagination {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.page-link {
+  padding: 0.5rem 1rem;
+  border: 1px solid #dee2e6;
+  border-radius: 4px;
+  text-decoration: none;
+  color: #7289da;
+  background: white;
+  transition: all 0.3s ease;
+}
+
+.page-link:hover {
+  background: #7289da;
+  color: white;
+  text-decoration: none;
+}
+
+.page-link.active {
+  background: #7289da;
+  color: white;
+  border-color: #7289da;
+}
+
+.page-link.disabled {
+  color: #6c757d;
+  cursor: not-allowed;
+}
+
+.floating-notification {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: #7289da;
+  color: white;
+  padding: 1rem;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  z-index: 1000;
+  animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .ticket-row {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+  }
+  
+  .ticket-actions {
+    flex-direction: row;
+    align-items: center;
+  }
+  
+  .ticket-timeline {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+}
+</style>
+{% endblock %}

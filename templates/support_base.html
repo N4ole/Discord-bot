@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Support - Summer Bot</title>
+    <meta
+      name="description"
+      content="Besoin d'aide avec Summer Bot ? Contactez notre équipe de support !"
+    />
+
+    <!-- Font Awesome -->
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+      rel="stylesheet"
+    />
+
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        line-height: 1.6;
+        color: #333;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+      }
+
+      .container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 2rem;
+      }
+
+      /* Header */
+      .header {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        padding: 1rem 0;
+        margin-bottom: 2rem;
+        border-radius: 15px;
+        text-align: center;
+      }
+
+      .header h1 {
+        color: #fff;
+        font-size: 2.5rem;
+        margin-bottom: 0.5rem;
+      }
+
+      .header p {
+        color: rgba(255, 255, 255, 0.9);
+        font-size: 1.1rem;
+      }
+
+      /* Navigation */
+      .nav-tabs {
+        display: flex;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 10px;
+        margin-bottom: 2rem;
+        overflow: hidden;
+      }
+
+      .nav-tab {
+        flex: 1;
+        padding: 1rem;
+        text-align: center;
+        background: transparent;
+        border: none;
+        color: rgba(255, 255, 255, 0.7);
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: block;
+      }
+
+      .nav-tab.active,
+      .nav-tab:hover {
+        background: rgba(255, 255, 255, 0.2);
+        color: #fff;
+      }
+
+      /* Cards */
+      .card {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 15px;
+        padding: 2rem;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        margin-bottom: 2rem;
+      }
+
+      .card h2 {
+        color: #333;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      /* Forms */
+      .form-group {
+        margin-bottom: 1.5rem;
+      }
+
+      .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: bold;
+        color: #555;
+      }
+
+      .form-group input,
+      .form-group textarea,
+      .form-group select {
+        width: 100%;
+        padding: 12px;
+        border: 2px solid #ddd;
+        border-radius: 8px;
+        font-size: 1rem;
+        transition: border-color 0.3s ease;
+      }
+
+      .form-group input:focus,
+      .form-group textarea:focus,
+      .form-group select:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+      }
+
+      .form-group textarea {
+        min-height: 120px;
+        resize: vertical;
+      }
+
+      /* Buttons */
+      .btn {
+        display: inline-block;
+        padding: 12px 24px;
+        background: linear-gradient(45deg, #667eea, #764ba2);
+        color: #fff;
+        text-decoration: none;
+        border-radius: 8px;
+        border: none;
+        cursor: pointer;
+        font-size: 1rem;
+        font-weight: bold;
+        transition: all 0.3s ease;
+        margin-right: 1rem;
+      }
+
+      .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+      }
+
+      .btn-secondary {
+        background: #6c757d;
+      }
+
+      .btn-success {
+        background: #28a745;
+      }
+
+      .btn-danger {
+        background: #dc3545;
+      }
+
+      /* Alerts */
+      .alert {
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 1rem;
+      }
+
+      .alert-success {
+        background: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+      }
+
+      .alert-error {
+        background: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+      }
+
+      .alert-info {
+        background: #d1ecf1;
+        color: #0c5460;
+        border: 1px solid #bee5eb;
+      }
+
+      /* Tickets List */
+      .ticket {
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+        border-left: 4px solid #667eea;
+      }
+
+      .ticket-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+      }
+
+      .ticket-title {
+        font-size: 1.2rem;
+        font-weight: bold;
+        color: #333;
+      }
+
+      .ticket-status {
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.875rem;
+        font-weight: bold;
+        text-transform: uppercase;
+      }
+
+      .status-open {
+        background: #fff3cd;
+        color: #856404;
+      }
+
+      .status-responded {
+        background: #d4edda;
+        color: #155724;
+      }
+
+      .status-closed {
+        background: #f8d7da;
+        color: #721c24;
+      }
+
+      .ticket-meta {
+        font-size: 0.9rem;
+        color: #6c757d;
+        margin-bottom: 1rem;
+      }
+
+      .ticket-message {
+        background: #fff;
+        padding: 1rem;
+        border-radius: 6px;
+        margin-bottom: 1rem;
+      }
+
+      .admin-response {
+        background: #e3f2fd;
+        border-left: 4px solid #2196f3;
+        padding: 1rem;
+        border-radius: 6px;
+        margin-top: 1rem;
+      }
+
+      /* Discord Integration */
+      .discord-info {
+        background: #5865f2;
+        color: #fff;
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 1rem;
+      }
+
+      .discord-info h3 {
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      /* Footer */
+      .footer {
+        text-align: center;
+        padding: 2rem;
+        color: rgba(255, 255, 255, 0.8);
+      }
+
+      .footer a {
+        color: rgba(255, 255, 255, 0.9);
+        text-decoration: none;
+        margin: 0 1rem;
+      }
+
+      .footer a:hover {
+        color: #fff;
+      }
+
+      /* Responsive */
+      @media (max-width: 768px) {
+        .container {
+          padding: 1rem;
+        }
+
+        .nav-tabs {
+          flex-direction: column;
+        }
+
+        .ticket-header {
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 0.5rem;
+        }
+      }
+
+      /* Animations */
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .card {
+        animation: fadeIn 0.5s ease-out;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <!-- Header -->
+      <div class="header">
+        <h1><i class="fas fa-headset"></i> Support Summer Bot</h1>
+        <p>Besoin d'aide ? Notre équipe est là pour vous aider !</p>
+      </div>
+
+      <!-- Navigation -->
+      <div class="nav-tabs">
+        <a
+          href="/support"
+          class="nav-tab {{ 'active' if page == 'support' else '' }}"
+        >
+          <i class="fas fa-home"></i> Accueil
+        </a>
+        <a
+          href="/support/login"
+          class="nav-tab {{ 'active' if page == 'login' else '' }}"
+        >
+          <i class="fas fa-sign-in-alt"></i> Connexion
+        </a>
+        <a
+          href="/support/register"
+          class="nav-tab {{ 'active' if page == 'register' else '' }}"
+        >
+          <i class="fas fa-user-plus"></i> Inscription
+        </a>
+        {% if session.get('support_user') %}
+        <a
+          href="/support/dashboard"
+          class="nav-tab {{ 'active' if page == 'dashboard' else '' }}"
+        >
+          <i class="fas fa-tachometer-alt"></i> Mes Tickets
+        </a>
+        <a href="/support/logout" class="nav-tab">
+          <i class="fas fa-sign-out-alt"></i> Déconnexion
+        </a>
+        {% endif %}
+      </div>
+
+      <!-- Flash Messages -->
+      {% with messages = get_flashed_messages(with_categories=true) %} {% if
+      messages %} {% for category, message in messages %}
+      <div
+        class="alert alert-{{ 'error' if category == 'error' else category }}"
+      >
+        {{ message }}
+      </div>
+      {% endfor %} {% endif %} {% endwith %}
+
+      <!-- Content Block -->
+      {% block content %}{% endblock %}
+
+      <!-- Footer -->
+      <div class="footer">
+        <a href="/promo"><i class="fas fa-robot"></i> Retour au Bot</a>
+        <a href="/support"><i class="fas fa-question-circle"></i> FAQ</a>
+        <a href="https://discord.gg/your-support-server" target="_blank">
+          <i class="fab fa-discord"></i> Discord
+        </a>
+      </div>
+    </div>
+  </body>
+</html>

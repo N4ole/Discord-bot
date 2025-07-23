@@ -1,0 +1,223 @@
+{% extends "support_base.html" %} {% block content %}
+<div class="card">
+  <h2><i class="fas fa-sign-in-alt"></i> Connexion au Support</h2>
+  <p>
+    Connectez-vous pour accéder à vos tickets et soumettre de nouvelles
+    demandes.
+  </p>
+
+  <form method="POST" style="margin-top: 2rem">
+    <div class="form-group">
+      <label for="username">
+        <i class="fas fa-user"></i> Nom d'utilisateur ou Email
+      </label>
+      <input
+        type="text"
+        id="username"
+        name="username"
+        required
+        value="{{ request.form.username or '' }}"
+        placeholder="Votre nom d'utilisateur ou email"
+        autocomplete="username"
+      />
+    </div>
+
+    <div class="form-group">
+      <label for="password"> <i class="fas fa-lock"></i> Mot de Passe </label>
+      <input
+        type="password"
+        id="password"
+        name="password"
+        required
+        placeholder="Votre mot de passe"
+        autocomplete="current-password"
+      />
+    </div>
+
+    <div class="form-group" style="margin: 1rem 0">
+      <label
+        style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer"
+      >
+        <input type="checkbox" name="remember_me" value="1" />
+        <span>Se souvenir de moi</span>
+      </label>
+    </div>
+
+    <div style="display: flex; gap: 1rem; margin-top: 2rem">
+      <button type="submit" class="btn">
+        <i class="fas fa-sign-in-alt"></i> Se Connecter
+      </button>
+      <a href="/support/register" class="btn btn-secondary">
+        <i class="fas fa-user-plus"></i> Créer un Compte
+      </a>
+    </div>
+  </form>
+
+  <!-- Aide connexion -->
+  <div
+    style="
+      margin-top: 2rem;
+      padding: 1rem;
+      background: #f8f9fa;
+      border-radius: 8px;
+    "
+  >
+    <h4><i class="fas fa-question-circle"></i> Besoin d'aide ?</h4>
+    <div style="margin-top: 1rem">
+      <p>
+        <strong>Mot de passe oublié ?</strong> Contactez-nous via Discord ou
+        créez un nouveau compte.
+      </p>
+      <p>
+        <strong>Problème de connexion ?</strong> Vérifiez votre nom
+        d'utilisateur et mot de passe.
+      </p>
+      <p>
+        <strong>Première visite ?</strong>
+        <a href="/support/register">Créez votre compte</a> pour commencer.
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- Section statistiques et témoignages -->
+<div class="card">
+  <h2><i class="fas fa-chart-line"></i> Aperçu du Support</h2>
+
+  <div
+    style="
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-top: 1rem;
+    "
+  >
+    <div class="stat-card">
+      <h3><i class="fas fa-ticket-alt"></i></h3>
+      <div class="stat-number" id="total-tickets">...</div>
+      <div class="stat-label">Tickets Traités</div>
+    </div>
+
+    <div class="stat-card">
+      <h3><i class="fas fa-clock"></i></h3>
+      <div class="stat-number">< 24h</div>
+      <div class="stat-label">Temps de Réponse</div>
+    </div>
+
+    <div class="stat-card">
+      <h3><i class="fas fa-users"></i></h3>
+      <div class="stat-number" id="active-users">...</div>
+      <div class="stat-label">Utilisateurs Actifs</div>
+    </div>
+
+    <div class="stat-card">
+      <h3><i class="fas fa-smile"></i></h3>
+      <div class="stat-number">98%</div>
+      <div class="stat-label">Satisfaction</div>
+    </div>
+  </div>
+</div>
+
+<!-- Témoignages -->
+<div class="card">
+  <h2><i class="fas fa-comments"></i> Ce que disent nos utilisateurs</h2>
+
+  <div
+    style="
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1rem;
+      margin-top: 1rem;
+    "
+  >
+    <div
+      style="
+        padding: 1rem;
+        background: #f8f9fa;
+        border-radius: 8px;
+        border-left: 4px solid #7289da;
+      "
+    >
+      <p style="font-style: italic; margin-bottom: 1rem">
+        "Support ultra-rapide ! Mon problème a été résolu en moins d'une heure.
+        L'équipe est très professionnelle."
+      </p>
+      <div
+        style="display: flex; align-items: center; gap: 0.5rem; color: #6c757d"
+      >
+        <i class="fas fa-user"></i>
+        <span>Alex_Dev</span>
+        <div style="display: flex; color: #ffc107; margin-left: auto">
+          <i class="fas fa-star"></i><i class="fas fa-star"></i
+          ><i class="fas fa-star"></i><i class="fas fa-star"></i
+          ><i class="fas fa-star"></i>
+        </div>
+      </div>
+    </div>
+
+    <div
+      style="
+        padding: 1rem;
+        background: #f8f9fa;
+        border-radius: 8px;
+        border-left: 4px solid #28a745;
+      "
+    >
+      <p style="font-style: italic; margin-bottom: 1rem">
+        "Interface simple et efficace. J'ai pu suivre l'évolution de mon ticket
+        en temps réel via Discord."
+      </p>
+      <div
+        style="display: flex; align-items: center; gap: 0.5rem; color: #6c757d"
+      >
+        <i class="fas fa-user"></i>
+        <span>Marie_Admin</span>
+        <div style="display: flex; color: #ffc107; margin-left: auto">
+          <i class="fas fa-star"></i><i class="fas fa-star"></i
+          ><i class="fas fa-star"></i><i class="fas fa-star"></i
+          ><i class="fas fa-star"></i>
+        </div>
+      </div>
+    </div>
+
+    <div
+      style="
+        padding: 1rem;
+        background: #f8f9fa;
+        border-radius: 8px;
+        border-left: 4px solid #dc3545;
+      "
+    >
+      <p style="font-style: italic; margin-bottom: 1rem">
+        "Excellent service ! L'équipe comprend vraiment les besoins des
+        développeurs Discord."
+      </p>
+      <div
+        style="display: flex; align-items: center; gap: 0.5rem; color: #6c757d"
+      >
+        <i class="fas fa-user"></i>
+        <span>Thomas_Bot</span>
+        <div style="display: flex; color: #ffc107; margin-left: auto">
+          <i class="fas fa-star"></i><i class="fas fa-star"></i
+          ><i class="fas fa-star"></i><i class="fas fa-star"></i
+          ><i class="fas fa-star"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Charger les statistiques dynamiques
+  document.addEventListener("DOMContentLoaded", function () {
+    // Simuler le chargement des stats (à remplacer par de vraies données)
+    setTimeout(() => {
+      document.getElementById("total-tickets").textContent = "1,247";
+      document.getElementById("active-users").textContent = "156";
+    }, 500);
+  });
+
+  // Auto-focus sur le champ username
+  document.getElementById("username").focus();
+</script>
+{% endblock %}

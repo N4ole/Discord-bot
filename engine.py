@@ -40,6 +40,9 @@ class DiscordBot(commands.Bot):
         await self.load_extension('slash.admin')
         await self.load_extension('slash.admin_roles')
         await self.load_extension('slash.help')
+        await self.load_extension('slash.utils')
+        await self.load_extension('slash.fun')
+        await self.load_extension('slash.tools')
 
         # Chargement des commandes préfixées
         print("Chargement des modules préfixés...")
@@ -49,6 +52,9 @@ class DiscordBot(commands.Bot):
         await self.load_extension('prefixe.admin')
         await self.load_extension('prefixe.admin_roles')
         await self.load_extension('prefixe.help')
+        await self.load_extension('prefixe.utils')
+        await self.load_extension('prefixe.fun')
+        await self.load_extension('prefixe.tools')
 
         # Chargement du système de mentions et événements
         print("Chargement du système de mentions...")

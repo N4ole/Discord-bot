@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ticket #{{ ticket.id }} - Administration Summer Bot</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .header {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            padding: 30px;
+        }
+
+        .header h1 {
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+        }
+
+        .header .ticket-meta {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            opacity: 0.9;
+        }
+
+        .nav-links {
+            padding: 20px 30px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .nav-links a {
+            color: #667eea;
+            text-decoration: none;
+            margin-right: 20px;
+            padding: 10px 15px;
+            border-radius: 5px;
+            transition: all 0.3s;
+        }
+
+        .nav-links a:hover,
+        .nav-links a.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .ticket-info {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .ticket-details {
+            background: #f8f9ff;
+            padding: 25px;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+        }
+
+        .ticket-details h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+        }
+
+        .ticket-details .description {
+            line-height: 1.6;
+            color: #555;
+            white-space: pre-wrap;
+        }
+
+        .user-card {
+            background: white;
+            border: 2px solid #f0f0f0;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .user-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 1.5rem;
+            margin: 0 auto 15px;
+        }
+
+        .status-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #f8f9ff;
+            border-radius: 10px;
+        }
+
+        .status-controls {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .status-badge {
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .status-open { background: #ffeb3b; color: #333; }
+        .status-waiting-admin { background: #ff9800; color: white; }
+        .status-waiting-user { background: #2196f3; color: white; }
+        .status-resolved { background: #4caf50; color: white; }
+        .status-closed { background: #9e9e9e; color: white; }
+
+        .priority-badge {
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .priority-low { background: #e8f5e8; color: #4caf50; }
+        .priority-medium { background: #fff3cd; color: #ff9800; }
+        .priority-high { background: #f8d7da; color: #dc3545; }
+        .priority-urgent { background: #d1ecf1; color: #721c24; }
+
+        .responses-section {
+            margin-bottom: 30px;
+        }
+
+        .responses-section h3 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 1.3rem;
+            border-bottom: 2px solid #f0f0f0;
+            padding-bottom: 10px;
+        }
+
+        .response {
+            background: white;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .response-header {
+            padding: 15px 20px;
+            background: #f8f9ff;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .response-author {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .response-author .avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+
+        .admin-response .response-header {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .admin-response .avatar {
+            background: white;
+            color: #667eea;
+        }
+
+        .response-content {
+            padding: 20px;
+            line-height: 1.6;
+            color: #555;
+            white-space: pre-wrap;
+        }
+
+        .admin-form {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 30px;
+            border-radius: 15px;
+            color: white;
+        }
+
+        .admin-form h3 {
+            margin-bottom: 20px;
+            font-size: 1.3rem;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            resize: vertical;
+        }
+
+        .form-control:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.3);
+        }
+
+        .form-row {
+            display: flex;
+            gap: 15px;
+        }
+
+        .form-row .form-group {
+            flex: 1;
+        }
+
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: bold;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: white;
+            color: #667eea;
+        }
+
+        .btn-primary:hover {
+            background: #f0f0f0;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 2px solid white;
+        }
+
+        .btn-secondary:hover {
+            background: white;
+            color: #667eea;
+        }
+
+        .flash-messages {
+            margin-bottom: 20px;
+        }
+
+        .flash-message {
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+
+        .flash-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .flash-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .flash-info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+
+        .metadata {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+                border-radius: 10px;
+            }
+
+            .ticket-info {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .form-row {
+                flex-direction: column;
+            }
+
+            .status-controls {
+                justify-content: center;
+            }
+
+            .nav-links {
+                padding: 15px 20px;
+            }
+
+            .content {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1><i class="fas fa-ticket-alt"></i> Ticket #{{ ticket.id }} - {{ ticket.subject }}</h1>
+            <div class="ticket-meta">
+                <span><i class="fas fa-calendar"></i> Créé le {{ ticket.created_at.strftime('%d/%m/%Y à %H:%M') }}</span>
+                <span><i class="fas fa-clock"></i> Modifié le {{ ticket.updated_at.strftime('%d/%m/%Y à %H:%M') }}</span>
+                <span><i class="fas fa-tag"></i> {{ ticket.category }}</span>
+            </div>
+        </div>
+
+        <!-- Navigation -->
+        <div class="nav-links">
+            <a href="/admin/tickets"><i class="fas fa-arrow-left"></i> Retour aux Tickets</a>
+            <a href="/dashboard"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+            <a href="/logs"><i class="fas fa-file-alt"></i> Logs</a>
+            <a href="/stats"><i class="fas fa-chart-line"></i> Statistiques</a>
+            <a href="/control"><i class="fas fa-cogs"></i> Contrôle</a>
+            <a href="/support"><i class="fas fa-question-circle"></i> Support Public</a>
+            <a href="/logout"><i class="fas fa-sign-out-alt"></i> Déconnexion</a>
+        </div>
+
+        <div class="content">
+            <!-- Flash Messages -->
+            {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+            <div class="flash-messages">
+                {% for category, message in messages %}
+                <div class="flash-message flash-{{ category }}">
+                    {{ message }}
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+            {% endwith %}
+
+            <!-- Statut et contrôles -->
+            <div class="status-section">
+                <h3><i class="fas fa-info-circle"></i> Statut et Priorité</h3>
+                <div class="status-controls">
+                    <span class="status-badge status-{{ ticket.status }}">
+                        {{ ticket.status.replace('_', ' ').title() }}
+                    </span>
+                    <span class="priority-badge priority-{{ ticket.priority }}">
+                        Priorité {{ ticket.priority.title() }}
+                    </span>
+                    
+                    <!-- Changement rapide de statut -->
+                    <form method="POST" action="{{ url_for('admin_ticket_status', ticket_id=ticket.id) }}" style="display: inline;">
+                        <select name="status" onchange="this.form.submit()" class="form-control" style="width: auto; display: inline-block;">
+                            <option value="">Changer le statut...</option>
+                            <option value="open" {% if ticket.status == 'open' %}selected{% endif %}>Ouvert</option>
+                            <option value="waiting_admin" {% if ticket.status == 'waiting_admin' %}selected{% endif %}>En attente admin</option>
+                            <option value="waiting_user" {% if ticket.status == 'waiting_user' %}selected{% endif %}>En attente utilisateur</option>
+                            <option value="resolved" {% if ticket.status == 'resolved' %}selected{% endif %}>Résolu</option>
+                            <option value="closed" {% if ticket.status == 'closed' %}selected{% endif %}>Fermé</option>
+                        </select>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Informations du ticket -->
+            <div class="ticket-info">
+                <div class="ticket-details">
+                    <h3><i class="fas fa-file-alt"></i> Description du Problème</h3>
+                    <div class="description">{{ ticket.description }}</div>
+                    
+                    {% if ticket.metadata %}
+                    <div class="metadata">
+                        <strong><i class="fas fa-info"></i> Informations supplémentaires :</strong><br>
+                        {% for key, value in ticket.metadata.items() %}
+                        <span><strong>{{ key }}:</strong> {{ value }}</span><br>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div class="user-card">
+                    <div class="user-avatar">{{ ticket.username[0].upper() }}</div>
+                    <h4>{{ ticket.username }}</h4>
+                    <p><i class="fas fa-envelope"></i> {{ ticket.email }}</p>
+                    {% if ticket.discord_username %}
+                    <p><i class="fab fa-discord"></i> {{ ticket.discord_username }}</p>
+                    {% endif %}
+                    {% if ticket.discord_id %}
+                    <p><i class="fas fa-id-badge"></i> ID: {{ ticket.discord_id }}</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Historique des réponses -->
+            <div class="responses-section">
+                <h3><i class="fas fa-comments"></i> Historique des Échanges</h3>
+                
+                {% if responses %}
+                    {% for response in responses %}
+                    <div class="response {% if response.is_admin %}admin-response{% endif %}">
+                        <div class="response-header">
+                            <div class="response-author">
+                                <div class="avatar">
+                                    {% if response.is_admin %}
+                                        <i class="fas fa-user-shield"></i>
+                                    {% else %}
+                                        {{ ticket.username[0].upper() }}
+                                    {% endif %}
+                                </div>
+                                <div>
+                                    <strong>
+                                        {% if response.is_admin %}
+                                            Équipe Support (Admin)
+                                        {% else %}
+                                            {{ ticket.username }}
+                                        {% endif %}
+                                    </strong>
+                                    <div style="font-size: 0.8rem; opacity: 0.8;">
+                                        {{ response.created_at.strftime('%d/%m/%Y à %H:%M') }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="response-content">{{ response.message }}</div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <p style="color: #666; text-align: center; padding: 20px;">
+                        <i class="fas fa-comments"></i> Aucune réponse pour le moment.
+                    </p>
+                {% endif %}
+            </div>
+
+            <!-- Formulaire de réponse admin -->
+            <div class="admin-form">
+                <h3><i class="fas fa-reply"></i> Répondre au Ticket</h3>
+                
+                <form method="POST" action="{{ url_for('admin_ticket_respond', ticket_id=ticket.id) }}">
+                    <div class="form-group">
+                        <label for="message"><i class="fas fa-edit"></i> Votre Réponse</label>
+                        <textarea name="message" id="message" class="form-control" rows="6" 
+                                  placeholder="Tapez votre réponse ici..." required></textarea>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="status"><i class="fas fa-flag"></i> Nouveau Statut</label>
+                            <select name="status" id="status" class="form-control">
+                                <option value="waiting_user">En attente de l'utilisateur</option>
+                                <option value="open">Maintenir ouvert</option>
+                                <option value="resolved">Marquer comme résolu</option>
+                                <option value="closed">Fermer le ticket</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div style="margin-top: 20px;">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-paper-plane"></i> Envoyer la Réponse
+                        </button>
+                        <a href="/admin/tickets" class="btn btn-secondary">
+                            <i class="fas fa-times"></i> Annuler
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Auto-resize textarea
+        const textarea = document.getElementById('message');
+        textarea.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = this.scrollHeight + 'px';
+        });
+
+        // Confirmation pour fermer le ticket
+        document.getElementById('status').addEventListener('change', function() {
+            if (this.value === 'closed') {
+                if (!confirm('Êtes-vous sûr de vouloir fermer ce ticket ?')) {
+                    this.value = 'waiting_user';
+                }
+            }
+        });
+    </script>
+</body>
+</html>

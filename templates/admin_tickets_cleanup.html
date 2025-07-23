@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Nettoyage des Tickets - Summer Bot</title>
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        padding: 20px;
+      }
+
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        background: white;
+        border-radius: 15px;
+        padding: 30px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+      }
+
+      .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+        padding-bottom: 20px;
+        border-bottom: 2px solid #f0f0f0;
+      }
+
+      .header h1 {
+        color: #333;
+        font-size: 2rem;
+      }
+
+      .nav-links {
+        margin-bottom: 20px;
+      }
+
+      .nav-links a {
+        color: #667eea;
+        text-decoration: none;
+        margin-right: 20px;
+        padding: 10px 15px;
+        border-radius: 5px;
+        transition: all 0.3s;
+      }
+
+      .nav-links a:hover,
+      .nav-links a.active {
+        background: #667eea;
+        color: white;
+      }
+
+      .warning-section {
+        background: #fff3cd;
+        border: 1px solid #ffeaa7;
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 30px;
+      }
+
+      .warning-section h3 {
+        color: #e17055;
+        margin-bottom: 10px;
+      }
+
+      .warning-section p {
+        color: #8b6914;
+        margin-bottom: 10px;
+      }
+
+      .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 20px;
+        margin-bottom: 30px;
+      }
+
+      .stat-card {
+        background: #f8f9ff;
+        border-radius: 10px;
+        padding: 20px;
+        text-align: center;
+        border: 2px solid #e3e8ff;
+      }
+
+      .stat-card h4 {
+        color: #667eea;
+        margin-bottom: 10px;
+      }
+
+      .stat-number {
+        font-size: 2rem;
+        font-weight: bold;
+        color: #333;
+        margin-bottom: 5px;
+      }
+
+      .cleanup-actions {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+        gap: 20px;
+        margin-bottom: 30px;
+      }
+
+      .cleanup-card {
+        background: white;
+        border: 2px solid #e0e0e0;
+        border-radius: 10px;
+        padding: 20px;
+        transition: all 0.3s;
+      }
+
+      .cleanup-card:hover {
+        border-color: #667eea;
+        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.1);
+      }
+
+      .cleanup-card h4 {
+        color: #333;
+        margin-bottom: 15px;
+      }
+
+      .cleanup-card p {
+        color: #666;
+        margin-bottom: 20px;
+        line-height: 1.5;
+      }
+
+      .btn {
+        padding: 12px 20px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        text-decoration: none;
+        font-size: 1rem;
+        transition: all 0.3s;
+        display: inline-block;
+        text-align: center;
+      }
+
+      .btn-primary {
+        background: #667eea;
+        color: white;
+      }
+
+      .btn-primary:hover {
+        background: #5a6fd8;
+      }
+
+      .btn-warning {
+        background: #ff9800;
+        color: white;
+      }
+
+      .btn-warning:hover {
+        background: #f57c00;
+      }
+
+      .btn-danger {
+        background: #dc3545;
+        color: white;
+      }
+
+      .btn-danger:hover {
+        background: #c82333;
+      }
+
+      .btn-secondary {
+        background: #6c757d;
+        color: white;
+      }
+
+      .btn-secondary:hover {
+        background: #5a6268;
+      }
+
+      .tickets-preview {
+        margin-top: 20px;
+      }
+
+      .tickets-list {
+        max-height: 300px;
+        overflow-y: auto;
+        border: 1px solid #e0e0e0;
+        border-radius: 5px;
+        padding: 15px;
+        background: #f8f9fa;
+      }
+
+      .ticket-item {
+        padding: 10px;
+        border-bottom: 1px solid #e0e0e0;
+        margin-bottom: 10px;
+      }
+
+      .ticket-item:last-child {
+        border-bottom: none;
+        margin-bottom: 0;
+      }
+
+      .ticket-meta {
+        font-size: 0.9rem;
+        color: #666;
+      }
+
+      .flash-messages {
+        margin-bottom: 20px;
+      }
+
+      .flash-message {
+        padding: 15px;
+        border-radius: 5px;
+        margin-bottom: 10px;
+      }
+
+      .flash-success {
+        background: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+      }
+
+      .flash-error {
+        background: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+      }
+
+      .flash-warning {
+        background: #fff3cd;
+        color: #856404;
+        border: 1px solid #ffeaa7;
+      }
+
+      @media (max-width: 768px) {
+        .stats-grid,
+        .cleanup-actions {
+          grid-template-columns: 1fr;
+        }
+
+        .header {
+          flex-direction: column;
+          text-align: center;
+        }
+
+        .header h1 {
+          margin-bottom: 10px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <!-- Messages flash -->
+      {% with messages = get_flashed_messages(with_categories=true) %} {% if
+      messages %}
+      <div class="flash-messages">
+        {% for category, message in messages %}
+        <div class="flash-message flash-{{ category }}">
+          <i class="fas fa-info-circle"></i> {{ message }}
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %} {% endwith %}
+
+      <div class="header">
+        <h1><i class="fas fa-broom"></i> Nettoyage des Tickets</h1>
+        <div class="admin-info">
+          <i class="fas fa-user-shield"></i> Connecté en tant qu'admin
+        </div>
+      </div>
+
+      <!-- Navigation -->
+      <div class="nav-links">
+        <a href="{{ url_for('control') }}"
+          ><i class="fas fa-tachometer-alt"></i> Tableau de bord</a
+        >
+        <a href="{{ url_for('admin_tickets') }}"
+          ><i class="fas fa-ticket-alt"></i> Tous les tickets</a
+        >
+        <a href="{{ url_for('admin_tickets_cleanup') }}" class="active"
+          ><i class="fas fa-broom"></i> Nettoyage</a
+        >
+        <a href="{{ url_for('logs') }}"><i class="fas fa-file-alt"></i> Logs</a>
+        <a href="{{ url_for('support_dashboard') }}"
+          ><i class="fas fa-headset"></i> Support public</a
+        >
+      </div>
+
+      <!-- Section d'avertissement -->
+      <div class="warning-section">
+        <h3>
+          <i class="fas fa-exclamation-triangle"></i> Attention - Action
+          Irréversible
+        </h3>
+        <p>
+          <strong
+            >La suppression des tickets est définitive et ne peut pas être
+            annulée.</strong
+          >
+        </p>
+        <p>
+          Cette fonctionnalité permet de nettoyer la base de données en
+          supprimant les anciens tickets résolus ou fermés.
+        </p>
+        <p>
+          Assurez-vous d'avoir sauvegardé les données importantes avant de
+          procéder.
+        </p>
+      </div>
+
+      <!-- Statistiques -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <h4><i class="fas fa-times-circle"></i> Tickets Fermés Anciens</h4>
+          <div class="stat-number">{{ stats.old_closed_count }}</div>
+          <p>Fermés depuis plus de 30 jours</p>
+        </div>
+        <div class="stat-card">
+          <h4><i class="fas fa-check-circle"></i> Tickets Résolus Anciens</h4>
+          <div class="stat-number">{{ stats.old_resolved_count }}</div>
+          <p>Résolus depuis plus de 90 jours</p>
+        </div>
+      </div>
+
+      <!-- Actions de nettoyage -->
+      <div class="cleanup-actions">
+        <!-- Nettoyage des tickets fermés -->
+        <div class="cleanup-card">
+          <h4>
+            <i class="fas fa-times-circle"></i> Supprimer les Tickets Fermés
+          </h4>
+          <p>
+            Supprime tous les tickets avec le statut "fermé" de plus de 30
+            jours. Ces tickets sont généralement considérés comme terminés
+            définitivement.
+          </p>
+
+          {% if stats.old_closed_count > 0 %}
+          <form
+            method="post"
+            action="{{ url_for('admin_tickets_cleanup_execute') }}"
+            onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer {{ stats.old_closed_count }} ticket(s) fermé(s) ? Cette action est irréversible.')"
+          >
+            <input type="hidden" name="cleanup_type" value="closed_30" />
+            <button type="submit" class="btn btn-warning">
+              <i class="fas fa-trash"></i> Supprimer {{ stats.old_closed_count
+              }} ticket(s)
+            </button>
+          </form>
+          {% else %}
+          <button class="btn btn-secondary" disabled>
+            <i class="fas fa-check"></i> Aucun ticket à supprimer
+          </button>
+          {% endif %}
+
+          <!-- Aperçu des tickets -->
+          {% if old_closed_tickets %}
+          <div class="tickets-preview">
+            <h5>Aperçu des tickets concernés :</h5>
+            <div class="tickets-list">
+              {% for ticket in old_closed_tickets[:5] %}
+              <div class="ticket-item">
+                <strong>#{{ ticket.id }} - {{ ticket.subject }}</strong>
+                <div class="ticket-meta">
+                  {{ ticket.username }} • Fermé le {{
+                  ticket.updated_at.strftime('%d/%m/%Y') }}
+                </div>
+              </div>
+              {% endfor %} {% if old_closed_tickets|length > 5 %}
+              <div class="ticket-item">
+                <em>... et {{ old_closed_tickets|length - 5 }} autre(s)</em>
+              </div>
+              {% endif %}
+            </div>
+          </div>
+          {% endif %}
+        </div>
+
+        <!-- Nettoyage des tickets résolus -->
+        <div class="cleanup-card">
+          <h4>
+            <i class="fas fa-check-circle"></i> Supprimer les Tickets Résolus
+          </h4>
+          <p>
+            Supprime tous les tickets avec le statut "résolu" de plus de 90
+            jours. Un délai plus long est appliqué car l'utilisateur pourrait
+            encore avoir des questions.
+          </p>
+
+          {% if stats.old_resolved_count > 0 %}
+          <form
+            method="post"
+            action="{{ url_for('admin_tickets_cleanup_execute') }}"
+            onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer {{ stats.old_resolved_count }} ticket(s) résolu(s) ? Cette action est irréversible.')"
+          >
+            <input type="hidden" name="cleanup_type" value="resolved_90" />
+            <button type="submit" class="btn btn-warning">
+              <i class="fas fa-trash"></i> Supprimer {{ stats.old_resolved_count
+              }} ticket(s)
+            </button>
+          </form>
+          {% else %}
+          <button class="btn btn-secondary" disabled>
+            <i class="fas fa-check"></i> Aucun ticket à supprimer
+          </button>
+          {% endif %}
+
+          <!-- Aperçu des tickets -->
+          {% if old_resolved_tickets %}
+          <div class="tickets-preview">
+            <h5>Aperçu des tickets concernés :</h5>
+            <div class="tickets-list">
+              {% for ticket in old_resolved_tickets[:5] %}
+              <div class="ticket-item">
+                <strong>#{{ ticket.id }} - {{ ticket.subject }}</strong>
+                <div class="ticket-meta">
+                  {{ ticket.username }} • Résolu le {{
+                  ticket.updated_at.strftime('%d/%m/%Y') }}
+                </div>
+              </div>
+              {% endfor %} {% if old_resolved_tickets|length > 5 %}
+              <div class="ticket-item">
+                <em>... et {{ old_resolved_tickets|length - 5 }} autre(s)</em>
+              </div>
+              {% endif %}
+            </div>
+          </div>
+          {% endif %}
+        </div>
+
+        <!-- Nettoyage complet -->
+        <div class="cleanup-card">
+          <h4><i class="fas fa-broom"></i> Nettoyage Complet</h4>
+          <p>
+            Supprime tous les anciens tickets (fermés + 30 jours et résolus + 90
+            jours) en une seule fois. Recommandé pour un nettoyage périodique.
+          </p>
+
+          {% if stats.old_closed_count > 0 or stats.old_resolved_count > 0 %}
+          <form
+            method="post"
+            action="{{ url_for('admin_tickets_cleanup_execute') }}"
+            onsubmit="return confirm('Êtes-vous sûr de vouloir effectuer un nettoyage complet ? Cela supprimera {{ stats.old_closed_count + stats.old_resolved_count }} ticket(s) au total. Cette action est irréversible.')"
+          >
+            <input type="hidden" name="cleanup_type" value="all_old" />
+            <button type="submit" class="btn btn-danger">
+              <i class="fas fa-broom"></i> Nettoyage Complet ({{
+              stats.old_closed_count + stats.old_resolved_count }} tickets)
+            </button>
+          </form>
+          {% else %}
+          <button class="btn btn-secondary" disabled>
+            <i class="fas fa-check"></i> Aucun nettoyage nécessaire
+          </button>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Informations supplémentaires -->
+      <div class="warning-section">
+        <h3>
+          <i class="fas fa-info-circle"></i> Informations sur le Nettoyage
+        </h3>
+        <p><strong>Critères de suppression :</strong></p>
+        <ul style="margin-left: 20px; margin-top: 10px">
+          <li>
+            Tickets fermés : Plus de 30 jours depuis la dernière modification
+          </li>
+          <li>
+            Tickets résolus : Plus de 90 jours depuis la dernière modification
+          </li>
+          <li>Toutes les réponses associées sont également supprimées</li>
+        </ul>
+        <p style="margin-top: 15px"><strong>Recommandations :</strong></p>
+        <ul style="margin-left: 20px; margin-top: 10px">
+          <li>
+            Effectuez un nettoyage mensuel pour maintenir les performances
+          </li>
+          <li>Sauvegardez la base de données avant un nettoyage important</li>
+          <li>Vérifiez les aperçus avant de confirmer la suppression</li>
+        </ul>
+      </div>
+    </div>
+  </body>
+</html>

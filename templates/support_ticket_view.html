@@ -1,0 +1,442 @@
+{% extends "support_base.html" %} {% block content %}
+<!-- En-tête du ticket -->
+<div class="card">
+  <div
+    style="
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+    "
+  >
+    <div>
+      <h2>
+        <i class="fas fa-ticket-alt"></i>
+        Ticket #{{ ticket.ticket_number or ticket.id }} - {{ ticket.subject }}
+      </h2>
+      <div class="ticket-meta" style="margin-top: 0.5rem">
+        <span class="ticket-status ticket-status-{{ ticket.status }}">
+          {% if ticket.status == 'open' %}
+          <i class="fas fa-envelope-open"></i> Ouvert {% elif ticket.status ==
+          'in_progress' %} <i class="fas fa-cog fa-spin"></i> En Cours {% elif
+          ticket.status == 'waiting_user' %}
+          <i class="fas fa-user-clock"></i> En Attente de Votre Réponse {% elif
+          ticket.status == 'resolved' %} <i class="fas fa-check"></i> Résolu {%
+          elif ticket.status == 'closed' %} <i class="fas fa-times"></i> Fermé
+          {% endif %}
+        </span>
+        <span class="ticket-priority ticket-priority-{{ ticket.priority }}">
+          {% if ticket.priority == 'low' %}
+          <i class="fas fa-arrow-down"></i> Faible {% elif ticket.priority ==
+          'medium' %} <i class="fas fa-minus"></i> Moyenne {% elif
+          ticket.priority == 'high' %} <i class="fas fa-arrow-up"></i> Haute {%
+          elif ticket.priority == 'urgent' %}
+          <i class="fas fa-exclamation"></i> Urgente {% endif %}
+        </span>
+        <span class="ticket-category">
+          <i class="fas fa-tag"></i> {{ ticket.category|replace('_', ' ')|title
+          }}
+        </span>
+        <span class="ticket-date">
+          <i class="fas fa-clock"></i> Créé {{ ticket.created_at | timeago }}
+        </span>
+      </div>
+    </div>
+    <div style="display: flex; gap: 1rem">
+      <a href="/support/dashboard" class="btn btn-secondary">
+        <i class="fas fa-arrow-left"></i> Retour
+      </a>
+      {% if ticket.status in ['open', 'in_progress', 'waiting_user'] %}
+      <button class="btn" onclick="showResponseForm()">
+        <i class="fas fa-reply"></i> Répondre
+      </button>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<!-- Informations du ticket -->
+<div
+  style="
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 2rem;
+    margin-bottom: 2rem;
+  "
+>
+  <!-- Description principale -->
+  <div class="card">
+    <h3><i class="fas fa-file-alt"></i> Description du Problème</h3>
+    <div
+      style="
+        margin-top: 1rem;
+        padding: 1rem;
+        background: #f8f9fa;
+        border-radius: 8px;
+        border-left: 4px solid #7289da;
+      "
+    >
+      <p style="white-space: pre-wrap; margin: 0">{{ ticket.description }}</p>
+    </div>
+
+    {% if ticket.metadata and ticket.metadata.steps_to_reproduce %}
+    <h4 style="margin-top: 2rem">
+      <i class="fas fa-list-ol"></i> Étapes pour Reproduire
+    </h4>
+    <div
+      style="
+        margin-top: 1rem;
+        padding: 1rem;
+        background: #fff3cd;
+        border-radius: 8px;
+        border-left: 4px solid #f39c12;
+      "
+    >
+      <p style="white-space: pre-wrap; margin: 0">
+        {{ ticket.metadata.steps_to_reproduce }}
+      </p>
+    </div>
+    {% endif %} {% if ticket.metadata and ticket.metadata.error_message %}
+    <h4 style="margin-top: 2rem">
+      <i class="fas fa-exclamation-circle"></i> Message d'Erreur
+    </h4>
+    <div
+      style="
+        margin-top: 1rem;
+        padding: 1rem;
+        background: #f8d7da;
+        border-radius: 8px;
+        border-left: 4px solid #dc3545;
+        font-family: monospace;
+      "
+    >
+      <p style="white-space: pre-wrap; margin: 0; font-size: 0.9rem">
+        {{ ticket.metadata.error_message }}
+      </p>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- Informations techniques -->
+  <div class="card">
+    <h3><i class="fas fa-info-circle"></i> Informations Techniques</h3>
+
+    <div style="margin-top: 1rem">
+      <div class="info-item">
+        <strong><i class="fas fa-hashtag"></i> ID du Ticket:</strong>
+        <span>{{ ticket.ticket_number or ticket.id }}</span>
+      </div>
+
+      <div class="info-item">
+        <strong><i class="fas fa-calendar"></i> Créé le:</strong>
+        <span
+          >{{ ticket.created_at.strftime('%d/%m/%Y à %H:%M') if
+          ticket.created_at else 'N/A' }}</span
+        >
+      </div>
+
+      <div class="info-item">
+        <strong><i class="fas fa-clock"></i> Dernière mise à jour:</strong>
+        <span
+          >{{ ticket.updated_at.strftime('%d/%m/%Y à %H:%M') if
+          ticket.updated_at else 'N/A' }}</span
+        >
+      </div>
+
+      {% if ticket.metadata and ticket.metadata.server_id %}
+      <div class="info-item">
+        <strong><i class="fas fa-server"></i> Serveur Discord:</strong>
+        <span style="font-family: monospace"
+          >{{ ticket.metadata.server_id }}</span
+        >
+      </div>
+      {% endif %} {% if ticket.metadata and ticket.metadata.command_used %}
+      <div class="info-item">
+        <strong><i class="fas fa-terminal"></i> Commande:</strong>
+        <span
+          style="
+            font-family: monospace;
+            background: #f8f9fa;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+          "
+          >{{ ticket.metadata.command_used }}</span
+        >
+      </div>
+      {% endif %} {% if ticket.metadata and ticket.metadata.urgent_contact %}
+      <div class="info-item">
+        <strong><i class="fas fa-bell"></i> Contact Urgent:</strong>
+        <span style="color: #dc3545"
+          ><i class="fas fa-check"></i> Autorisé</span
+        >
+      </div>
+      {% endif %} {% if ticket.metadata and ticket.metadata.email_notifications
+      %}
+      <div class="info-item">
+        <strong><i class="fas fa-envelope"></i> Notifications Email:</strong>
+        <span style="color: #28a745"
+          ><i class="fas fa-check"></i> Activées</span
+        >
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<!-- Historique des réponses -->
+<div class="card">
+  <h3><i class="fas fa-comments"></i> Historique des Réponses</h3>
+
+  {% if responses %}
+  <div class="responses-list" style="margin-top: 1rem">
+    {% for response in responses %}
+    <div
+      class="response-item {% if response.is_admin %}admin-response{% else %}user-response{% endif %}"
+    >
+      <div class="response-header">
+        <div class="response-author">
+          {% if response.is_admin %}
+          <i class="fas fa-shield-alt" style="color: #dc3545"></i>
+          <strong>Support Technique</strong>
+          {% else %}
+          <i class="fas fa-user" style="color: #7289da"></i>
+          <strong>{{ session.support_user.username }}</strong>
+          {% endif %}
+        </div>
+        <div class="response-date">
+          <i class="fas fa-clock"></i>
+          {{ response.created_at | timeago }}
+        </div>
+      </div>
+      <div class="response-content">
+        <p style="white-space: pre-wrap">{{ response.message }}</p>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div style="text-align: center; padding: 2rem; color: #6c757d">
+    <i
+      class="fas fa-comment-slash"
+      style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.5"
+    ></i>
+    <h4>Aucune réponse pour le moment</h4>
+    <p>Notre équipe de support vous répondra dans les plus brefs délais.</p>
+  </div>
+  {% endif %}
+</div>
+
+<!-- Formulaire de réponse (masqué par défaut) -->
+{% if ticket.status in ['open', 'in_progress', 'waiting_user'] %}
+<div id="response-form" class="card" style="display: none">
+  <h3><i class="fas fa-reply"></i> Ajouter une Réponse</h3>
+
+  <form
+    method="POST"
+    action="/support/ticket/{{ ticket.id }}/respond"
+    style="margin-top: 1rem"
+  >
+    <div class="form-group">
+      <label for="response_message">
+        <i class="fas fa-comment"></i> Votre Réponse
+      </label>
+      <textarea
+        id="response_message"
+        name="message"
+        required
+        rows="6"
+        placeholder="Décrivez ici votre réponse, des informations supplémentaires, ou confirmez si le problème est résolu..."
+      ></textarea>
+    </div>
+
+    <div class="form-group" style="margin: 1rem 0">
+      <label
+        style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer"
+      >
+        <input type="checkbox" name="mark_resolved" value="1" />
+        <span><i class="fas fa-check"></i> Marquer ce ticket comme résolu</span>
+      </label>
+      <small
+        style="
+          color: #6c757d;
+          margin-left: 1.5rem;
+          display: block;
+          margin-top: 0.25rem;
+        "
+      >
+        Cochez cette case si votre problème est résolu et que vous souhaitez
+        fermer le ticket.
+      </small>
+    </div>
+
+    <div style="display: flex; gap: 1rem">
+      <button type="submit" class="btn">
+        <i class="fas fa-paper-plane"></i> Envoyer la Réponse
+      </button>
+      <button
+        type="button"
+        class="btn btn-secondary"
+        onclick="hideResponseForm()"
+      >
+        <i class="fas fa-times"></i> Annuler
+      </button>
+    </div>
+  </form>
+</div>
+{% endif %}
+
+<!-- Statut de résolution -->
+{% if ticket.status == 'resolved' %}
+<div class="card" style="background: #d4edda; border-left: 4px solid #28a745">
+  <h3>
+    <i class="fas fa-check-circle" style="color: #28a745"></i> Ticket Résolu
+  </h3>
+  <p>
+    Ce ticket a été marqué comme résolu. Si vous rencontrez encore des
+    problèmes, n'hésitez pas à créer un nouveau ticket ou à répondre ci-dessus
+    pour le rouvrir.
+  </p>
+
+  <div style="margin-top: 1rem">
+    <a href="/support/ticket/new" class="btn">
+      <i class="fas fa-plus"></i> Créer un Nouveau Ticket
+    </a>
+    <button class="btn btn-secondary" onclick="showResponseForm()">
+      <i class="fas fa-redo"></i> Rouvrir ce Ticket
+    </button>
+  </div>
+</div>
+{% endif %}
+
+<script>
+  function showResponseForm() {
+    document.getElementById("response-form").style.display = "block";
+    document.getElementById("response_message").focus();
+
+    // Scroll vers le formulaire
+    document.getElementById("response-form").scrollIntoView({
+      behavior: "smooth",
+      block: "start",
+    });
+  }
+
+  function hideResponseForm() {
+    document.getElementById("response-form").style.display = "none";
+  }
+
+  // Auto-refresh toutes les 30 secondes pour voir les nouvelles réponses
+  setInterval(function () {
+    // Vérifier s'il y a de nouvelles réponses
+    fetch(`/support/api/ticket/{{ ticket.id }}/check_updates`)
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.hasNewResponses) {
+          // Afficher une notification
+          showUpdateNotification("Nouvelles réponses disponibles");
+        }
+      })
+      .catch((err) =>
+        console.log("Erreur lors de la vérification des mises à jour")
+      );
+  }, 30000);
+
+  function showUpdateNotification(message) {
+    const notification = document.createElement("div");
+    notification.className = "floating-notification";
+    notification.innerHTML = `
+    <i class="fas fa-info-circle"></i>
+    ${message}
+    <a href="#" onclick="location.reload()" style="color: white; text-decoration: underline; margin-left: 0.5rem;">Actualiser</a>
+  `;
+    document.body.appendChild(notification);
+
+    setTimeout(() => {
+      notification.remove();
+    }, 5000);
+  }
+</script>
+
+<style>
+  .info-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #eee;
+  }
+
+  .info-item:last-child {
+    border-bottom: none;
+  }
+
+  .responses-list {
+    max-height: 600px;
+    overflow-y: auto;
+  }
+
+  .response-item {
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    border-radius: 8px;
+    border-left: 4px solid #dee2e6;
+  }
+
+  .user-response {
+    background: #f8f9fa;
+    border-left-color: #7289da;
+  }
+
+  .admin-response {
+    background: #fff3cd;
+    border-left-color: #dc3545;
+  }
+
+  .response-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+    font-size: 0.875rem;
+  }
+
+  .response-author {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .response-date {
+    color: #6c757d;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+  }
+
+  .response-content {
+    margin-top: 0.5rem;
+  }
+
+  .floating-notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: #7289da;
+    color: white;
+    padding: 1rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    animation: slideIn 0.3s ease;
+  }
+
+  @keyframes slideIn {
+    from {
+      transform: translateX(100%);
+    }
+    to {
+      transform: translateX(0);
+    }
+  }
+</style>
+{% endblock %}

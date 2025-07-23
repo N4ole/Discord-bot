@@ -1,0 +1,348 @@
+{% extends "support_base.html" %} {% block content %}
+<!-- En-tête de bienvenue -->
+<div class="card">
+  <div
+    style="
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+    "
+  >
+    <div>
+      <h2><i class="fas fa-tachometer-alt"></i> Tableau de Bord</h2>
+      <p>Bienvenue, <strong>{{ session.support_user.username }}</strong> !</p>
+    </div>
+    <div style="display: flex; gap: 1rem">
+      <a href="/support/ticket/new" class="btn">
+        <i class="fas fa-plus"></i> Nouveau Ticket
+      </a>
+      <a href="/support/logout" class="btn btn-secondary">
+        <i class="fas fa-sign-out-alt"></i> Déconnexion
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- Statistiques utilisateur -->
+<div
+  style="
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+  "
+>
+  <div class="stat-card">
+    <h3><i class="fas fa-ticket-alt" style="color: #7289da"></i></h3>
+    <div class="stat-number">{{ stats.total_tickets }}</div>
+    <div class="stat-label">Mes Tickets</div>
+  </div>
+
+  <div class="stat-card">
+    <h3><i class="fas fa-clock" style="color: #f39c12"></i></h3>
+    <div class="stat-number">{{ stats.open_tickets }}</div>
+    <div class="stat-label">En Cours</div>
+  </div>
+
+  <div class="stat-card">
+    <h3><i class="fas fa-check" style="color: #28a745"></i></h3>
+    <div class="stat-number">{{ stats.resolved_tickets }}</div>
+    <div class="stat-label">Résolus</div>
+  </div>
+
+  <div class="stat-card">
+    <h3><i class="fas fa-comment" style="color: #dc3545"></i></h3>
+    <div class="stat-number">{{ stats.pending_responses }}</div>
+    <div class="stat-label">En Attente</div>
+  </div>
+</div>
+
+<!-- Tickets récents -->
+<div class="card">
+  <div
+    style="
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1rem;
+    "
+  >
+    <h2><i class="fas fa-history"></i> Mes Tickets Récents</h2>
+    <a href="/support/tickets" class="btn btn-secondary">
+      <i class="fas fa-list"></i> Voir Tous
+    </a>
+  </div>
+
+  {% if recent_tickets %}
+  <div class="tickets-list">
+    {% for ticket in recent_tickets %}
+    <div class="ticket-item">
+      <div class="ticket-header">
+        <div class="ticket-info">
+          <h4>
+            <a href="/support/ticket/{{ ticket.id }}"
+              >#{{ ticket.ticket_number or ticket.id }} - {{ ticket.subject
+              }}</a
+            >
+          </h4>
+          <div class="ticket-meta">
+            <span class="ticket-status ticket-status-{{ ticket.status }}">
+              {% if ticket.status == 'open' %}
+              <i class="fas fa-envelope-open"></i> Ouvert {% elif ticket.status
+              == 'in_progress' %} <i class="fas fa-cog fa-spin"></i> En Cours {%
+              elif ticket.status == 'waiting_user' %}
+              <i class="fas fa-user-clock"></i> En Attente {% elif ticket.status
+              == 'resolved' %} <i class="fas fa-check"></i> Résolu {% elif
+              ticket.status == 'closed' %} <i class="fas fa-times"></i> Fermé {%
+              endif %}
+            </span>
+            <span class="ticket-priority ticket-priority-{{ ticket.priority }}">
+              {% if ticket.priority == 'low' %}
+              <i class="fas fa-arrow-down"></i> Faible {% elif ticket.priority
+              == 'medium' %} <i class="fas fa-minus"></i> Moyenne {% elif
+              ticket.priority == 'high' %} <i class="fas fa-arrow-up"></i> Haute
+              {% elif ticket.priority == 'urgent' %}
+              <i class="fas fa-exclamation"></i> Urgente {% endif %}
+            </span>
+            <span class="ticket-date">
+              <i class="fas fa-clock"></i> {{ ticket.created_at | timeago }}
+            </span>
+          </div>
+        </div>
+        <div class="ticket-actions">
+          <a href="/support/ticket/{{ ticket.id }}" class="btn btn-sm">
+            <i class="fas fa-eye"></i> Voir
+          </a>
+        </div>
+      </div>
+
+      <div class="ticket-preview">
+        <p>
+          {{ ticket.description[:150] }}{% if ticket.description|length > 150
+          %}...{% endif %}
+        </p>
+      </div>
+
+      {% if ticket.last_response %}
+      <div class="ticket-last-response">
+        <i class="fas fa-comment"></i>
+        <strong>Dernière réponse :</strong> {{ ticket.last_response | timeago }}
+        {% if ticket.unread_responses > 0 %}
+        <span class="unread-badge"
+          >{{ ticket.unread_responses }} non lu{% if ticket.unread_responses > 1
+          %}s{% endif %}</span
+        >
+        {% endif %}
+      </div>
+      {% endif %}
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div style="text-align: center; padding: 2rem; color: #6c757d">
+    <i
+      class="fas fa-inbox"
+      style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.5"
+    ></i>
+    <h3>Aucun ticket pour le moment</h3>
+    <p>Vous n'avez pas encore créé de ticket de support.</p>
+    <a href="/support/ticket/new" class="btn" style="margin-top: 1rem">
+      <i class="fas fa-plus"></i> Créer votre premier ticket
+    </a>
+  </div>
+  {% endif %}
+</div>
+
+<!-- Actions rapides -->
+<div class="card">
+  <h2><i class="fas fa-bolt"></i> Actions Rapides</h2>
+
+  <div
+    style="
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1rem;
+      margin-top: 1rem;
+    "
+  >
+    <a href="/support/ticket/new" class="quick-action">
+      <i class="fas fa-plus"></i>
+      <h4>Nouveau Ticket</h4>
+      <p>Créer une nouvelle demande de support</p>
+    </a>
+
+    <a href="/support/tickets" class="quick-action">
+      <i class="fas fa-list"></i>
+      <h4>Mes Tickets</h4>
+      <p>Voir tous vos tickets de support</p>
+    </a>
+
+    <a href="/support/profile" class="quick-action">
+      <i class="fas fa-user"></i>
+      <h4>Mon Profil</h4>
+      <p>Modifier vos informations personnelles</p>
+    </a>
+
+    <a href="/support" class="quick-action">
+      <i class="fas fa-question-circle"></i>
+      <h4>Centre d'Aide</h4>
+      <p>Consulter la FAQ et les ressources</p>
+    </a>
+
+    <a href="/promo" class="quick-action">
+      <i class="fas fa-robot"></i>
+      <h4>Le Bot</h4>
+      <p>Découvrir les fonctionnalités du bot</p>
+    </a>
+
+    <a
+      href="https://discord.gg/votre-serveur"
+      class="quick-action"
+      target="_blank"
+    >
+      <i class="fab fa-discord"></i>
+      <h4>Discord</h4>
+      <p>Rejoindre notre serveur Discord</p>
+    </a>
+  </div>
+</div>
+
+<!-- Notifications et alertes -->
+{% if notifications %}
+<div class="card">
+  <h2><i class="fas fa-bell"></i> Notifications</h2>
+
+  <div class="notifications-list">
+    {% for notification in notifications %}
+    <div class="notification notification-{{ notification.type }}">
+      <div class="notification-icon">
+        {% if notification.type == 'info' %}
+        <i class="fas fa-info-circle"></i>
+        {% elif notification.type == 'success' %}
+        <i class="fas fa-check-circle"></i>
+        {% elif notification.type == 'warning' %}
+        <i class="fas fa-exclamation-triangle"></i>
+        {% elif notification.type == 'error' %}
+        <i class="fas fa-times-circle"></i>
+        {% endif %}
+      </div>
+      <div class="notification-content">
+        <h4>{{ notification.title }}</h4>
+        <p>{{ notification.message }}</p>
+        <small>{{ notification.created_at | timeago }}</small>
+      </div>
+      <button
+        class="notification-close"
+        onclick="dismissNotification({{ notification.id }})"
+      >
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+
+<script>
+  // Auto-refresh des données toutes les 30 secondes
+  setInterval(function () {
+    // Vérifier s'il y a de nouvelles notifications ou mises à jour
+    fetch("/support/api/notifications")
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.hasUpdates) {
+          // Afficher une notification discrète
+          showUpdateNotification();
+        }
+      })
+      .catch((err) =>
+        console.log("Erreur lors de la vérification des mises à jour")
+      );
+  }, 30000);
+
+  function dismissNotification(id) {
+    fetch(`/support/api/notification/${id}/dismiss`, {
+      method: "POST",
+    }).then(() => {
+      location.reload();
+    });
+  }
+
+  function showUpdateNotification() {
+    const notification = document.createElement("div");
+    notification.className = "floating-notification";
+    notification.innerHTML = `
+    <i class="fas fa-info-circle"></i>
+    Des mises à jour sont disponibles. 
+    <a href="#" onclick="location.reload()">Actualiser</a>
+  `;
+    document.body.appendChild(notification);
+
+    setTimeout(() => {
+      notification.remove();
+    }, 5000);
+  }
+</script>
+
+<style>
+  .quick-action {
+    display: block;
+    padding: 1.5rem;
+    background: #f8f9fa;
+    border-radius: 8px;
+    text-decoration: none;
+    color: inherit;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+  }
+
+  .quick-action:hover {
+    background: #e9ecef;
+    border-color: #7289da;
+    transform: translateY(-2px);
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .quick-action i {
+    font-size: 2rem;
+    color: #7289da;
+    margin-bottom: 0.5rem;
+  }
+
+  .quick-action h4 {
+    margin: 0.5rem 0;
+    color: #333;
+  }
+
+  .quick-action p {
+    margin: 0;
+    color: #6c757d;
+    font-size: 0.875rem;
+  }
+
+  .floating-notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: #7289da;
+    color: white;
+    padding: 1rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    animation: slideIn 0.3s ease;
+  }
+
+  @keyframes slideIn {
+    from {
+      transform: translateX(100%);
+    }
+    to {
+      transform: translateX(0);
+    }
+  }
+</style>
+{% endblock %}

@@ -1,0 +1,536 @@
+{% extends "support_base.html" %} {% block content %}
+<div class="card">
+  <h2><i class="fas fa-plus"></i> Créer un Nouveau Ticket</h2>
+  <p>
+    Décrivez votre problème ou votre demande avec le plus de détails possible
+    pour nous permettre de vous aider efficacement.
+  </p>
+
+  <form method="POST" enctype="multipart/form-data" style="margin-top: 2rem">
+    <!-- Informations générales -->
+    <div class="form-section">
+      <h3><i class="fas fa-info-circle"></i> Informations Générales</h3>
+
+      <div class="form-group">
+        <label for="category">
+          <i class="fas fa-tags"></i> Catégorie du Problème
+        </label>
+        <select id="category" name="category" required>
+          <option value="">Sélectionnez une catégorie...</option>
+          <option value="bot_commands">🤖 Commandes du Bot</option>
+          <option value="bot_config">⚙️ Configuration du Bot</option>
+          <option value="permissions">🔒 Permissions et Rôles</option>
+          <option value="technical">🔧 Problème Technique</option>
+          <option value="feature_request">💡 Demande de Fonctionnalité</option>
+          <option value="bug_report">🐛 Signalement de Bug</option>
+          <option value="discord_integration">📡 Intégration Discord</option>
+          <option value="account">👤 Compte Utilisateur</option>
+          <option value="other">❓ Autre</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="priority">
+          <i class="fas fa-exclamation-triangle"></i> Priorité
+        </label>
+        <select id="priority" name="priority" required>
+          <option value="low">
+            🟢 Faible - Question générale ou amélioration
+          </option>
+          <option value="medium" selected>
+            🟡 Moyenne - Problème gênant mais non bloquant
+          </option>
+          <option value="high">
+            🟠 Haute - Problème bloquant une fonctionnalité
+          </option>
+          <option value="urgent">
+            🔴 Urgente - Bot complètement inutilisable
+          </option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="subject">
+          <i class="fas fa-heading"></i> Sujet du Ticket
+        </label>
+        <input
+          type="text"
+          id="subject"
+          name="subject"
+          required
+          maxlength="200"
+          value="{{ request.form.subject or '' }}"
+          placeholder="Résumez votre problème en quelques mots..."
+        />
+        <small>Soyez précis et concis (max 200 caractères)</small>
+      </div>
+    </div>
+
+    <!-- Description détaillée -->
+    <div class="form-section">
+      <h3><i class="fas fa-align-left"></i> Description Détaillée</h3>
+
+      <div class="form-group">
+        <label for="description">
+          <i class="fas fa-file-alt"></i> Description du Problème
+        </label>
+        <textarea
+          id="description"
+          name="description"
+          required
+          rows="8"
+          placeholder="Décrivez votre problème en détail :&#10;&#10;1. Que tentiez-vous de faire ?&#10;2. Qu'est-ce qui s'est passé ?&#10;3. Qu'attendiez-vous qu'il se passe ?&#10;4. À quel moment le problème est-il apparu ?&#10;5. Avez-vous des messages d'erreur ?&#10;&#10;Plus vous donnez de détails, plus nous pourrons vous aider rapidement !"
+        >
+{{ request.form.description or '' }}</textarea
+        >
+      </div>
+
+      <div class="form-group">
+        <label for="steps_to_reproduce">
+          <i class="fas fa-list-ol"></i> Étapes pour Reproduire (Optionnel)
+        </label>
+        <textarea
+          id="steps_to_reproduce"
+          name="steps_to_reproduce"
+          rows="4"
+          placeholder="Si c'est un bug, listez les étapes pour le reproduire :&#10;1. Allez sur...&#10;2. Cliquez sur...&#10;3. Tapez...&#10;4. Le problème apparaît..."
+        >
+{{ request.form.steps_to_reproduce or '' }}</textarea
+        >
+      </div>
+    </div>
+
+    <!-- Informations techniques -->
+    <div class="form-section">
+      <h3><i class="fas fa-cogs"></i> Informations Techniques</h3>
+
+      <div
+        style="
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+          gap: 1rem;
+        "
+      >
+        <div class="form-group">
+          <label for="server_id">
+            <i class="fas fa-server"></i> ID du Serveur Discord (Optionnel)
+          </label>
+          <input
+            type="text"
+            id="server_id"
+            name="server_id"
+            pattern="[0-9]{17,19}"
+            value="{{ request.form.server_id or '' }}"
+            placeholder="123456789012345678"
+          />
+          <small>L'ID du serveur où vous rencontrez le problème</small>
+        </div>
+
+        <div class="form-group">
+          <label for="command_used">
+            <i class="fas fa-terminal"></i> Commande Utilisée (Optionnel)
+          </label>
+          <input
+            type="text"
+            id="command_used"
+            name="command_used"
+            value="{{ request.form.command_used or '' }}"
+            placeholder="/help, !ping, etc."
+          />
+          <small>La commande qui pose problème, si applicable</small>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="error_message">
+          <i class="fas fa-exclamation-circle"></i> Message d'Erreur (Optionnel)
+        </label>
+        <textarea
+          id="error_message"
+          name="error_message"
+          rows="3"
+          placeholder="Copiez-collez ici le message d'erreur exact, si vous en avez un..."
+        >
+{{ request.form.error_message or '' }}</textarea
+        >
+      </div>
+    </div>
+
+    <!-- Pièces jointes -->
+    <div class="form-section">
+      <h3><i class="fas fa-paperclip"></i> Pièces Jointes</h3>
+
+      <div class="form-group">
+        <label for="attachments">
+          <i class="fas fa-upload"></i> Fichiers (Screenshots, logs, etc.)
+        </label>
+        <input
+          type="file"
+          id="attachments"
+          name="attachments"
+          multiple
+          accept=".jpg,.jpeg,.png,.gif,.txt,.log,.json,.yaml,.yml"
+        />
+        <small>
+          Formats acceptés : Images (JPG, PNG, GIF), Logs (TXT, LOG), Config
+          (JSON, YAML) - Max 10MB par fichier
+        </small>
+      </div>
+
+      <div class="upload-tips">
+        <h4>
+          <i class="fas fa-lightbulb"></i> Conseils pour les captures d'écran :
+        </h4>
+        <ul>
+          <li>
+            Incluez la console développeur si vous avez des erreurs JavaScript
+          </li>
+          <li>Montrez l'URL dans la barre d'adresse</li>
+          <li>Capturez tout le contexte, pas juste l'erreur</li>
+          <li>
+            Si c'est une commande Discord, montrez la commande et la réponse
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Informations de contact -->
+    <div class="form-section">
+      <h3><i class="fas fa-address-book"></i> Contact et Suivi</h3>
+
+      <div class="form-group">
+        <label>
+          <input type="checkbox" name="urgent_contact" value="1" />
+          <span>
+            <i class="fas fa-bell"></i>
+            Problème urgent - Autorisez-nous à vous contacter via Discord si
+            nécessaire
+          </span>
+        </label>
+        <small style="display: block; margin-top: 0.5rem; color: #6c757d">
+          Si coché, nous pourrons vous envoyer un message privé Discord pour un
+          suivi rapide
+        </small>
+      </div>
+
+      <div class="form-group">
+        <label>
+          <input type="checkbox" name="email_notifications" value="1" checked />
+          <span>
+            <i class="fas fa-envelope"></i>
+            Recevoir les notifications par email
+          </span>
+        </label>
+        <small style="display: block; margin-top: 0.5rem; color: #6c757d">
+          Nous vous tiendrons informé de l'évolution de votre ticket
+        </small>
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div
+      style="
+        display: flex;
+        gap: 1rem;
+        margin-top: 2rem;
+        padding-top: 2rem;
+        border-top: 1px solid #dee2e6;
+      "
+    >
+      <button type="submit" class="btn">
+        <i class="fas fa-paper-plane"></i> Envoyer le Ticket
+      </button>
+      <a href="/support/dashboard" class="btn btn-secondary">
+        <i class="fas fa-arrow-left"></i> Retour au Tableau de Bord
+      </a>
+      <button type="button" class="btn btn-secondary" onclick="saveDraft()">
+        <i class="fas fa-save"></i> Sauvegarder Brouillon
+      </button>
+    </div>
+  </form>
+</div>
+
+<!-- Aide contextuelle -->
+<div class="card">
+  <h2><i class="fas fa-question-circle"></i> Aide pour Créer un Bon Ticket</h2>
+
+  <div
+    style="
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1rem;
+      margin-top: 1rem;
+    "
+  >
+    <div class="help-tip">
+      <h4>
+        <i class="fas fa-check-circle" style="color: #28a745"></i> À Faire
+      </h4>
+      <ul>
+        <li>Soyez précis dans le titre</li>
+        <li>Donnez le maximum de contexte</li>
+        <li>Incluez des captures d'écran</li>
+        <li>Mentionnez la commande exacte</li>
+        <li>Indiquez quand le problème a commencé</li>
+      </ul>
+    </div>
+
+    <div class="help-tip">
+      <h4>
+        <i class="fas fa-times-circle" style="color: #dc3545"></i> À Éviter
+      </h4>
+      <ul>
+        <li>Titres vagues ("ça marche pas")</li>
+        <li>Descriptions trop courtes</li>
+        <li>Demandes multiples dans un ticket</li>
+        <li>Informations sensibles (mots de passe)</li>
+        <li>Langage inapproprié</li>
+      </ul>
+    </div>
+
+    <div class="help-tip">
+      <h4>
+        <i class="fas fa-clock" style="color: #f39c12"></i> Temps de Réponse
+      </h4>
+      <ul>
+        <li><strong>Urgente :</strong> < 2 heures</li>
+        <li><strong>Haute :</strong> < 8 heures</li>
+        <li><strong>Moyenne :</strong> < 24 heures</li>
+        <li><strong>Faible :</strong> < 72 heures</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Auto-sauvegarde du brouillon
+  let draftTimer;
+  const draftKey = "support_ticket_draft";
+
+  function autoSaveDraft() {
+    clearTimeout(draftTimer);
+    draftTimer = setTimeout(() => {
+      saveDraft();
+    }, 30000); // Sauvegarde toutes les 30 secondes
+  }
+
+  function saveDraft() {
+    const formData = {
+      category: document.getElementById("category").value,
+      priority: document.getElementById("priority").value,
+      subject: document.getElementById("subject").value,
+      description: document.getElementById("description").value,
+      steps_to_reproduce: document.getElementById("steps_to_reproduce").value,
+      server_id: document.getElementById("server_id").value,
+      command_used: document.getElementById("command_used").value,
+      error_message: document.getElementById("error_message").value,
+      timestamp: new Date().toISOString(),
+    };
+
+    localStorage.setItem(draftKey, JSON.stringify(formData));
+
+    // Afficher une notification discrète
+    const notification = document.createElement("div");
+    notification.className = "draft-notification";
+    notification.innerHTML = '<i class="fas fa-save"></i> Brouillon sauvegardé';
+    document.body.appendChild(notification);
+
+    setTimeout(() => {
+      notification.remove();
+    }, 2000);
+  }
+
+  function loadDraft() {
+    const draft = localStorage.getItem(draftKey);
+    if (draft) {
+      try {
+        const data = JSON.parse(draft);
+        const timeDiff = new Date() - new Date(data.timestamp);
+        const hoursDiff = timeDiff / (1000 * 60 * 60);
+
+        if (hoursDiff < 24) {
+          // Brouillon de moins de 24h
+          if (
+            confirm(
+              "Un brouillon récent a été trouvé. Voulez-vous le charger ?"
+            )
+          ) {
+            Object.keys(data).forEach((key) => {
+              const element = document.getElementById(key);
+              if (element && key !== "timestamp") {
+                element.value = data[key];
+              }
+            });
+          }
+        }
+      } catch (e) {
+        console.log("Erreur lors du chargement du brouillon");
+      }
+    }
+  }
+
+  // Validation côté client
+  document.querySelector("form").addEventListener("submit", function (e) {
+    const category = document.getElementById("category").value;
+    const subject = document.getElementById("subject").value;
+    const description = document.getElementById("description").value;
+
+    if (!category || !subject || !description) {
+      e.preventDefault();
+      alert("Veuillez remplir tous les champs obligatoires !");
+      return false;
+    }
+
+    if (description.length < 20) {
+      e.preventDefault();
+      alert(
+        "La description doit contenir au moins 20 caractères pour nous permettre de vous aider efficacement."
+      );
+      return false;
+    }
+
+    // Supprimer le brouillon une fois le ticket envoyé
+    localStorage.removeItem(draftKey);
+  });
+
+  // Écouter les changements pour la sauvegarde automatique
+  [
+    "category",
+    "priority",
+    "subject",
+    "description",
+    "steps_to_reproduce",
+    "server_id",
+    "command_used",
+    "error_message",
+  ].forEach((id) => {
+    const element = document.getElementById(id);
+    if (element) {
+      element.addEventListener("input", autoSaveDraft);
+      element.addEventListener("change", autoSaveDraft);
+    }
+  });
+
+  // Charger le brouillon au démarrage
+  document.addEventListener("DOMContentLoaded", loadDraft);
+
+  // Validation de l'ID de serveur
+  document.getElementById("server_id").addEventListener("input", function (e) {
+    const value = e.target.value;
+    if (value && !/^[0-9]{17,19}$/.test(value)) {
+      e.target.setCustomValidity(
+        "L'ID de serveur Discord doit contenir entre 17 et 19 chiffres"
+      );
+    } else {
+      e.target.setCustomValidity("");
+    }
+  });
+
+  // Compteur de caractères pour le sujet
+  document.getElementById("subject").addEventListener("input", function (e) {
+    const remaining = 200 - e.target.value.length;
+    const counter =
+      document.querySelector(".char-counter") ||
+      document.createElement("small");
+    counter.className = "char-counter";
+    counter.textContent = `${remaining} caractères restants`;
+    counter.style.color = remaining < 20 ? "#dc3545" : "#6c757d";
+
+    if (!document.querySelector(".char-counter")) {
+      e.target.parentNode.appendChild(counter);
+    }
+  });
+</script>
+
+<style>
+  .form-section {
+    margin-bottom: 2rem;
+    padding-bottom: 2rem;
+    border-bottom: 1px solid #dee2e6;
+  }
+
+  .form-section:last-child {
+    border-bottom: none;
+  }
+
+  .form-section h3 {
+    margin-bottom: 1rem;
+    color: #495057;
+    font-size: 1.1rem;
+  }
+
+  .upload-tips {
+    margin-top: 1rem;
+    padding: 1rem;
+    background: #f8f9fa;
+    border-radius: 8px;
+    border-left: 4px solid #7289da;
+  }
+
+  .upload-tips h4 {
+    margin-bottom: 0.5rem;
+    color: #495057;
+  }
+
+  .upload-tips ul {
+    margin: 0;
+    padding-left: 1.5rem;
+  }
+
+  .upload-tips li {
+    margin-bottom: 0.25rem;
+    color: #6c757d;
+  }
+
+  .help-tip {
+    padding: 1rem;
+    background: #f8f9fa;
+    border-radius: 8px;
+    border-left: 4px solid #7289da;
+  }
+
+  .help-tip h4 {
+    margin-bottom: 0.5rem;
+  }
+
+  .help-tip ul {
+    margin: 0;
+    padding-left: 1.5rem;
+  }
+
+  .help-tip li {
+    margin-bottom: 0.25rem;
+    color: #6c757d;
+  }
+
+  .draft-notification {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: #28a745;
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    font-size: 0.875rem;
+    z-index: 1000;
+    animation: slideUp 0.3s ease;
+  }
+
+  @keyframes slideUp {
+    from {
+      transform: translateY(100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+
+  .char-counter {
+    display: block;
+    margin-top: 0.25rem;
+    font-size: 0.875rem;
+  }
+</style>
+{% endblock %}

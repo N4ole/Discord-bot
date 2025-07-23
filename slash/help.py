@@ -19,7 +19,10 @@ class HelpSlash(commands.Cog):
         app_commands.Choice(name="🎭 Rôles", value="roles"),
         app_commands.Choice(name="📊 Logs", value="logs"),
         app_commands.Choice(name="🛠️ Configuration", value="config"),
-        app_commands.Choice(name="📋 Informations", value="info")
+        app_commands.Choice(name="📋 Informations", value="info"),
+        app_commands.Choice(name="🎮 Divertissement", value="fun"),
+        app_commands.Choice(name="🔧 Outils Avancés", value="tools"),
+        app_commands.Choice(name="⚙️ Utilitaires", value="utils")
     ])
     async def help_slash(self, interaction: discord.Interaction, category: app_commands.Choice[str] = None):
         """Commande slash d'aide"""
@@ -57,11 +60,14 @@ class HelpSlash(commands.Cog):
         embed.add_field(
             name="📂 Catégories",
             value="""
-            🛡️ **Modération** - Ban, kick, mute...
+            🛡️ **Modération** - Ban, kick, mute, clean...
             🎭 **Rôles** - Gestion des rôles
             📊 **Logs** - Système de journalisation
             🛠️ **Configuration** - Préfixes, paramètres
             📋 **Informations** - Stats et infos
+            🎮 **Divertissement** - Jeux et fun
+            🔧 **Outils Avancés** - Cryptographie, sondages
+            ⚙️ **Utilitaires** - Ping, météo, traduction
             """,
             inline=True
         )
@@ -120,6 +126,21 @@ class HelpSlash(commands.Cog):
                 
                 **Durées**: 10s, 5m, 2h, 1d (max 28 jours)
                 **Permission requise**: Modérer les membres
+                """,
+                inline=False
+            )
+
+            embed.add_field(
+                name="🧹 Nettoyage",
+                value="""
+                `/clean <nombre> [utilisateur] [contient] [bots]` - Supprime des messages
+                
+                **Exemples**:
+                • `/clean 20` - Supprime 20 messages
+                • `/clean 50 user:@John` - 50 messages de John
+                • `/clean 30 contains:spam` - Messages avec "spam"
+                
+                **Permission requise**: Gérer les messages
                 """,
                 inline=False
             )
@@ -185,7 +206,8 @@ class HelpSlash(commands.Cog):
             embed.add_field(
                 name="👤 Utilisateurs",
                 value="""
-                `/userinfo [membre]` - Informations détaillées
+                `/info [membre]` - Informations détaillées
+                `/avatar [membre]` - Avatar d'un utilisateur
                 `/roles [membre]` - Rôles d'un membre
                 """,
                 inline=False
@@ -194,7 +216,69 @@ class HelpSlash(commands.Cog):
             embed.add_field(
                 name="🏰 Serveur",
                 value="""
-                `/serverinfo` - Statistiques du serveur
+                `/server` - Statistiques du serveur
+                `/botinfo` - Informations du bot
+                `/uptime` - Temps de fonctionnement
+                """,
+                inline=False
+            )
+
+        elif category == "fun":
+            embed.description = "Commandes de divertissement et jeux"
+            embed.add_field(
+                name="🎮 Jeux",
+                value="""
+                `/coinflip` - Lance une pièce
+                `/8ball <question>` - Boule magique
+                `/rps <choix>` - Pierre-papier-ciseaux
+                `/choose <options>` - Choix aléatoire
+                """,
+                inline=False
+            )
+
+            embed.add_field(
+                name="😄 Fun",
+                value="""
+                `/joke` - Blague aléatoire
+                `/quote` - Citation inspirante
+                `/compliment [membre]` - Compliment
+                """,
+                inline=False
+            )
+
+        elif category == "tools":
+            embed.description = "Outils avancés pour la productivité et l'organisation"
+            embed.add_field(
+                name="📊 Analyse",
+                value="""
+                `/analyze [utilisateur]` - Analyse serveur/utilisateur
+                """,
+                inline=False
+            )
+
+            embed.add_field(
+                name="🧹 Gestion Messages",
+                value="""
+                `/clean <nombre> [filtres]` - Nettoyage intelligent
+                `/remind <temps> <message>` - Rappels programmés
+                """,
+                inline=False
+            )
+
+            embed.add_field(
+                name="🗳️ Communauté",
+                value="""
+                `/poll <question> <options> [durée]` - Sondages avancés
+                """,
+                inline=False
+            )
+
+        elif category == "utils":
+            embed.description = "Utilitaires pratiques et outils de monitoring"
+            embed.add_field(
+                name="🔧 Monitoring",
+                value="""
+                `/ping` - Latence du bot
                 """,
                 inline=False
             )
