@@ -6,7 +6,7 @@ Test du système de suppression des tickets
 Démonstration des nouvelles fonctionnalités de nettoyage
 """
 
-from support_db import support_db
+from core.support_db import support_db
 import sys
 import os
 from datetime import datetime, timedelta

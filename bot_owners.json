@@ -1,8 +1,0 @@
-{
-    "owners": [
-        702923932239527978,
-        854382745252790272
-    ],
-    "description": "Liste des propriétaires autorisés du bot Discord",
-    "note": "Ajoutez les IDs Discord des propriétaires dans le tableau 'owners'"
-}

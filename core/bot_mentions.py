@@ -41,7 +41,8 @@ class BotMentions(commands.Cog):
     async def send_mention_help(self, message):
         """Envoie l'aide quand le bot est mentionné"""
         # Récupère le préfixe pour ce serveur
-        from prefix_manager import prefix_manager
+        # Importer le prefix_manager
+        from .prefix_manager import prefix_manager
         prefix = "!"  # défaut
         if message.guild:
             prefix = prefix_manager.get_prefix(message.guild.id)

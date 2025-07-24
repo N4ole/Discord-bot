@@ -3,7 +3,7 @@ Système d'événements de logs pour Discord
 """
 import discord
 from discord.ext import commands
-from log_manager import log_manager, LogFormatter
+from .log_manager import log_manager, LogFormatter
 from datetime import datetime
 
 

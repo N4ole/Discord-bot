@@ -1,7 +1,7 @@
 """
 Test des notifications Discord pour le système de support
 """
-from support_db import SupportDB
+from core.support_db import SupportDB
 import sys
 import os
 

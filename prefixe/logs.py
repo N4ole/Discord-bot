@@ -3,7 +3,7 @@ Commandes préfixées - Module logs (gestion des logs)
 """
 import discord
 from discord.ext import commands
-from log_manager import log_manager
+from core.log_manager import log_manager
 
 
 class LogsPrefixe(commands.Cog):

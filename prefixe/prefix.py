@@ -3,7 +3,7 @@ Commandes préfixées - Module préfixe (gestion des préfixes)
 """
 import discord
 from discord.ext import commands
-from prefix_manager import prefix_manager
+from core.prefix_manager import prefix_manager
 
 
 class PrefixeCommands(commands.Cog):

@@ -6,7 +6,7 @@ Test du système de notifications multi-admins
 Ce script démontre comment ajouter et gérer plusieurs admins pour recevoir les notifications
 """
 
-from support_notifier import support_notifier
+from core.support_notifier import support_notifier
 import asyncio
 import sys
 import os

@@ -20,7 +20,7 @@ async def test_user_fetch():
 
     try:
         # Importer le token et créer un client Discord
-        from bot_owner_manager import get_bot_owners
+        from core.bot_owner_manager import get_bot_owners
 
         # Obtenir les propriétaires
         owners = get_bot_owners()

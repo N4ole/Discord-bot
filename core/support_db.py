@@ -289,7 +289,7 @@ class SupportDB:
                     # Essayer d'envoyer la notification
                     try:
                         print("🔍 DEBUG: Import support_notifier")
-                        from support_notifier import support_notifier
+                        from .support_notifier import support_notifier
 
                         print(
                             f"🔍 DEBUG: support_notifier.bot = {support_notifier.bot}")

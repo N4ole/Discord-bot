@@ -1,7 +1,7 @@
 """
 Commandes préfixées - Module de gestion des propriétaires (réservé aux propriétaires du bot)
 """
-from bot_owner_manager import is_bot_owner, get_bot_owners, add_bot_owner, remove_bot_owner
+from core.bot_owner_manager import is_bot_owner, get_bot_owners, add_bot_owner, remove_bot_owner
 import discord
 from discord.ext import commands
 import os

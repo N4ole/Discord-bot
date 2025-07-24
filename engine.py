@@ -6,9 +6,9 @@ from discord.ext import commands
 import os
 import asyncio
 from datetime import datetime
-from prefix_manager import get_prefix
+from core.prefix_manager import get_prefix
 from web_panel import start_web_panel, log_bot_event, update_bot_stats
-from status_rotator import StatusRotator
+from core.status_rotator import StatusRotator
 
 
 class DiscordBot(commands.Bot):
@@ -70,12 +70,12 @@ class DiscordBot(commands.Bot):
 
         # Chargement du système de mentions et événements
         print("Chargement du système de mentions...")
-        await self.load_extension('bot_mentions')
+        await self.load_extension('core.bot_mentions')
 
         # Chargement du système d'événements de logs
         print("Chargement du système de logs...")
-        await self.load_extension('log_events')
-        await self.load_extension('multiserver_diagnostic')
+        await self.load_extension('core.log_events')
+        await self.load_extension('scripts.multiserver_diagnostic')
 
         # Synchronisation des commandes slash
         print("Synchronisation des commandes slash...")

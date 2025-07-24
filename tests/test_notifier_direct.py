@@ -15,7 +15,7 @@ def test_notifier():
     print("=" * 50)
 
     try:
-        from support_notifier import support_notifier
+        from core.support_notifier import support_notifier
         print("✅ Module support_notifier importé")
 
         # Vérifier si le bot est configuré

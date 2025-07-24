@@ -6,7 +6,7 @@ Test du système de numérotation séquentielle des tickets
 Vérifie que les IDs restent séquentiels même après suppression
 """
 
-from support_db import support_db
+from core.support_db import support_db
 import sys
 import os
 

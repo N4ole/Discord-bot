@@ -1,11 +1,32 @@
-# Fichiers sensibles
+# Fichiers sensibles et configuration
+config/prefixes.json
+config/logs_config.json
+config/bot_owners.json
 
-prefixes.json
-logs_config.json
+# Cache Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
 
-__pycache__
-
-
+# Environnement
 .env
-.env.example
 .env.panel
+
+# Base de données
+*.db
+
+# Logs et fichiers temporaires
+*.log
+debug_*.log
+cookies.txt
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db

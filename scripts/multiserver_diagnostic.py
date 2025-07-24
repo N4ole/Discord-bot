@@ -3,7 +3,7 @@ Commandes de diagnostic et gestion multi-serveurs
 """
 import discord
 from discord.ext import commands
-from log_manager import log_manager
+from core.log_manager import log_manager
 
 
 class MultiServerDiagnostic(commands.Cog):

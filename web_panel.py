@@ -4,10 +4,10 @@ Interface web sécurisée pour surveiller les logs et statistiques
 """
 from collections import defaultdict
 import time
-from bot_owner_manager import get_bot_owners, add_bot_owner, remove_bot_owner, is_bot_owner
+from core.bot_owner_manager import get_bot_owners, add_bot_owner, remove_bot_owner, is_bot_owner
 import uuid
 from werkzeug.utils import secure_filename
-from support_db import SupportDB
+from core.support_db import SupportDB
 from flask import Flask, render_template, request, session, redirect, url_for, flash, jsonify
 from werkzeug.security import check_password_hash, generate_password_hash
 from datetime import datetime, timedelta
@@ -44,7 +44,7 @@ def set_bot_instance(bot):
 
     # Initialiser le notificateur de support avec l'instance du bot
     try:
-        from support_notifier import support_notifier
+        from core.support_notifier import support_notifier
         support_notifier.set_bot_instance(bot)
         print("✅ Notificateur de support initialisé avec l'instance du bot")
         print(
@@ -1257,7 +1257,7 @@ support_db = SupportDB()
 def test_notifier():
     """Route de test pour vérifier l'état du notificateur"""
     try:
-        from support_notifier import support_notifier
+        from core.support_notifier import support_notifier
         status = {
             'bot_configured': support_notifier.bot is not None,
             'bot_ready': support_notifier.bot.is_ready() if support_notifier.bot else False,
@@ -1676,7 +1676,7 @@ def admin_notifications():
         return redirect(url_for('login'))
 
     try:
-        from support_notifier import support_notifier
+        from core.support_notifier import support_notifier
 
         # Vérifier le statut du système de notifications
         notification_status = {

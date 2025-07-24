@@ -4,7 +4,7 @@ Commandes slash - Module logs (gestion des logs)
 import discord
 from discord import app_commands
 from discord.ext import commands
-from log_manager import log_manager
+from core.log_manager import log_manager
 
 
 class LogsSlash(commands.Cog):
