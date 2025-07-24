@@ -1,23 +1,81 @@
-# 🤖 Bot Discord Multi-Fonctionnel
+# 🤖 Documentation Générale - Bot Discord
 
-Un bot Discord complet développé en Python avec une architecture modulaire, supportant les commandes slash et préfixées avec système multi-serveur, panel web d'administration et système de support intégré.
+## 📋 Vue d'ensemble
+
+Ce bot Discord offre un système complet de gestion de serveur avec interface web d'administration, système de support, et gestion multi-serveurs.
 
 ## ✨ Fonctionnalités principales
 
-- 🏗️ **Architecture modulaire** - Commandes organisées par catégories
-- ⚡ **Double interface** - Commandes slash (/) ET préfixées (!)
-- 🌐 **Multi-serveur** - Configuration indépendante par serveur
-- 📊 **Système de logs** - Surveillance complète des activités
-- 🛡️ **Modération complète** - Ban, kick, mute avec gestion des rôles
-- � **Mention interactive** - Aide automatique en mentionnant le bot
-- ⚙️ **Préfixes personnalisables** - Chaque serveur peut avoir son préfixe
-- 🌐 **Panel web d'administration** - Interface web sécurisée pour monitorer le bot
-- 🎫 **Système de support** - Interface utilisateur pour tickets de support
-- 🔧 **Commandes utilitaires** - Ping, infos utilisateur/serveur, météo, traduction
-- 🎮 **Commandes de divertissement** - Jeux, blagues, citations, mini-jeux
-- 🔐 **Outils avancés** - Cryptographie, sondages, rappels, analyse de sécurité
+### � Commandes Discord
+- **Commandes slash** : `/help`, `/ping`, `/stats`, `/fun`, etc.
+- **Commandes préfixées** : `!help`, `!owner`, `!admin`, etc.
+- **Gestion des rôles** : Attribution automatique et manuelle
+- **Logs avancés** : Suivi des événements serveur
+- **Système de préfixes** : Personnalisation par serveur
+
+### 🌐 Interface Web
+- **Dashboard administrateur** : Statistiques en temps réel
+- **Gestion des serveurs** : Vue détaillée de chaque serveur
+- **Système de logs** : Consultation et filtrage
+- **Gestion des propriétaires** : Interface graphique
+- **Panel de support** : Tickets utilisateur
+
+### 🛠️ Outils d'administration
+- **Multi-serveurs** : Gestion centralisée
+- **Rotation des statuts** : Personnalisation automatique
+- **Système de notifications** : Alertes Discord
+- **Base de données** : SQLite intégré
+- **Cache intelligent** : Optimisation des performances
+
+## � Documentation
+
+Cette documentation est organisée en 4 sections principales :
+
+### 🏠 [README.md](README.md) - Documentation Générale
+- Vue d'ensemble du bot et de ses fonctionnalités
+- Structure du projet et configuration de base
+- Guide de démarrage rapide
+- Informations de sécurité et maintenance
+
+### 📦 [INSTALLATION.md](INSTALLATION.md) - Guide d'Installation
+- Prérequis système et logiciels requis
+- Installation étape par étape
+- Configuration Discord et variables d'environnement
+- Dépannage et première utilisation
+
+### 👑 [OWNER_MANAGEMENT.md](OWNER_MANAGEMENT.md) - Documentation Propriétaires
+- Gestion de la liste des propriétaires
+- Commandes Discord et interface web
+- Administration globale et configuration avancée
+- Procédures de sécurité et d'urgence
+
+### 🛡️ [ADMIN.md](ADMIN.md) - Documentation Administrateurs
+- Commandes de modération et gestion des membres
+- Configuration des serveurs et système de logs
+- Interface web d'administration
+- Outils avancés et bonnes pratiques
 
 ## 📁 Structure du projet
+
+```
+Discord-bot/
+├── main.py                 # Point d'entrée principal
+├── engine.py              # Moteur du bot Discord
+├── web_panel.py           # Interface web Flask
+├── bot_owner_manager.py   # Gestion des propriétaires
+├── bot_owners.json        # Configuration des propriétaires
+├── prefixe/               # Commandes préfixées
+│   ├── owner_management.py
+│   ├── admin.py
+│   └── ...
+├── slash/                 # Commandes slash
+│   ├── admin.py
+│   ├── help.py
+│   └── ...
+├── templates/             # Templates HTML
+├── static/               # Fichiers statiques
+└── docs/                 # Documentation
+```
 
 ```
 Discord-bot/

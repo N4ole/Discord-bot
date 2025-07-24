@@ -2,6 +2,9 @@
 Panel Web d'Administration pour le Bot Discord
 Interface web sécurisée pour surveiller les logs et statistiques
 """
+from collections import defaultdict
+import time
+from bot_owner_manager import get_bot_owners, add_bot_owner, remove_bot_owner, is_bot_owner
 import uuid
 from werkzeug.utils import secure_filename
 from support_db import SupportDB
@@ -10,10 +13,15 @@ from werkzeug.security import check_password_hash, generate_password_hash
 from datetime import datetime, timedelta
 import json
 import os
+import sys
+import uuid
+import asyncio
 import threading
-import time
-from collections import defaultdict
+from datetime import datetime
+import concurrent.futures
+import traceback
 import discord
+sys.path.append(os.path.dirname(__file__))
 
 app = Flask(__name__)
 app.secret_key = os.getenv('FLASK_SECRET_KEY', 'your-super-secret-key-here')
@@ -379,6 +387,381 @@ def control():
                            bot_stats=bot_stats_current,
                            uptime_str=uptime_str,
                            admin=session.get('admin_username'))
+
+
+@app.route('/status_manager')
+def status_manager():
+    """Page de gestion du système de rotation des statuts"""
+    if 'admin_logged_in' not in session:
+        return redirect(url_for('login'))
+
+    logger.log('INFO', 'Accès à la page de gestion des statuts', {
+               'admin': session.get('admin_username')})
+
+    status_info = get_status_rotator_info()
+
+    # Si status_info est None, utiliser des valeurs par défaut
+    if status_info is None:
+        status_info = {
+            'current_status': None,
+            'rotation_active': False,
+            'rotation_interval': 60,
+            'total_statuses': 0,
+            'special_statuses': ['maintenance', 'update', 'error', 'offline']
+        }
+
+    # Assurer que toutes les clés existent avec des valeurs par défaut
+    status_info.setdefault('current_status', None)
+    status_info.setdefault('rotation_active', False)
+    status_info.setdefault('rotation_interval', 60)
+    status_info.setdefault('total_statuses', 0)
+    status_info.setdefault('special_statuses', [
+                           'maintenance', 'update', 'error', 'offline'])
+
+    return render_template('status_manager.html',
+                           status_info=status_info,
+                           admin=session.get('admin_username'))
+
+
+@app.route('/owner_management')
+def owner_management():
+    """Page de gestion des propriétaires du bot"""
+
+    # Debug initial
+    with open("debug_owners.log", "a") as f:
+        f.write(f"[{datetime.now()}] ROUTE: owner_management appelée\n")
+        f.write(f"[{datetime.now()}] SESSION: {dict(session)}\n")
+
+    if 'admin_logged_in' not in session:
+        with open("debug_owners.log", "a") as f:
+            f.write(f"[{datetime.now()}] REDIRECT: Session non authentifiée\n")
+        return redirect(url_for('login'))
+
+    logger.log('INFO', 'Accès à la page de gestion des propriétaires', {
+               'admin': session.get('admin_username')})
+
+    owners = get_bot_owners()
+
+    # Debug dans fichier
+    with open("debug_owners.log", "a") as f:
+        f.write(f"[{datetime.now()}] PAGE DEBUG: bot_instance = {bot_instance}\n")
+        f.write(
+            f"[{datetime.now()}] PAGE DEBUG: bot_instance is None = {bot_instance is None}\n")
+
+    print(f"🔍 PAGE DEBUG: bot_instance = {bot_instance}", flush=True)
+    print(
+        f"🔍 PAGE DEBUG: bot_instance is None = {bot_instance is None}", flush=True)
+
+    # Récupérer les informations des propriétaires
+    owners_info = []
+    for owner_id in owners:
+        if bot_instance:
+            try:
+                # Utiliser asyncio pour récupérer les infos utilisateur
+                loop = asyncio.new_event_loop()
+                asyncio.set_event_loop(loop)
+                user = loop.run_until_complete(
+                    bot_instance.fetch_user(owner_id))
+                loop.close()
+
+                owners_info.append({
+                    'id': owner_id,
+                    'name': user.name,
+                    'discriminator': user.discriminator if hasattr(user, 'discriminator') and user.discriminator != '0' else '',
+                    'avatar': user.avatar.url if user.avatar else None,
+                    'found': True
+                })
+                print(
+                    f"✅ PAGE DEBUG: Utilisateur trouvé - {user.name} ({owner_id})", flush=True)
+            except Exception as e:
+                print(
+                    f"❌ PAGE DEBUG: Erreur pour l'utilisateur {owner_id}: {str(e)}", flush=True)
+                owners_info.append({
+                    'id': owner_id,
+                    'name': f'Utilisateur inconnu',
+                    'discriminator': '',
+                    'avatar': None,
+                    'found': False
+                })
+        else:
+            print(
+                f"⚠️  PAGE DEBUG: Bot non connecté pour l'utilisateur {owner_id}", flush=True)
+            owners_info.append({
+                'id': owner_id,
+                'name': f'Bot non connecté',
+                'discriminator': '',
+                'avatar': None,
+                'found': False
+            })
+
+    print(f"🔍 DEBUG: {len(owners_info)} propriétaires traités")
+
+    return render_template('owner_management.html',
+                           owners=owners_info,
+                           total_owners=len(owners),
+                           admin=session.get('admin_username'))
+
+
+@app.route('/api/owner/add', methods=['POST'])
+def api_add_owner():
+    """API pour ajouter un propriétaire"""
+    if 'admin_logged_in' not in session:
+        return jsonify({'error': 'Non autorisé'}), 401
+
+    try:
+        data = request.get_json()
+        user_id = data.get('user_id')
+
+        if not user_id:
+            return jsonify({'error': 'ID utilisateur manquant'}), 400
+
+        try:
+            user_id = int(user_id)
+        except ValueError:
+            return jsonify({'error': 'ID utilisateur invalide'}), 400
+
+        # Vérifier si l'utilisateur existe
+        if bot_instance:
+            try:
+                loop = asyncio.new_event_loop()
+                asyncio.set_event_loop(loop)
+                user = loop.run_until_complete(
+                    bot_instance.fetch_user(user_id))
+                loop.close()
+                user_name = user.name
+            except discord.NotFound:
+                return jsonify({'error': 'Utilisateur introuvable'}), 404
+            except Exception as e:
+                return jsonify({'error': f'Erreur lors de la vérification: {str(e)}'}), 500
+        else:
+            user_name = f'ID: {user_id}'
+
+        # Vérifier si déjà propriétaire
+        if is_bot_owner(user_id):
+            return jsonify({'error': 'Cet utilisateur est déjà propriétaire'}), 400
+
+        # Ajouter le propriétaire
+        if add_bot_owner(user_id):
+            logger.log('INFO', f'Propriétaire ajouté: {user_name} ({user_id})', {
+                       'admin': session.get('admin_username')})
+            return jsonify({'success': True, 'message': f'Propriétaire {user_name} ajouté avec succès'})
+        else:
+            return jsonify({'error': 'Erreur lors de l\'ajout du propriétaire'}), 500
+
+    except Exception as e:
+        logger.log('ERROR', f'Erreur API add_owner: {str(e)}')
+        return jsonify({'error': f'Erreur inattendue: {str(e)}'}), 500
+
+
+@app.route('/api/owner/remove', methods=['POST'])
+def api_remove_owner():
+    """API pour supprimer un propriétaire"""
+    if 'admin_logged_in' not in session:
+        return jsonify({'error': 'Non autorisé'}), 401
+
+    try:
+        data = request.get_json()
+        user_id = data.get('user_id')
+
+        if not user_id:
+            return jsonify({'error': 'ID utilisateur manquant'}), 400
+
+        try:
+            user_id = int(user_id)
+        except ValueError:
+            return jsonify({'error': 'ID utilisateur invalide'}), 400
+
+        # Vérifier si l'utilisateur est propriétaire
+        if not is_bot_owner(user_id):
+            return jsonify({'error': 'Cet utilisateur n\'est pas propriétaire'}), 400
+
+        # Empêcher de supprimer le dernier propriétaire
+        owners = get_bot_owners()
+        if len(owners) <= 1:
+            return jsonify({'error': 'Impossible de supprimer le dernier propriétaire'}), 400
+
+        # Récupérer le nom de l'utilisateur
+        if bot_instance:
+            try:
+                loop = asyncio.new_event_loop()
+                asyncio.set_event_loop(loop)
+                user = loop.run_until_complete(
+                    bot_instance.fetch_user(user_id))
+                loop.close()
+                user_name = user.name
+            except:
+                user_name = f'ID: {user_id}'
+        else:
+            user_name = f'ID: {user_id}'
+
+        # Supprimer le propriétaire
+        if remove_bot_owner(user_id):
+            logger.log('WARNING', f'Propriétaire supprimé: {user_name} ({user_id})', {
+                       'admin': session.get('admin_username')})
+            return jsonify({'success': True, 'message': f'Propriétaire {user_name} supprimé avec succès'})
+        else:
+            return jsonify({'error': 'Erreur lors de la suppression du propriétaire'}), 500
+
+    except Exception as e:
+        logger.log('ERROR', f'Erreur API remove_owner: {str(e)}')
+        return jsonify({'error': f'Erreur inattendue: {str(e)}'}), 500
+
+
+@app.route('/api/owners', methods=['GET'])
+def api_get_owners():
+    """API pour récupérer la liste des propriétaires"""
+    if 'admin_logged_in' not in session:
+        return jsonify({'error': 'Non autorisé'}), 401
+
+    app.logger.info(f"🔍 API DEBUG: bot_instance = {bot_instance}")
+    app.logger.info(
+        f"🔍 API DEBUG: bot_instance is None = {bot_instance is None}")
+
+    owners = get_bot_owners()
+    owners_data = []
+
+    for owner_id in owners:
+        if bot_instance:
+            try:
+                loop = asyncio.new_event_loop()
+                asyncio.set_event_loop(loop)
+                user = loop.run_until_complete(
+                    bot_instance.fetch_user(owner_id))
+                loop.close()
+
+                owners_data.append({
+                    'id': owner_id,
+                    'name': user.name,
+                    'discriminator': user.discriminator if hasattr(user, 'discriminator') and user.discriminator != '0' else '',
+                    'avatar': user.avatar.url if user.avatar else None,
+                    'found': True
+                })
+                print(
+                    f"✅ API GET: Utilisateur trouvé - {user.name} ({owner_id})")
+            except Exception as e:
+                print(
+                    f"❌ API GET: Erreur pour l'utilisateur {owner_id}: {str(e)}")
+                owners_data.append({
+                    'id': owner_id,
+                    'name': f'Utilisateur inconnu',
+                    'discriminator': '',
+                    'avatar': None,
+                    'found': False
+                })
+        else:
+            print(
+                f"⚠️ API GET: Bot non connecté pour l'utilisateur {owner_id}")
+            owners_data.append({
+                'id': owner_id,
+                'name': f'Bot non connecté',
+                'discriminator': '',
+                'avatar': None,
+                'found': False
+            })
+
+    return jsonify({'owners': owners_data, 'total': len(owners)})
+
+
+@app.route('/api/status', methods=['GET'])
+def api_status_info():
+    """API pour récupérer les informations de statut en temps réel"""
+    if 'admin_logged_in' not in session:
+        return jsonify({'error': 'Non autorisé'}), 401
+
+    status_info = get_status_rotator_info()
+    return jsonify(status_info or {'error': 'Système de statuts non disponible'})
+
+
+@app.route('/api/status/control', methods=['POST'])
+def api_status_control():
+    """API pour contrôler le système de rotation des statuts"""
+    if 'admin_logged_in' not in session:
+        return jsonify({'error': 'Non autorisé'}), 401
+
+    if not bot_instance or not hasattr(bot_instance, 'status_rotator') or not bot_instance.status_rotator:
+        return jsonify({'error': 'Système de statuts non disponible'}), 400
+
+    data = request.get_json()
+    action = data.get('action')
+    rotator = bot_instance.status_rotator
+
+    try:
+        if action == 'start':
+            if rotator.rotation_task and not rotator.rotation_task.done():
+                return jsonify({'error': 'Rotation déjà active'}), 400
+            rotator.start_rotation()
+            logger.log('INFO', 'Rotation des statuts démarrée via panel web', {
+                       'admin': session.get('admin_username')})
+            return jsonify({'success': True, 'message': 'Rotation démarrée'})
+
+        elif action == 'stop':
+            rotator.stop_rotation()
+            logger.log('INFO', 'Rotation des statuts arrêtée via panel web', {
+                       'admin': session.get('admin_username')})
+            return jsonify({'success': True, 'message': 'Rotation arrêtée'})
+
+        elif action == 'next':
+            import asyncio
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            loop.run_until_complete(rotator._update_status())
+            loop.close()
+            logger.log('INFO', 'Statut mis à jour manuellement via panel web', {
+                       'admin': session.get('admin_username')})
+            return jsonify({'success': True, 'message': 'Statut mis à jour'})
+
+        elif action == 'set_interval':
+            interval = data.get('interval', 60)
+            if interval < 10:
+                interval = 10
+            elif interval > 3600:
+                interval = 3600
+            rotator.set_rotation_interval(interval)
+            logger.log('INFO', f'Intervalle de rotation changé à {interval}s via panel web', {
+                       'admin': session.get('admin_username')})
+            return jsonify({'success': True, 'message': f'Intervalle défini à {interval}s'})
+
+        elif action == 'special_status':
+            status_type = data.get('status_type')
+            duration = data.get('duration', 0)
+
+            if status_type not in rotator.special_statuses:
+                return jsonify({'error': 'Type de statut invalide'}), 400
+
+            import asyncio
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            loop.run_until_complete(rotator.set_special_status(
+                status_type, duration if duration > 0 else None))
+            loop.close()
+
+            logger.log('INFO', f'Statut spécial {status_type} activé via panel web', {
+                       'admin': session.get('admin_username'),
+                       'duration': duration
+                       })
+            return jsonify({'success': True, 'message': f'Statut spécial {status_type} activé'})
+
+        elif action == 'clear_special_status':
+            import asyncio
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            loop.run_until_complete(rotator.clear_special_status())
+            loop.close()
+
+            logger.log('INFO', 'Statut spécial désactivé via panel web', {
+                       'admin': session.get('admin_username')
+                       })
+            return jsonify({'success': True, 'message': 'Statut spécial désactivé, rotation reprise'})
+
+        else:
+            return jsonify({'error': 'Action inconnue'}), 400
+
+    except Exception as e:
+        logger.log('ERROR', f'Erreur lors du contrôle des statuts: {str(e)}', {
+                   'admin': session.get('admin_username'),
+                   'action': action
+                   })
+        return jsonify({'error': f'Erreur: {str(e)}'}), 500
 
 
 @app.route('/control/server/<int:server_id>')
@@ -819,6 +1202,45 @@ def update_bot_stats(**kwargs):
         bot_stats['commands_used'] += 1
         current_hour = datetime.now().hour
         detailed_stats['commands_by_hour'][current_hour] += 1
+
+
+def get_status_rotator_info():
+    """Récupère les informations du système de rotation des statuts"""
+    print(f"🔍 DEBUG get_status_rotator_info: bot_instance = {bot_instance}")
+
+    if not bot_instance or not hasattr(bot_instance, 'status_rotator'):
+        print(f"🔍 DEBUG: pas de bot_instance ou pas d'attribut status_rotator")
+        return None
+
+    rotator = bot_instance.status_rotator
+    print(f"🔍 DEBUG: rotator = {rotator}")
+
+    if not rotator:
+        print(f"🔍 DEBUG: rotator est None")
+        return None
+
+    try:
+        print(f"🔍 DEBUG: tentative d'appel get_current_status_info()")
+        current_info = rotator.get_current_status_info()
+        print(f"🔍 DEBUG: current_info = {current_info}")
+
+        rotation_active = rotator.rotation_task and not rotator.rotation_task.done()
+        print(f"🔍 DEBUG: rotation_active = {rotation_active}")
+
+        result = {
+            'current_status': current_info,
+            'rotation_active': rotation_active,
+            'rotation_interval': rotator.rotation_interval,
+            'total_statuses': len(rotator.statuses),
+            'special_statuses': list(rotator.special_statuses.keys())
+        }
+        print(f"🔍 DEBUG: result = {result}")
+        return result
+    except Exception as e:
+        print(f"❌ ERROR get_status_rotator_info: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        return {'error': str(e)}
 
 
 # ===============================================

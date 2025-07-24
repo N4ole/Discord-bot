@@ -1,9 +1,13 @@
 """
 Commandes préfixées - Module help (système d'aide)
 """
+from bot_owner_manager import is_bot_owner
 import discord
 from discord.ext import commands
 from datetime import datetime
+import os
+import sys
+sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 
 
 class HelpPrefixe(commands.Cog):
@@ -165,6 +169,16 @@ class HelpPrefixe(commands.Cog):
             """.format(ctx.prefix),
             inline=False
         )
+
+        # Commandes propriétaires (seulement visible par les propriétaires)
+        if is_bot_owner(ctx.author.id):
+            embed.add_field(
+                name="👑 Commandes Propriétaires",
+                value=f"""
+                `{ctx.prefix}annonce <message>` - Envoie une annonce à tous les propriétaires de serveurs
+                """,
+                inline=False
+            )
 
         # Footer avec infos utiles
         embed.add_field(

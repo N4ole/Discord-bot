@@ -5,8 +5,10 @@ import discord
 from discord.ext import commands
 import os
 import asyncio
+from datetime import datetime
 from prefix_manager import get_prefix
 from web_panel import start_web_panel, log_bot_event, update_bot_stats
+from status_rotator import StatusRotator
 
 
 class DiscordBot(commands.Bot):
@@ -24,8 +26,10 @@ class DiscordBot(commands.Bot):
             help_command=None
         )
 
-        # Initialisation du panel web
+        # Initialisation du panel web et des systèmes
         self.web_panel_thread = None
+        self.status_rotator = None
+        self.start_time = datetime.now()  # Pour calculer l'uptime
 
     async def setup_hook(self):
         """Méthode appelée lors de l'initialisation du bot"""
@@ -43,6 +47,7 @@ class DiscordBot(commands.Bot):
         await self.load_extension('slash.utils')
         await self.load_extension('slash.fun')
         await self.load_extension('slash.tools')
+        await self.load_extension('slash.status')
 
         # Chargement des commandes préfixées
         print("Chargement des modules préfixés...")
@@ -55,6 +60,13 @@ class DiscordBot(commands.Bot):
         await self.load_extension('prefixe.utils')
         await self.load_extension('prefixe.fun')
         await self.load_extension('prefixe.tools')
+        await self.load_extension('prefixe.status')
+        await self.load_extension('prefixe.announce')
+        await self.load_extension('prefixe.addperm')
+        await self.load_extension('prefixe.owner_management')
+        print("✅ Module prefixe/announce chargé")
+        print("✅ Module prefixe/addperm chargé")
+        print("✅ Module prefixe/owner_management chargé")
 
         # Chargement du système de mentions et événements
         print("Chargement du système de mentions...")
@@ -85,6 +97,10 @@ class DiscordBot(commands.Bot):
             self, host='127.0.0.1', port=8080)
         log_bot_event('SUCCESS', 'Bot configuré et panel web démarré')
 
+        # Initialisation du système de rotation des statuts
+        print("🔄 Initialisation du système de rotation des statuts...")
+        self.status_rotator = StatusRotator(self)
+
     async def on_ready(self):
         """Événement déclenché quand le bot est prêt"""
         import time
@@ -102,6 +118,11 @@ class DiscordBot(commands.Bot):
         )
         log_bot_event(
             'SUCCESS', f'Bot connecté - {len(self.guilds)} serveurs, {len(self.users)} utilisateurs')
+
+        # Démarrer la rotation des statuts
+        if self.status_rotator:
+            self.status_rotator.start_rotation()
+            print("🔄 Rotation des statuts démarrée")
 
     async def on_command_error(self, ctx, error):
         """Gestion des erreurs de commandes"""
