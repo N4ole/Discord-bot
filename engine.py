@@ -160,7 +160,7 @@ class DiscordBot(commands.Bot):
         # Démarrage du panel web
         print("🌐 Démarrage du panel web...")
         self.web_panel_thread = start_web_panel(
-            self, host='127.0.0.1', port=8080)
+            self, host='192.168.27.67', port=8080)
         log_bot_event('SUCCESS', 'Bot configuré et panel web démarré')
 
         # Initialisation du système de rotation des statuts
@@ -172,7 +172,7 @@ class DiscordBot(commands.Bot):
         import time
         print(f'🎉 {self.user} est connecté et prêt à {time.strftime("%H:%M:%S")}!')
         print(f'Bot ID: {self.user.id}')
-        print(f'🌐 Panel web accessible sur: http://127.0.0.1:8080')
+        print(f'🌐 Panel web accessible sur: http://192.168.27.67:8080')
         print(f'📊 Identifiants: admin / admin123')
         print('-------------------')
 

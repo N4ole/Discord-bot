@@ -1789,7 +1789,7 @@ def admin_tickets_cleanup_execute():
 if __name__ == '__main__':
     # Test du panel web
     print("🌐 Démarrage du panel web de test...")
-    start_web_panel(host='127.0.0.1', port=8080)
+    start_web_panel(host='192.168.27.67', port=8080)
 
     # Ajouter quelques logs de test
     logger.log('INFO', 'Panel web démarré')
@@ -1798,7 +1798,7 @@ if __name__ == '__main__':
     logger.log('ERROR', 'Erreur de connexion à la base de données',
                {'error_type': 'DatabaseError'})
 
-    print("Panel web accessible sur: http://127.0.0.1:8080")
+    print("Panel web accessible sur: http://192.168.27.67:8080")
     print("Identifiants par défaut: admin / admin123")
 
     try:

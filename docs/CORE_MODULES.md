@@ -1,12 +1,18 @@
-# Core Modules - Bot Discord
+# 🔧 Core Modules - Bot Discord
 
-Ce dossier contient les modules principaux (core) du bot Discord.
+Ce dossier contient les modules principaux (core) du bot Discord qui gèrent les fonctionnalités essentielles.
 
-## Modules disponibles
+## 📦 Modules disponibles
 
 ### 🎯 **bot_owner_manager.py**
-- Gestion centralisée des propriétaires du bot
-- Fonctions : `get_bot_owners()`, `add_bot_owner()`, `remove_bot_owner()`, `is_bot_owner()`
+
+- **Description** : Gestion centralisée des propriétaires du bot
+- **Fonctions principales** :
+  - `get_bot_owners()` - Récupère la liste des propriétaires
+  - `add_bot_owner(user_id)` - Ajoute un propriétaire
+  - `remove_bot_owner(user_id)` - Retire un propriétaire  
+  - `is_bot_owner(user_id)` - Vérifie si un utilisateur est propriétaire
+- **Fichier de config** : `config/bot_owners.json`
 
 ### 🏷️ **prefix_manager.py**
 - Gestion des préfixes personnalisés par serveur

@@ -1,23 +1,30 @@
-# Configuration du Bot Discord
+# ⚙️ Configuration du Bot Discord
 
-Ce dossier contient tous les fichiers de configuration du bot.
+Ce dossier contient tous les fichiers de configuration du bot en format JSON.
 
-## Fichiers de configuration
+## 📁 Fichiers de configuration
 
-### Propriétaires et permissions
-- `bot_owners.json` - Liste des propriétaires du bot
-- `prefixes.json` - Préfixes personnalisés par serveur
+### 👑 Propriétaires et permissions
 
-### Logs et journalisation
-- `logs_config.json` - Configuration des logs par serveur
-- `logs_config.example.json` - Exemple de configuration des logs
+- **`bot_owners.json`** - Liste des propriétaires du bot avec leurs permissions
+- **`prefixes.json`** - Préfixes personnalisés par serveur Discord
 
-### Autres
-- `package.json` - Configuration Node.js (si utilisé)
+### 📝 Logs et journalisation
 
-## Important
+- **`logs_config.json`** - Configuration des logs par serveur
+- **`logs_config.example.json`** - Exemple de configuration des logs
 
-⚠️ **Ces fichiers contiennent des informations sensibles !**
+## ⚠️ Sécurité importante
+
+**Ces fichiers contiennent des informations sensibles !**
+
+- Ne jamais partager le contenu de `bot_owners.json`
+- Sauvegarder régulièrement ces configurations
+- Vérifier les permissions avant d'ajouter de nouveaux propriétaires
+
+## 🔧 Utilisation
+
+Ces fichiers sont automatiquement lus et mis à jour par le bot lors de son fonctionnement. Aucune intervention manuelle n'est généralement nécessaire.
 
 - Ne partagez jamais le contenu de ces fichiers
 - Vérifiez que ces fichiers sont dans votre `.gitignore`
