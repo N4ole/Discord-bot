@@ -4,7 +4,7 @@ Interface web sécurisée pour surveiller les logs et statistiques
 """
 from collections import defaultdict
 import time
-from core.bot_owner_manager import get_bot_owners, add_bot_owner, remove_bot_owner, is_bot_owner
+from core.bot_owner_manager import get_bot_owners, is_bot_owner
 import uuid
 from werkzeug.utils import secure_filename
 from core.support_db import SupportDB
@@ -49,7 +49,7 @@ def set_bot_instance(bot):
         print("✅ Notificateur de support initialisé avec l'instance du bot")
         print(
             f"🔍 DEBUG: support_notifier.bot après config = {support_notifier.bot}")
-        print(f"🔍 DEBUG: admin_user_id = {support_notifier.admin_user_id}")
+        print(f"🔍 DEBUG: admin_user_ids = {support_notifier.admin_user_ids}")
     except ImportError:
         print("⚠️ Module de notification de support non trouvé")
     except Exception as e:
@@ -423,245 +423,6 @@ def status_manager():
                            admin=session.get('admin_username'))
 
 
-@app.route('/owner_management')
-def owner_management():
-    """Page de gestion des propriétaires du bot"""
-
-    # Debug initial
-    with open("debug_owners.log", "a") as f:
-        f.write(f"[{datetime.now()}] ROUTE: owner_management appelée\n")
-        f.write(f"[{datetime.now()}] SESSION: {dict(session)}\n")
-
-    if 'admin_logged_in' not in session:
-        with open("debug_owners.log", "a") as f:
-            f.write(f"[{datetime.now()}] REDIRECT: Session non authentifiée\n")
-        return redirect(url_for('login'))
-
-    logger.log('INFO', 'Accès à la page de gestion des propriétaires', {
-               'admin': session.get('admin_username')})
-
-    owners = get_bot_owners()
-
-    # Debug dans fichier
-    with open("debug_owners.log", "a") as f:
-        f.write(f"[{datetime.now()}] PAGE DEBUG: bot_instance = {bot_instance}\n")
-        f.write(
-            f"[{datetime.now()}] PAGE DEBUG: bot_instance is None = {bot_instance is None}\n")
-
-    print(f"🔍 PAGE DEBUG: bot_instance = {bot_instance}", flush=True)
-    print(
-        f"🔍 PAGE DEBUG: bot_instance is None = {bot_instance is None}", flush=True)
-
-    # Récupérer les informations des propriétaires
-    owners_info = []
-    for owner_id in owners:
-        if bot_instance:
-            try:
-                # Utiliser asyncio pour récupérer les infos utilisateur
-                loop = asyncio.new_event_loop()
-                asyncio.set_event_loop(loop)
-                user = loop.run_until_complete(
-                    bot_instance.fetch_user(owner_id))
-                loop.close()
-
-                owners_info.append({
-                    'id': owner_id,
-                    'name': user.name,
-                    'discriminator': user.discriminator if hasattr(user, 'discriminator') and user.discriminator != '0' else '',
-                    'avatar': user.avatar.url if user.avatar else None,
-                    'found': True
-                })
-                print(
-                    f"✅ PAGE DEBUG: Utilisateur trouvé - {user.name} ({owner_id})", flush=True)
-            except Exception as e:
-                print(
-                    f"❌ PAGE DEBUG: Erreur pour l'utilisateur {owner_id}: {str(e)}", flush=True)
-                owners_info.append({
-                    'id': owner_id,
-                    'name': f'Utilisateur inconnu',
-                    'discriminator': '',
-                    'avatar': None,
-                    'found': False
-                })
-        else:
-            print(
-                f"⚠️  PAGE DEBUG: Bot non connecté pour l'utilisateur {owner_id}", flush=True)
-            owners_info.append({
-                'id': owner_id,
-                'name': f'Bot non connecté',
-                'discriminator': '',
-                'avatar': None,
-                'found': False
-            })
-
-    print(f"🔍 DEBUG: {len(owners_info)} propriétaires traités")
-
-    return render_template('owner_management.html',
-                           owners=owners_info,
-                           total_owners=len(owners),
-                           admin=session.get('admin_username'))
-
-
-@app.route('/api/owner/add', methods=['POST'])
-def api_add_owner():
-    """API pour ajouter un propriétaire"""
-    if 'admin_logged_in' not in session:
-        return jsonify({'error': 'Non autorisé'}), 401
-
-    try:
-        data = request.get_json()
-        user_id = data.get('user_id')
-
-        if not user_id:
-            return jsonify({'error': 'ID utilisateur manquant'}), 400
-
-        try:
-            user_id = int(user_id)
-        except ValueError:
-            return jsonify({'error': 'ID utilisateur invalide'}), 400
-
-        # Vérifier si l'utilisateur existe
-        if bot_instance:
-            try:
-                loop = asyncio.new_event_loop()
-                asyncio.set_event_loop(loop)
-                user = loop.run_until_complete(
-                    bot_instance.fetch_user(user_id))
-                loop.close()
-                user_name = user.name
-            except discord.NotFound:
-                return jsonify({'error': 'Utilisateur introuvable'}), 404
-            except Exception as e:
-                return jsonify({'error': f'Erreur lors de la vérification: {str(e)}'}), 500
-        else:
-            user_name = f'ID: {user_id}'
-
-        # Vérifier si déjà propriétaire
-        if is_bot_owner(user_id):
-            return jsonify({'error': 'Cet utilisateur est déjà propriétaire'}), 400
-
-        # Ajouter le propriétaire
-        if add_bot_owner(user_id):
-            logger.log('INFO', f'Propriétaire ajouté: {user_name} ({user_id})', {
-                       'admin': session.get('admin_username')})
-            return jsonify({'success': True, 'message': f'Propriétaire {user_name} ajouté avec succès'})
-        else:
-            return jsonify({'error': 'Erreur lors de l\'ajout du propriétaire'}), 500
-
-    except Exception as e:
-        logger.log('ERROR', f'Erreur API add_owner: {str(e)}')
-        return jsonify({'error': f'Erreur inattendue: {str(e)}'}), 500
-
-
-@app.route('/api/owner/remove', methods=['POST'])
-def api_remove_owner():
-    """API pour supprimer un propriétaire"""
-    if 'admin_logged_in' not in session:
-        return jsonify({'error': 'Non autorisé'}), 401
-
-    try:
-        data = request.get_json()
-        user_id = data.get('user_id')
-
-        if not user_id:
-            return jsonify({'error': 'ID utilisateur manquant'}), 400
-
-        try:
-            user_id = int(user_id)
-        except ValueError:
-            return jsonify({'error': 'ID utilisateur invalide'}), 400
-
-        # Vérifier si l'utilisateur est propriétaire
-        if not is_bot_owner(user_id):
-            return jsonify({'error': 'Cet utilisateur n\'est pas propriétaire'}), 400
-
-        # Empêcher de supprimer le dernier propriétaire
-        owners = get_bot_owners()
-        if len(owners) <= 1:
-            return jsonify({'error': 'Impossible de supprimer le dernier propriétaire'}), 400
-
-        # Récupérer le nom de l'utilisateur
-        if bot_instance:
-            try:
-                loop = asyncio.new_event_loop()
-                asyncio.set_event_loop(loop)
-                user = loop.run_until_complete(
-                    bot_instance.fetch_user(user_id))
-                loop.close()
-                user_name = user.name
-            except:
-                user_name = f'ID: {user_id}'
-        else:
-            user_name = f'ID: {user_id}'
-
-        # Supprimer le propriétaire
-        if remove_bot_owner(user_id):
-            logger.log('WARNING', f'Propriétaire supprimé: {user_name} ({user_id})', {
-                       'admin': session.get('admin_username')})
-            return jsonify({'success': True, 'message': f'Propriétaire {user_name} supprimé avec succès'})
-        else:
-            return jsonify({'error': 'Erreur lors de la suppression du propriétaire'}), 500
-
-    except Exception as e:
-        logger.log('ERROR', f'Erreur API remove_owner: {str(e)}')
-        return jsonify({'error': f'Erreur inattendue: {str(e)}'}), 500
-
-
-@app.route('/api/owners', methods=['GET'])
-def api_get_owners():
-    """API pour récupérer la liste des propriétaires"""
-    if 'admin_logged_in' not in session:
-        return jsonify({'error': 'Non autorisé'}), 401
-
-    app.logger.info(f"🔍 API DEBUG: bot_instance = {bot_instance}")
-    app.logger.info(
-        f"🔍 API DEBUG: bot_instance is None = {bot_instance is None}")
-
-    owners = get_bot_owners()
-    owners_data = []
-
-    for owner_id in owners:
-        if bot_instance:
-            try:
-                loop = asyncio.new_event_loop()
-                asyncio.set_event_loop(loop)
-                user = loop.run_until_complete(
-                    bot_instance.fetch_user(owner_id))
-                loop.close()
-
-                owners_data.append({
-                    'id': owner_id,
-                    'name': user.name,
-                    'discriminator': user.discriminator if hasattr(user, 'discriminator') and user.discriminator != '0' else '',
-                    'avatar': user.avatar.url if user.avatar else None,
-                    'found': True
-                })
-                print(
-                    f"✅ API GET: Utilisateur trouvé - {user.name} ({owner_id})")
-            except Exception as e:
-                print(
-                    f"❌ API GET: Erreur pour l'utilisateur {owner_id}: {str(e)}")
-                owners_data.append({
-                    'id': owner_id,
-                    'name': f'Utilisateur inconnu',
-                    'discriminator': '',
-                    'avatar': None,
-                    'found': False
-                })
-        else:
-            print(
-                f"⚠️ API GET: Bot non connecté pour l'utilisateur {owner_id}")
-            owners_data.append({
-                'id': owner_id,
-                'name': f'Bot non connecté',
-                'discriminator': '',
-                'avatar': None,
-                'found': False
-            })
-
-    return jsonify({'owners': owners_data, 'total': len(owners)})
-
-
 @app.route('/api/status', methods=['GET'])
 def api_status_info():
     """API pour récupérer les informations de statut en temps réel"""
@@ -701,14 +462,22 @@ def api_status_control():
             return jsonify({'success': True, 'message': 'Rotation arrêtée'})
 
         elif action == 'next':
-            import asyncio
-            loop = asyncio.new_event_loop()
-            asyncio.set_event_loop(loop)
-            loop.run_until_complete(rotator._update_status())
-            loop.close()
-            logger.log('INFO', 'Statut mis à jour manuellement via panel web', {
-                       'admin': session.get('admin_username')})
-            return jsonify({'success': True, 'message': 'Statut mis à jour'})
+            # Utiliser la méthode run_async_safe du bot
+            try:
+                async def update_status():
+                    await rotator._update_status()
+
+                result = bot_instance.run_async_safe(update_status())
+                if result is not None:
+                    logger.log('INFO', 'Statut mis à jour manuellement via panel web', {
+                               'admin': session.get('admin_username')})
+                    return jsonify({'success': True, 'message': 'Statut mis à jour'})
+                else:
+                    return jsonify({'error': 'Erreur lors de la mise à jour du statut'}), 500
+            except Exception as e:
+                logger.log(
+                    'ERROR', f'Erreur lors de la mise à jour du statut: {e}')
+                return jsonify({'error': 'Erreur lors de la mise à jour du statut'}), 500
 
         elif action == 'set_interval':
             interval = data.get('interval', 60)
@@ -728,18 +497,24 @@ def api_status_control():
             if status_type not in rotator.special_statuses:
                 return jsonify({'error': 'Type de statut invalide'}), 400
 
-            import asyncio
-            loop = asyncio.new_event_loop()
-            asyncio.set_event_loop(loop)
-            loop.run_until_complete(rotator.set_special_status(
-                status_type, duration if duration > 0 else None))
-            loop.close()
+            # Utiliser la méthode run_async_safe du bot
+            try:
+                async def set_special_status():
+                    await rotator.set_special_status(status_type, duration if duration > 0 else None)
 
-            logger.log('INFO', f'Statut spécial {status_type} activé via panel web', {
-                       'admin': session.get('admin_username'),
-                       'duration': duration
-                       })
-            return jsonify({'success': True, 'message': f'Statut spécial {status_type} activé'})
+                result = bot_instance.run_async_safe(set_special_status())
+                if result is not None:
+                    logger.log('INFO', f'Statut spécial {status_type} activé via panel web', {
+                               'admin': session.get('admin_username'),
+                               'duration': duration
+                               })
+                    return jsonify({'success': True, 'message': f'Statut {status_type} activé'})
+                else:
+                    return jsonify({'error': 'Erreur lors de l\'activation du statut spécial'}), 500
+            except Exception as e:
+                logger.log(
+                    'ERROR', f'Erreur lors de l\'activation du statut spécial: {e}')
+                return jsonify({'error': 'Erreur lors de l\'activation du statut spécial'}), 500
 
         elif action == 'clear_special_status':
             import asyncio
@@ -1261,7 +1036,7 @@ def test_notifier():
         status = {
             'bot_configured': support_notifier.bot is not None,
             'bot_ready': support_notifier.bot.is_ready() if support_notifier.bot else False,
-            'admin_user_id': support_notifier.admin_user_id,
+            'admin_user_ids': support_notifier.admin_user_ids,
             'bot_type': str(type(support_notifier.bot)) if support_notifier.bot else None
         }
         return f"""
@@ -1269,7 +1044,7 @@ def test_notifier():
         <ul>
             <li>Bot configuré: {status['bot_configured']}</li>
             <li>Bot prêt: {status['bot_ready']}</li>
-            <li>Admin User ID: {status['admin_user_id']}</li>
+            <li>Admin User IDs: {status['admin_user_ids']}</li>
             <li>Type du bot: {status['bot_type']}</li>
         </ul>
         """
@@ -1682,7 +1457,7 @@ def admin_notifications():
         notification_status = {
             'bot_connected': bot_instance is not None,
             'notifier_ready': support_notifier.bot is not None,
-            'admin_user_id': support_notifier.admin_user_id,
+            'admin_user_ids': support_notifier.admin_user_ids,
             'last_notification': None  # TODO: implémenter le suivi
         }
 
@@ -1705,7 +1480,7 @@ def admin_test_notification():
         return redirect(url_for('login'))
 
     try:
-        from support_notifier import support_notifier
+        from core.support_notifier import support_notifier
 
         # Données de test
         test_ticket_data = {
@@ -1769,7 +1544,7 @@ def admin_tickets():
         return redirect(url_for('login'))
 
     try:
-        from support_db import support_db
+        from core.support_db import support_db
 
         # Récupérer tous les tickets avec les informations utilisateur
         tickets = support_db.get_all_tickets_for_admin()
@@ -1901,7 +1676,7 @@ def admin_ticket_delete(ticket_id):
         return redirect(url_for('login'))
 
     try:
-        from support_db import support_db
+        from core.support_db import support_db
 
         # Vérifier que le ticket existe
         ticket = support_db.get_ticket_by_id(ticket_id)
@@ -1935,7 +1710,7 @@ def admin_tickets_cleanup():
         return redirect(url_for('login'))
 
     try:
-        from support_db import support_db
+        from core.support_db import support_db
 
         # Récupérer les tickets qui peuvent être supprimés
         old_tickets = support_db.get_tickets_for_deletion(
@@ -1964,7 +1739,7 @@ def admin_tickets_cleanup_execute():
         return redirect(url_for('login'))
 
     try:
-        from support_db import support_db
+        from core.support_db import support_db
 
         cleanup_type = request.form.get('cleanup_type')
 

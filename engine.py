@@ -31,6 +31,72 @@ class DiscordBot(commands.Bot):
         self.status_rotator = None
         self.start_time = datetime.now()  # Pour calculer l'uptime
 
+    def run_async_safe(self, coro, timeout=5):
+        """Exécute une coroutine de manière sécurisée depuis un thread synchrone"""
+        try:
+            import asyncio
+            import concurrent.futures
+
+            # Utiliser asyncio.run_coroutine_threadsafe pour exécuter dans le loop du bot
+            if self.loop and not self.loop.is_closed():
+                future = asyncio.run_coroutine_threadsafe(coro, self.loop)
+                return future.result(timeout=timeout)
+            else:
+                return None
+        except Exception as e:
+            print(f"❌ Erreur lors de l'exécution async safe: {e}")
+            return None
+
+    def get_user_info_sync(self, user_id):
+        """Récupère les informations d'un utilisateur de manière synchrone pour le web panel"""
+        try:
+            user_id = int(user_id)
+
+            # Vérifier d'abord dans le cache des propriétaires pré-chargés
+            if hasattr(self, 'owner_cache') and user_id in self.owner_cache:
+                cached_user = self.owner_cache[user_id]
+                return {
+                    'id': user_id,
+                    'name': cached_user.get('name', f'Utilisateur {user_id}'),
+                    'discriminator': cached_user.get('discriminator', ''),
+                    'avatar': cached_user.get('avatar'),
+                    'found': True
+                }
+
+            # Essayer de trouver l'utilisateur dans le cache des utilisateurs du bot
+            if hasattr(self, 'users'):
+                for user in self.users:
+                    if user.id == user_id:
+                        avatar_url = None
+                        if user.avatar:
+                            avatar_url = user.avatar.url
+                        return {
+                            'id': user_id,
+                            'name': user.display_name or user.name,
+                            'discriminator': user.discriminator if user.discriminator != '0' else '',
+                            'avatar': avatar_url,
+                            'found': True
+                        }
+
+            # Fallback - utilisateur non trouvé
+            return {
+                'id': user_id,
+                'name': f'Utilisateur {user_id}',
+                'discriminator': '',
+                'avatar': None,
+                'found': False
+            }
+        except Exception as e:
+            print(
+                f"❌ Erreur lors de la récupération de l'utilisateur {user_id}: {e}")
+            return {
+                'id': user_id,
+                'name': f'Utilisateur inconnu',
+                'discriminator': '',
+                'avatar': None,
+                'found': False
+            }
+
     async def setup_hook(self):
         """Méthode appelée lors de l'initialisation du bot"""
         import time
@@ -110,6 +176,9 @@ class DiscordBot(commands.Bot):
         print(f'📊 Identifiants: admin / admin123')
         print('-------------------')
 
+        # Pré-charger les utilisateurs propriétaires pour le web panel
+        await self.preload_owner_users()
+
         # Mettre à jour les statistiques du bot
         update_bot_stats(
             connected_servers=len(self.guilds),
@@ -123,6 +192,48 @@ class DiscordBot(commands.Bot):
         if self.status_rotator:
             self.status_rotator.start_rotation()
             print("🔄 Rotation des statuts démarrée")
+
+    async def preload_owner_users(self):
+        """Pré-charge les informations des propriétaires pour le web panel"""
+        try:
+            from core.bot_owner_manager import get_bot_owners
+            owners = get_bot_owners()
+            print(
+                f"🔍 Pré-chargement des informations de {len(owners)} propriétaires...")
+
+            # Initialiser le cache s'il n'existe pas
+            if not hasattr(self, 'owner_cache'):
+                self.owner_cache = {}
+
+            for owner_id in owners:
+                try:
+                    user = await self.fetch_user(owner_id)
+                    if user:
+                        # Stocker les informations dans le cache
+                        avatar_url = None
+                        if user.avatar:
+                            avatar_url = user.avatar.url
+
+                        self.owner_cache[owner_id] = {
+                            'name': user.display_name or user.name,
+                            'discriminator': user.discriminator if user.discriminator != '0' else '',
+                            'avatar': avatar_url
+                        }
+                        print(
+                            f"✅ Propriétaire pré-chargé: {user.name} ({owner_id})")
+                    else:
+                        print(f"⚠️ Propriétaire {owner_id} non trouvé")
+                except Exception as e:
+                    print(
+                        f"❌ Erreur lors du pré-chargement de {owner_id}: {e}")
+                    # Stocker une info basique même en cas d'erreur
+                    self.owner_cache[owner_id] = {
+                        'name': f'Utilisateur {owner_id}',
+                        'discriminator': '',
+                        'avatar': None
+                    }
+        except Exception as e:
+            print(f"❌ Erreur lors du pré-chargement des propriétaires: {e}")
 
     async def on_command_error(self, ctx, error):
         """Gestion des erreurs de commandes"""

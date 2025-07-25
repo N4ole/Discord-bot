@@ -12,7 +12,7 @@ class BotOwnerManager:
 
     def __init__(self):
         self.config_file = os.path.join(
-            os.path.dirname(__file__), 'config', 'bot_owners.json')
+            os.path.dirname(os.path.dirname(__file__)), 'config', 'bot_owners.json')
         self._owners_cache = None
         self._last_modified = None
 

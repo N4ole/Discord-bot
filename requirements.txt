@@ -1,53 +1,18 @@
-# Discord Bot - Requirements
-# Core Discord API
+# Discord Bot - Summer of Making
+# Production dependencies
+
 discord.py>=2.3.0
-
-# Environment variables management
 python-dotenv>=1.0.0
-
-# Web panel dependencies
 Flask>=2.3.0
 Werkzeug>=2.3.0
-
-# System monitoring (for bot info commands)
 psutil>=5.9.0
-
-# HTTP requests (for weather and translation APIs)
 requests>=2.31.0
+aiohttp>=3.8.0
 
-# JSON handling (included in Python standard library, but listed for clarity)
-# json - Built-in
-
-# Date and time utilities (included in Python standard library)
-# datetime - Built-in
-
-# Threading and asyncio (included in Python standard library)
-# threading - Built-in
-# asyncio - Built-in
-
-# Collections for data structures (included in Python standard library)
-# collections - Built-in
-
-# OS operations (included in Python standard library)
-# os - Built-in
-
-# Concurrent futures for threading
-# concurrent.futures - Built-in
-
-# Optional: For enhanced web panel features
-# Uncomment if you want these additional features
-
-# gunicorn>=21.2.0          # Production WSGI server for web panel
-# redis>=4.6.0              # For caching and session storage
-# sqlite3                   # Built-in - for persistent data storage
-# aiohttp>=3.8.0            # For async HTTP requests
-# aiofiles>=23.0.0          # For async file operations
+# Optional production enhancements
+# gunicorn>=21.2.0
+# redis>=4.6.0
 
 # Development dependencies (optional)
-# autopep8>=2.0.0           # Code formatting
-# pylint>=2.17.0            # Code linting
-# pytest>=7.4.0             # Testing framework
-
-# Security enhancements (optional)
-# cryptography>=41.0.0      # For advanced encryption
-# bcrypt>=4.0.0             # For password hashing improvements
+# pytest>=7.4.0
+# pylint>=2.17.0
