@@ -20,16 +20,98 @@ Un bot Discord complet avec interface web d'administration et système de suppor
 ## 🚀 Démarrage rapide
 
 ```bash
-# Installation des dépendances
+# 1. Installation des dépendances
 pip install -r requirements.txt
 
-# Configuration (voir docs/INSTALLATION.md)
+# 2. Configuration initiale (OBLIGATOIRE)
 cp .env.example .env
-# Éditer .env avec votre token Discord
+# Éditer .env avec votre token Discord et votre ID utilisateur
 
-# Lancement
+# 3. Lancement
 python main.py
 ```
+
+## ⚙️ Configuration initiale requise
+
+Avant de lancer le bot, vous devez créer **3 fichiers essentiels** :
+
+### 1. 📄 Fichier `.env` (Configuration Discord)
+
+```bash
+# Copiez le fichier exemple
+cp .env.example .env
+
+# Éditez .env et remplacez :
+DISCORD_TOKEN=YOUR_DISCORD_BOT_TOKEN    # Token de votre bot Discord
+OWNER_ID=YOUR_DISCORD_USER_ID           # Votre ID utilisateur Discord
+```
+
+**🔗 Comment obtenir ces informations :**
+
+- **Token Discord** :
+  1. Allez sur <https://discord.com/developers/applications>
+  2. Créez une nouvelle application ou sélectionnez la vôtre
+  3. Section "Bot" → "Token" → "Copy"
+  
+- **Votre ID Discord** :
+  1. Discord → Paramètres → Avancé → Mode développeur (ON)
+  2. Clic droit sur votre profil → "Copier l'ID"
+
+### 2. 🌐 Fichier `.env.panel` (Configuration Panel Web)
+
+Créez ce fichier à la racine avec le contenu suivant :
+
+```bash
+# Copiez le fichier exemple
+cp .env.panel.example .env.panel
+
+# Ou créez-le manuellement avec ce contenu :
+```
+
+```bash
+# Configuration du Panel Web d'Administration
+
+# Identifiants administrateurs (changez-les !)
+ADMIN_USERNAME=admin
+ADMIN_PASSWORD=admin123
+
+# 🌐 Configuration du serveur web
+WEB_HOST=0.0.0.0
+WEB_PORT=8080
+
+# 🔐 Sécurité (optionnel)
+SECRET_KEY=your-secret-key-here
+
+# Configuration avancée
+LOG_RETENTION_DAYS=7
+MAX_LOGS_IN_MEMORY=1000
+AUTO_REFRESH_INTERVAL=10
+
+# Sécurité
+ENABLE_IP_WHITELIST=false
+ALLOWED_IPS=127.0.0.1,::1
+
+# Fonctionnalités
+ENABLE_COMMAND_TRACKING=true
+ENABLE_ERROR_TRACKING=true
+ENABLE_PERFORMANCE_METRICS=true
+
+```
+
+### 3. 🗄️ Base de données `support.db`
+
+La base de données sera **créée automatiquement** au premier lancement du bot.
+
+- ✅ **Aucune action requise** - Le bot l'initialise tout seul
+- 📍 **Emplacement** : `support.db` (à la racine)
+- 🔒 **Sécurité** : Fichier local uniquement (non synchronisé sur GitHub)
+
+### ⚠️ Notes importantes
+
+- 🔐 **Sécurité** : Ne **JAMAIS** commiter les fichiers `.env`, `.env.panel` ou `support.db`
+- 🔑 **Mots de passe** : Changez les identifiants par défaut du panel web
+- 💾 **Sauvegarde** : Pensez à sauvegarder `support.db` pour ne pas perdre vos données
+- 🌐 **Accès web** : Le panel sera accessible sur <http://127.0.0.1:8080> après démarrage
 
 ## 📚 Documentation complète
 
@@ -40,7 +122,7 @@ python main.py
 
 ## 🏗️ Structure du projet
 
-```
+```text
 Discord-bot/
 ├── 📁 config/          # Configuration JSON
 ├── 📁 docs/            # Documentation complète
@@ -64,7 +146,7 @@ Discord-bot/
 
 ## 🔗 Liens rapides
 
-- **Interface web** : http://127.0.0.1:8080 (après démarrage)
+- **Interface web** : <http://127.0.0.1:8080> (après démarrage)
 - **Documentation** : [docs/README.md](docs/README.md)
 - **Architecture** : [docs/PROJECT_STRUCTURE.md](docs/PROJECT_STRUCTURE.md)
 
