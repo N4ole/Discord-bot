@@ -294,6 +294,42 @@ class UtilsSlash(commands.Cog):
         embed.set_footer(text=f"Demandé par {interaction.user.display_name}")
         await interaction.response.send_message(embed=embed)
 
+    @app_commands.command(name="myid", description="Affiche votre ID Discord")
+    async def myid_slash(self, interaction: discord.Interaction):
+        """Commande pour obtenir son ID Discord"""
+        user_id = interaction.user.id
+
+        embed = discord.Embed(
+            title="🆔 Votre ID Discord",
+            description=f"Votre ID Discord est : `{user_id}`",
+            color=discord.Color.blue()
+        )
+
+        embed.add_field(
+            name="📋 Comment utiliser cet ID",
+            value="• Pour devenir propriétaire du bot\n"
+                  "• Pour la configuration des permissions\n"
+                  "• Pour les commandes administratives",
+            inline=False
+        )
+
+        embed.add_field(
+            name="⚙️ Configuration .env",
+            value=f"```env\nOWNER_ID={user_id}\n```",
+            inline=False
+        )
+
+        embed.add_field(
+            name="💡 Astuce",
+            value="Copiez cet ID dans votre fichier `.env` pour devenir propriétaire du bot",
+            inline=False
+        )
+
+        embed.set_thumbnail(url=interaction.user.display_avatar.url)
+        embed.set_footer(text=f"Demandé par {interaction.user.display_name}")
+
+        await interaction.response.send_message(embed=embed)
+
     @app_commands.command(name="uptime", description="Affiche le temps de fonctionnement du bot")
     async def uptime_slash(self, interaction: discord.Interaction):
         """Affiche l'uptime du bot"""
@@ -385,13 +421,59 @@ class UtilsSlash(commands.Cog):
         )
 
         embed.add_field(
-            name="🔗 Liens",
-            value="[Panel Admin](http://127.0.0.1:8080) • [Support](https://discord.gg/example)",
+            name="🔗 Liens Utiles",
+            value="""
+            [🎫 Support](http://127.0.0.1:8080/support) • [� Promo](http://127.0.0.1:8080/promo)
+            """,
             inline=False
         )
 
         embed.set_footer(
             text=f"Développé avec ❤️ • Demandé par {interaction.user.display_name}")
+        await interaction.response.send_message(embed=embed)
+
+    @app_commands.command(name="support", description="Affiche les liens vers le système de support")
+    async def support_slash(self, interaction: discord.Interaction):
+        """Affiche les informations sur le système de support"""
+        embed = discord.Embed(
+            title="🎫 Système de Support",
+            description="Besoin d'aide ? Utilisez notre système de support intégré !",
+            color=discord.Color.blue()
+        )
+
+        embed.set_thumbnail(url=self.bot.user.display_avatar.url)
+
+        embed.add_field(
+            name="🌐 Panel Web de Support",
+            value="[🎫 Créer un Ticket](http://127.0.0.1:8080/support)\n"
+                  "Créez un ticket d'aide pour obtenir de l'assistance",
+            inline=False
+        )
+
+        embed.add_field(
+            name="📊 Autres Services Web",
+            value="[🎉 Page de Promotion](http://127.0.0.1:8080/promo) - Découvrir le bot\n"
+                  "[🏠 Panel Principal](http://127.0.0.1:8080) - Interface d'administration",
+            inline=False
+        )
+
+        embed.add_field(
+            name="💡 Comment utiliser",
+            value="1. Cliquez sur le lien **Créer un Ticket**\n"
+                  "2. Remplissez le formulaire avec votre problème\n"
+                  "3. Attendez une réponse de l'équipe de support\n"
+                  "4. Suivez l'évolution de votre ticket",
+            inline=False
+        )
+
+        embed.add_field(
+            name="🔧 Support Direct",
+            value=f"Vous pouvez aussi me mentionner {self.bot.user.mention} "
+            "ou utiliser les commandes d'aide disponibles !",
+            inline=False
+        )
+
+        embed.set_footer(text=f"Demandé par {interaction.user.display_name}")
         await interaction.response.send_message(embed=embed)
 
 

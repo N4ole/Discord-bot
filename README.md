@@ -56,6 +56,7 @@ OWNER_ID=YOUR_DISCORD_USER_ID           # Votre ID utilisateur Discord
 - **Votre ID Discord** :
   1. Discord → Paramètres → Avancé → Mode développeur (ON)
   2. Clic droit sur votre profil → "Copier l'ID"
+  3. **Ou utilisez la commande `!myid` dans Discord** (plus facile !)
 
 ### 2. 🌐 Fichier `.env.panel` (Configuration Panel Web)
 

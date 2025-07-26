@@ -1,6 +1,20 @@
 """
-Utilitaire pour obtenir votre ID Discord
-Lancez ce script pendant que le bot est en ligne pour obtenir votre ID
+[DÉPRÉCIÉ] Utilitaire pour obtenir votre ID Discord
+
+⚠️ ATTENTION: Ce script est maintenant DÉPRÉCIÉ !
+
+🎉 NOUVELLE MÉTHODE (plus simple):
+La commande !myid est maintenant intégrée directement dans le bot principal.
+
+✅ Utilisez plutôt:
+- Commande préfixe: !myid
+- Commande slash: /myid
+
+Ces commandes sont disponibles dès que le bot est en ligne et n'ont pas besoin
+d'un script séparé.
+
+---
+Script conservé pour compatibilité uniquement.
 """
 import discord
 from discord.ext import commands

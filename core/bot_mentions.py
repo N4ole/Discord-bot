@@ -111,6 +111,16 @@ class BotMentions(commands.Cog):
             inline=False
         )
 
+        # Lien vers le panel de support
+        embed.add_field(
+            name="🎫 Support & Panel Web",
+            value="""
+            • [🎫 Système de Support](http://127.0.0.1:8080/support) - Créer un ticket d'aide
+            • [🎉 Page de Promotion](http://127.0.0.1:8080/promo) - Découvrir le bot
+            """,
+            inline=False
+        )
+
         embed.set_footer(
             text=f"🤖 {len(self.bot.guilds)} serveurs • {len(self.bot.users)} utilisateurs")
 
@@ -184,6 +194,15 @@ class BotMentions(commands.Cog):
                 • Modérer les membres • Gérer les rôles
                 • Voir l'historique des messages
                 """,
+                inline=False
+            )
+
+            embed.add_field(
+                name="🎫 Panel Web & Support",
+                value="""
+                • [🎫 Système de Support](http://127.0.0.1:8080/support) - Créer un ticket d'aide
+                • [� Page de Promotion](http://127.0.0.1:8080/promo) - Découvrir le bot
+                 """,
                 inline=False
             )
 

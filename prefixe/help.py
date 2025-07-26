@@ -126,6 +126,7 @@ class HelpPrefixe(commands.Cog):
             value="""
             `{0}info [membre]` - Infos sur un membre
             `{0}avatar [membre]` - Avatar d'un utilisateur
+            `{0}myid` - Affiche votre ID Discord
             `{0}uptime` - Temps de fonctionnement du bot
             `{0}botinfo` - Informations détaillées du bot
             """.format(ctx.prefix),
@@ -137,6 +138,7 @@ class HelpPrefixe(commands.Cog):
             name="⚙️ Utilitaires",
             value="""
             `{0}ping` - Latence du bot
+            `{0}support` - Système de support et tickets
             """.format(ctx.prefix),
             inline=False
         )
@@ -192,6 +194,16 @@ class HelpPrefixe(commands.Cog):
             • Commandes slash disponibles: tapez `/`
             • Les permissions sont indiquées entre parenthèses
             • Usage: `{ctx.prefix}help <commande>` pour plus de détails
+            """,
+            inline=False
+        )
+
+        # Panel Web et Support
+        embed.add_field(
+            name="🌐 Panel Web & Support",
+            value="""
+            • [🎫 Système de Support](http://127.0.0.1:8080/support) - Créer un ticket d'aide
+            • [🎉 Page de Promotion](http://127.0.0.1:8080/promo) - Découvrir le bot
             """,
             inline=False
         )

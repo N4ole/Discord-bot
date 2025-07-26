@@ -83,6 +83,16 @@ class HelpSlash(commands.Cog):
             inline=False
         )
 
+        # Panel Web et Support
+        embed.add_field(
+            name="🌐 Panel Web & Support",
+            value="""
+            • [🎫 Système de Support](http://127.0.0.1:8080/support) - Créer un ticket d'aide
+            • [🎉 Page de Promotion](http://127.0.0.1:8080/promo) - Découvrir le bot
+            """,
+            inline=False
+        )
+
         embed.set_footer(
             text="💡 Utilisez /help <catégorie> pour plus de détails")
         return embed
