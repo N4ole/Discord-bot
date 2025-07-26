@@ -8,25 +8,41 @@ __pycache__/
 *.pyc
 *.pyo
 *.pyd
+*/__pycache__/
 
 # Environnement
 .env
-.env.panel
+.env.*
+.env*
+*.env.*
+*env*
+!.env.example
 
 # Base de données
 *.db
+*.sqlite
+*.sqlite3
 
 # Logs et fichiers temporaires
 *.log
 debug_*.log
 cookies.txt
+temp/
+tmp/
 
-# IDE
+# IDE et éditeurs
 .vscode/
 .idea/
 *.swp
 *.swo
+*~
 
-# OS
+# OS spécifique
 .DS_Store
 Thumbs.db
+desktop.ini
+
+# Autres fichiers sensibles
+token.txt
+secrets/
+private/
