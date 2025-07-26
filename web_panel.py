@@ -47,9 +47,6 @@ def set_bot_instance(bot):
         from core.support_notifier import support_notifier
         support_notifier.set_bot_instance(bot)
         print("✅ Notificateur de support initialisé avec l'instance du bot")
-        print(
-            f"🔍 DEBUG: support_notifier.bot après config = {support_notifier.bot}")
-        print(f"🔍 DEBUG: admin_user_ids = {support_notifier.admin_user_ids}")
     except ImportError:
         print("⚠️ Module de notification de support non trouvé")
     except Exception as e:
@@ -1028,28 +1025,7 @@ def get_status_rotator_info():
 support_db = SupportDB()
 
 
-@app.route('/test-notifier')
-def test_notifier():
-    """Route de test pour vérifier l'état du notificateur"""
-    try:
-        from core.support_notifier import support_notifier
-        status = {
-            'bot_configured': support_notifier.bot is not None,
-            'bot_ready': support_notifier.bot.is_ready() if support_notifier.bot else False,
-            'admin_user_ids': support_notifier.admin_user_ids,
-            'bot_type': str(type(support_notifier.bot)) if support_notifier.bot else None
-        }
-        return f"""
-        <h1>Test Notificateur</h1>
-        <ul>
-            <li>Bot configuré: {status['bot_configured']}</li>
-            <li>Bot prêt: {status['bot_ready']}</li>
-            <li>Admin User IDs: {status['admin_user_ids']}</li>
-            <li>Type du bot: {status['bot_type']}</li>
-        </ul>
-        """
-    except Exception as e:
-        return f"Erreur: {e}"
+# Routes principales
 
 
 @app.route('/support')
@@ -1472,65 +1448,6 @@ def admin_notifications():
             f'Erreur lors du chargement des notifications: {str(e)}', 'error')
         return redirect(url_for('admin'))
 
-
-@app.route('/admin/test-notification', methods=['POST'])
-def admin_test_notification():
-    """Test d'envoi de notification Discord"""
-    if 'admin_logged_in' not in session:
-        return redirect(url_for('login'))
-
-    try:
-        from core.support_notifier import support_notifier
-
-        # Données de test
-        test_ticket_data = {
-            'ticket_id': 'TEST',
-            'username': 'Admin Test',
-            'email': 'admin@test.com',
-            'category': 'test',
-            'priority': 'medium',
-            'subject': 'Test de notification Discord',
-            'description': 'Ceci est un test manuel du système de notifications Discord depuis le panel d\'administration.'
-        }
-
-        # Programmer l'envoi de la notification de test
-        import threading
-
-        def send_test_notification():
-            try:
-                import asyncio
-                loop = asyncio.new_event_loop()
-                asyncio.set_event_loop(loop)
-                result = loop.run_until_complete(
-                    support_notifier.send_new_ticket_notification(
-                        test_ticket_data)
-                )
-                loop.close()
-
-                if result:
-                    logger.log(
-                        'SUCCESS', 'Test de notification Discord réussi')
-                else:
-                    logger.log(
-                        'ERROR', 'Échec du test de notification Discord')
-            except Exception as e:
-                logger.log('ERROR', f'Erreur test notification: {str(e)}')
-
-        test_thread = threading.Thread(
-            target=send_test_notification, daemon=True)
-        test_thread.start()
-
-        flash(
-            'Test de notification Discord programmé. Vérifiez vos messages privés.', 'info')
-        logger.log('INFO', 'Test de notification Discord lancé par admin')
-
-    except ImportError:
-        flash('Module de notifications non disponible', 'error')
-    except Exception as e:
-        flash(f'Erreur lors du test: {str(e)}', 'error')
-        logger.log('ERROR', f'Erreur test notification admin: {str(e)}')
-
-    return redirect(url_for('admin_notifications'))
 
 # ===============================================
 # ADMINISTRATION DES TICKETS DE SUPPORT

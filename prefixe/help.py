@@ -77,7 +77,7 @@ class HelpPrefixe(commands.Cog):
             value="""
             `{0}prefix` - Gère le préfixe du bot
             `{0}prefix set <nouveau>` - Change le préfixe (Gérer le serveur)
-            `{0}prefix reset` - Remet le préfixe par défaut
+            `{0}prefix reset` - Remet le préfixe par défaut (Gérer le serveur)
             `{0}prefix info` - Infos sur les préfixes
             """.format(ctx.prefix),
             inline=False
@@ -125,7 +125,6 @@ class HelpPrefixe(commands.Cog):
             name="📋 Informations",
             value="""
             `{0}info [membre]` - Infos sur un membre
-            `{0}server` - Infos sur le serveur
             `{0}avatar [membre]` - Avatar d'un utilisateur
             `{0}uptime` - Temps de fonctionnement du bot
             `{0}botinfo` - Informations détaillées du bot
@@ -175,6 +174,11 @@ class HelpPrefixe(commands.Cog):
             embed.add_field(
                 name="👑 Commandes Propriétaires",
                 value=f"""
+                `{ctx.prefix}owner` - Gestion des propriétaires du bot
+                `{ctx.prefix}status_owner` - Contrôles avancés du statut
+                `{ctx.prefix}diag` - Outils de diagnostic système
+                `{ctx.prefix}serveur [page]` - Liste détaillée des serveurs
+                `{ctx.prefix}link <server_id>` - Lien d'invitation par MP
                 `{ctx.prefix}annonce <message>` - Envoie une annonce à tous les propriétaires de serveurs
                 """,
                 inline=False

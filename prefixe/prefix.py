@@ -150,6 +150,17 @@ class PrefixeCommands(commands.Cog):
             )
             await ctx.send(embed=embed)
 
+    @prefix_reset.error
+    async def prefix_reset_error(self, ctx, error):
+        """Gestion des erreurs pour la commande prefix reset"""
+        if isinstance(error, commands.MissingPermissions):
+            embed = discord.Embed(
+                title="❌ Permissions Insuffisantes",
+                description="Tu as besoin de la permission `Gérer le serveur` pour remettre le préfixe par défaut.",
+                color=discord.Color.red()
+            )
+            await ctx.send(embed=embed)
+
 
 async def setup(bot):
     """Fonction pour charger le cog"""
